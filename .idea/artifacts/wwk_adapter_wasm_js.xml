@@ -1,0 +1,6 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="wwk-adapter-wasm-js">
+    <output-path>$PROJECT_DIR$/wwk-adapter/build/libs</output-path>
+    <root id="archive" name="wwk-adapter-wasm-js.jar" />
+  </artifact>
+</component>
