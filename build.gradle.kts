@@ -5,4 +5,10 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.android.lint) apply false
+    alias(libs.plugins.dokka)
+}
+
+dependencies {
+    dokka(project(":core"))
+    dokka(project(":wwk-adapter"))
 }
