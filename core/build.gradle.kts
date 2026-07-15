@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.android.lint)
+    alias(libs.plugins.dokka)
 }
 
 kotlin {
@@ -10,7 +11,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     android {
-        namespace = "com.tcsappdev.core"
+        namespace = "com.tcsappdev.worldwinddraw.core"
         compileSdk {
             version = release(36) {
                 minorApiLevel = 1

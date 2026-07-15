@@ -12,8 +12,11 @@ kotlinStdlib = "2.2.10"
 kotlinTest = "2.2.10"
 runner = "1.5.2"
 core = "1.5.0"
+worldwind = "2.0.5"
+dokka = "2.2.0"
 
 [libraries]
+worldwind = { group = "earth.worldwind", name = "worldwind", version.ref = "worldwind" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -39,4 +42,5 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 android-lint = { id = "com.android.lint", version.ref = "agp" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
