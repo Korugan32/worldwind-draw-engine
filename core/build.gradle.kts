@@ -77,7 +77,9 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
-                // Add KMP dependencies here
+                // api, not implementation: StateFlow appears in core's own public API
+                // (DrawStateMachine.state), so consumers need direct access to it too.
+                api(libs.kotlinx.coroutines.core)
             }
         }
 

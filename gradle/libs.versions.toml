@@ -14,9 +14,11 @@ runner = "1.5.2"
 core = "1.5.0"
 worldwind = "2.0.5"
 dokka = "2.2.0"
+kotlinxCoroutines = "1.11.0"
 
 [libraries]
 worldwind = { group = "earth.worldwind", name = "worldwind", version.ref = "worldwind" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
