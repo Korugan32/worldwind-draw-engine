@@ -10,7 +10,7 @@ class DrawEngineReducerTest {
     fun modeChangeAlwaysChangesMode() {
         val startState = DrawEngineState(mode = DrawMode.Idle)
         val result = DrawEngineReducer.reduce(startState, DrawEvent.ModeChange(DrawMode.Pan))
-        assertEquals(DrawMode.Pan, result.mode)
+        assertEquals(DrawMode.Pan, result.state.mode)
     }
 
     @Test
@@ -18,7 +18,7 @@ class DrawEngineReducerTest {
         val startState = DrawEngineState(mode = DrawMode.Draw(DrawableEntityType.Polygon, emptyList()))
         val event = DrawEvent.Click(GeoPosition(0.0, 0.0), null)
         val result = DrawEngineReducer.reduce(startState, event)
-        assertEquals(1, (result.mode as DrawMode.Draw).pendingVertices.size)
+        assertEquals(1, (result.state.mode as DrawMode.Draw).pendingVertices.size)
     }
 
     @Test
@@ -26,7 +26,7 @@ class DrawEngineReducerTest {
         val startState = DrawEngineState(mode = DrawMode.Idle)
         val event = DrawEvent.Click(GeoPosition(0.0, 0.0), EntityId("x"))
         val result = DrawEngineReducer.reduce(startState, event)
-        assertEquals(DrawMode.Select(EntityId("x")), result.mode)
+        assertEquals(DrawMode.Select(EntityId("x")), result.state.mode)
     }
 
     @Test
@@ -34,7 +34,7 @@ class DrawEngineReducerTest {
         val startState = DrawEngineState(mode = DrawMode.Idle)
         val event = DrawEvent.Click(GeoPosition(0.0, 0.0), null)
         val result = DrawEngineReducer.reduce(startState, event)
-        assertEquals(result.mode, DrawMode.Idle)
+        assertEquals(result.state.mode, DrawMode.Idle)
     }
 
     @Test
@@ -44,7 +44,7 @@ class DrawEngineReducerTest {
         val startState = DrawEngineState(mode = DrawMode.Select(EntityId("A")))
         val event = DrawEvent.Click(GeoPosition(0.0, 0.0), EntityId("A"))
         val result = DrawEngineReducer.reduce(startState, event)
-        assertEquals(result.mode, DrawMode.Edit(EntityId("A")))
+        assertEquals(result.state.mode, DrawMode.Edit(EntityId("A")))
     }
 
     @Test
@@ -54,7 +54,7 @@ class DrawEngineReducerTest {
         val startState = DrawEngineState(mode = DrawMode.Select(EntityId("A")))
         val event = DrawEvent.Click(GeoPosition(0.0, 0.0), EntityId("B"))
         val result = DrawEngineReducer.reduce(startState, event)
-        assertEquals(result.mode, DrawMode.Select(EntityId("B")))
+        assertEquals(result.state.mode, DrawMode.Select(EntityId("B")))
     }
 
     @Test
@@ -62,7 +62,15 @@ class DrawEngineReducerTest {
         val startState = DrawEngineState(mode = DrawMode.Select(EntityId("A")))
         val event = DrawEvent.Click(GeoPosition(0.0, 0.0), null)
         val result = DrawEngineReducer.reduce(startState, event)
-        assertEquals(result.mode, DrawMode.Idle)
+        assertEquals(result.state.mode, DrawMode.Idle)
     }
 
+    @Test
+    fun reducerProducesNoCommandsYet() {
+        // Documents the current (temporary) limitation: no transition constructs a real
+        // entity yet, so `commands` is always empty until "finish drawing" is added.
+        val startState = DrawEngineState(mode = DrawMode.Idle)
+        val result = DrawEngineReducer.reduce(startState, DrawEvent.ModeChange(DrawMode.Pan))
+        assertEquals(emptyList(), result.commands)
+    }
 }

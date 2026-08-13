@@ -1,0 +1,58 @@
+package com.tcsappdev.worldwinddraw.core.history
+
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+/**
+ * The undo/redo stack. [execute] runs a [Command] and makes it undoable; [undo]/[redo]
+ * walk the history in either direction. [canUndo]/[canRedo] are exposed as [StateFlow] so
+ * a host UI can enable/disable undo/redo buttons reactively without polling.
+ *
+ * Executing a new command after undoing clears the redo stack — the same behavior as a
+ * browser dropping its forward history once you navigate somewhere new after going back.
+ * [capacity] caps how many steps stay undoable; the oldest entry is dropped once exceeded.
+ */
+class HistoryManager(private val capacity: Int = 100) {
+    private val undoStack = mutableListOf<Command>()
+    private val redoStack = mutableListOf<Command>()
+
+    private val _canUndo = MutableStateFlow(false)
+    val canUndo: StateFlow<Boolean> = _canUndo.asStateFlow()
+
+    private val _canRedo = MutableStateFlow(false)
+    val canRedo: StateFlow<Boolean> = _canRedo.asStateFlow()
+
+    fun execute(command: Command) {
+        command.execute()
+        undoStack.add(command)
+        if (undoStack.size > capacity) {
+            undoStack.removeFirst()
+        }
+        redoStack.clear()
+        updateFlags()
+    }
+
+    fun undo() {
+        if (undoStack.isNotEmpty()) {
+            val command = undoStack.removeLast()
+            command.undo()
+            redoStack.add(command)
+            updateFlags()
+        }
+    }
+
+    fun redo() {
+        if (redoStack.isNotEmpty()) {
+            val command = redoStack.removeLast()
+            command.execute()
+            undoStack.add(command)
+            updateFlags()
+        }
+    }
+
+    private fun updateFlags() {
+        _canUndo.value = undoStack.isNotEmpty()
+        _canRedo.value = redoStack.isNotEmpty()
+    }
+}
