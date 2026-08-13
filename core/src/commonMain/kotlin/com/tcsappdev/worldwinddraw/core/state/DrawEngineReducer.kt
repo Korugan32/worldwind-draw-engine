@@ -1,17 +1,26 @@
 package com.tcsappdev.worldwinddraw.core.state
 
+import com.tcsappdev.worldwinddraw.core.history.Command
+
+/**
+ * The result of running the reducer: the new [state], plus any [commands] that need to be
+ * executed (and pushed to history) as a consequence of this event. Most transitions only
+ * change [DrawMode] and produce no commands — [commands] defaults to empty for those.
+ */
+data class ReduceResult(
+    val state: DrawEngineState,
+    val commands: List<Command> = emptyList(),
+)
+
 /**
  * The pure `(state, event) -> new state` core of the draw engine. Has no side effects and
  * touches nothing outside its arguments, which is what makes every mode/event combination
  * testable in isolation (see `DrawEngineReducerTest`) with no UI or rendering engine
  * running.
- *
- * Doesn't yet emit commands for undo/redo — that gets added once a `Command` type exists;
- * for now this only computes the next [DrawEngineState].
  */
 object DrawEngineReducer {
-    fun reduce(state: DrawEngineState, event: DrawEvent): DrawEngineState {
-        return when (event) {
+    fun reduce(state: DrawEngineState, event: DrawEvent): ReduceResult {
+        val newState = when (event) {
             is DrawEvent.ModeChange -> state.copy(mode = event.mode)
             is DrawEvent.Click -> {
                 val currentMode = state.mode
@@ -38,12 +47,14 @@ object DrawEngineReducer {
                         }
                     }
 
-
                     else -> state
                 }
             }
 
             else -> state
         }
+        // No branch produces commands yet — that lands once there's a way to turn a
+        // finished Draw.pendingVertices draft into a real entity (see PLAN.md Faz 3 notes).
+        return ReduceResult(state = newState, commands = emptyList())
     }
 }
