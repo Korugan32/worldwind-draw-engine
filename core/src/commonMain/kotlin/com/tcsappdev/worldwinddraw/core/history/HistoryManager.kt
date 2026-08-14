@@ -27,7 +27,10 @@ class HistoryManager(private val capacity: Int = 100) {
         command.execute()
         undoStack.add(command)
         if (undoStack.size > capacity) {
-            undoStack.removeFirst()
+            // removeAt(0), not removeFirst(): on Android, `List.removeFirst()` can resolve
+            // to a real JVM/platform method that only exists from API 35 onward, well above
+            // this library's minSdk. removeAt(0) has no such ambiguity.
+            undoStack.removeAt(0)
         }
         redoStack.clear()
         updateFlags()
@@ -35,7 +38,7 @@ class HistoryManager(private val capacity: Int = 100) {
 
     fun undo() {
         if (undoStack.isNotEmpty()) {
-            val command = undoStack.removeLast()
+            val command = undoStack.removeAt(undoStack.lastIndex)
             command.undo()
             redoStack.add(command)
             updateFlags()
@@ -44,7 +47,7 @@ class HistoryManager(private val capacity: Int = 100) {
 
     fun redo() {
         if (redoStack.isNotEmpty()) {
-            val command = redoStack.removeLast()
+            val command = redoStack.removeAt(redoStack.lastIndex)
             command.execute()
             undoStack.add(command)
             updateFlags()
