@@ -86,6 +86,9 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
+                // runTest (from here), not runBlocking (kotlinx-coroutines-core): runBlocking
+                // isn't available on js/wasmJs, and commonTest must compile for every target.
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
 
