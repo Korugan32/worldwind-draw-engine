@@ -48,6 +48,26 @@ class DrawableEntityTest {
     }
 
     @Test
+    fun polygonRejectsNonPositiveOutlineWidth() {
+        val vertices = listOf(
+            Vertex(VertexId("TestVertex1"), GeoPosition(0.0, 0.0)),
+            Vertex(VertexId("TestVertex2"), GeoPosition(1.0, 1.0)),
+            Vertex(VertexId("TestVertex3"), GeoPosition(2.0, 2.0)),
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            DrawnPolygon(
+                id = EntityId("TestEntity1"),
+                style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)),
+                vertices = vertices,
+                outlineWidth = 0f,
+            )
+        }
+        // Default (no outlineStyle, default outlineWidth) must NOT throw.
+        DrawnPolygon(id = EntityId("TestEntity2"), style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)), vertices = vertices)
+    }
+
+    @Test
     fun polylineRequiresAtLeastTwoVertices() {
         // 1 vertex: below the minimum, must throw.
         assertFailsWith<IllegalArgumentException> {
@@ -80,6 +100,33 @@ class DrawableEntityTest {
     }
 
     @Test
+    fun polylineRejectsNonPositiveLineWidth() {
+        val vertices = listOf(
+            Vertex(VertexId("TestVertex1"), GeoPosition(0.0, 0.0)),
+            Vertex(VertexId("TestVertex2"), GeoPosition(1.0, 1.0)),
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            DrawnPolyline(
+                id = EntityId("TestEntity1"),
+                style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)),
+                vertices = vertices,
+                lineWidth = 0f,
+            )
+        }
+        assertFailsWith<IllegalArgumentException> {
+            DrawnPolyline(
+                id = EntityId("TestEntity1"),
+                style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)),
+                vertices = vertices,
+                lineWidth = -1f,
+            )
+        }
+        // Default lineWidth must NOT throw.
+        DrawnPolyline(id = EntityId("TestEntity2"), style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)), vertices = vertices)
+    }
+
+    @Test
     fun markerHoldsItsPosition() {
         val position = GeoPosition(0.0, 0.0)
         val marker = DrawnMarker(
@@ -90,5 +137,29 @@ class DrawableEntityTest {
         assertEquals(
             position, marker.position
         )
+    }
+
+    @Test
+    fun markerRejectsNonPositiveSize() {
+        val position = GeoPosition(0.0, 0.0)
+
+        assertFailsWith<IllegalArgumentException> {
+            DrawnMarker(
+                id = EntityId("TestEntity1"),
+                style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)),
+                position = position,
+                size = 0f,
+            )
+        }
+        assertFailsWith<IllegalArgumentException> {
+            DrawnMarker(
+                id = EntityId("TestEntity1"),
+                style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)),
+                position = position,
+                size = -1f,
+            )
+        }
+        // Default size must NOT throw.
+        DrawnMarker(id = EntityId("TestEntity2"), style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)), position = position)
     }
 }
