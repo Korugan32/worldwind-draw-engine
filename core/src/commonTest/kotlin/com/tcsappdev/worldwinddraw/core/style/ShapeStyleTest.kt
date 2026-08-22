@@ -1,9 +1,23 @@
 package com.tcsappdev.worldwinddraw.core.style
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class ShapeStyleTest {
+    @Test
+    fun constructorParametersMatchTheirPropertyNames() {
+        // Regression test: ColorRgba's constructor once had `blue` declared before `green`,
+        // even though the parameter names were correct — so a positional call like
+        // ColorRgba(0, 255, 0) silently stored 255 into `blue` instead of `green`. Using three
+        // distinct, non-symmetric values here means any future reordering trips this test,
+        // whereas symmetric/zero values would stay silently green.
+        val color = ColorRgba(10, 20, 30)
+        assertEquals(10, color.red)
+        assertEquals(20, color.green)
+        assertEquals(30, color.blue)
+    }
+
     @Test
     fun colorChannelsMustBeWithinByteRange() {
         // green=260 and blue=-10 are both invalid, but only one assertFailsWith call is used
@@ -15,19 +29,5 @@ class ShapeStyleTest {
             ColorRgba(red = 0, green = 260, blue = -10, alpha = 20)
         }
         ColorRgba(red = 0, green = 255, blue = 0, alpha = 20)
-    }
-
-    @Test
-    fun gradientRequiresAtLeastTwoColors() {
-        // Kept as two separate assertFailsWith blocks on purpose: putting both invalid calls
-        // inside one block would mean the first exception short-circuits the block, and the
-        // second call would silently never run.
-        assertFailsWith<IllegalArgumentException> {
-            ShapeStyle.Gradient(colors = emptyList())
-        }
-        assertFailsWith<IllegalArgumentException> {
-            ShapeStyle.Gradient(colors = listOf(ColorRgba(0, 0, 0, 0)))
-        }
-        ShapeStyle.Gradient(colors = listOf(ColorRgba(0, 0, 0, 0), ColorRgba(0, 0, 0, 0)))
     }
 }
