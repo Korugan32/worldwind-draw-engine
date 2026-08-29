@@ -13,23 +13,39 @@ sealed interface DrawEvent {
     /**
      * A tap/click at [position]. [hitEntityId] is whatever the adapter's own picking
      * determined was under that point, or `null` for empty space — hit-testing happens
-     * in the adapter (see the plan's `HitTestService` contract), not recomputed here.
+     * in the adapter, not recomputed here.
      */
     data class Click(val position: GeoPosition, val hitEntityId: EntityId?) : DrawEvent
 
     /**
      * A drag gesture begins at [position]. [hitEntityId] identifies which shape (if any)
-     * was grabbed; [hitVertexId] additionally identifies a specific vertex of it.
-     * Both `null` means empty space; [hitEntityId] set with [hitVertexId] `null` means
-     * the whole shape (e.g. a marker, which has no vertices) was grabbed.
+     * was grabbed. Exactly one of [hitVertexId] (an existing vertex) or [hitEdgeIndex] (a
+     * midpoint handle, not yet a real vertex — see
+     * [DrawMode.Edit.ActiveDrag.NewVertex][DrawMode.Edit.ActiveDrag]) should be set for a
+     * drag the reducer acts on; both `null` (with [hitEntityId] also often `null`) means
+     * empty space or a whole-shape grab this library doesn't support yet.
      */
-    data class DragStart(val position: GeoPosition, val hitVertexId: VertexId?, val hitEntityId: EntityId?) : DrawEvent
+    data class DragStart(
+        val position: GeoPosition,
+        val hitVertexId: VertexId?,
+        val hitEntityId: EntityId?,
+        val hitEdgeIndex: Int? = null,
+    ) : DrawEvent
 
     /** The drag continues at [position]. What's being dragged is already known from the [DragStart] that began it. */
     data class DragMove(val position: GeoPosition) : DrawEvent
 
-    /** The drag ends at [position]. */
-    data class DragEnd(val position: GeoPosition) : DrawEvent
+    /**
+     * The drag ends at [position]. [newVertexId] is a fresh id the adapter generates only
+     * when the drag that's ending was a [DrawMode.Edit.ActiveDrag.NewVertex] one (the
+     * adapter knows this because it's the same gesture whose `DragStart` it built) — it's
+     * what the reducer uses to finally construct the one real
+     * [com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand] for the whole
+     * gesture. `null` here on a `NewVertex` drag just skips the insert (a graceful no-op),
+     * matching how `null` fields elsewhere in [DrawEvent] mean "the adapter couldn't/didn't
+     * supply this," not an error.
+     */
+    data class DragEnd(val position: GeoPosition, val newVertexId: VertexId? = null) : DrawEvent
 
     /** An explicit request (e.g. a host UI button) to switch to [mode], regardless of the current mode. */
     data class ModeChange(val mode: DrawMode) : DrawEvent
