@@ -53,7 +53,7 @@ fun WorldWindowMap(
                 engine.layers.apply {
                     addLayer(BackgroundLayer())
                     addLayer(BlueMarbleLayer())
-                    addLayer(DrawLayer(entityRepository, scope))
+                    addLayer(DrawLayer(entityRepository, stateMachine, scope, onContentChanged = ::requestRedraw))
                 }
                 val camera = initialCameraPosition.toWwkPosition()
                 engine.camera.position.set(camera.latitude, camera.longitude, camera.altitude)

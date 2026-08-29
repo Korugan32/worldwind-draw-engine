@@ -37,7 +37,8 @@ import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 
 class MainActivity : ComponentActivity() {
     private val entityRepository = EntityRepository()
-    private val stateMachine = DrawStateMachine(HistoryManager())
+    private val historyManager = HistoryManager()
+    private val stateMachine = DrawStateMachine(historyManager, entityRepository)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,8 +57,10 @@ class MainActivity : ComponentActivity() {
                         )
                         // Visual proof that real map taps reach PickInputBridge -> DrawEngineReducer:
                         // toggling "Draw" mode here, then tapping the map, accumulates
-                        // pendingVertices from the actual pick position of each tap.
-                        DrawModeOverlay(stateMachine, modifier = Modifier.align(Alignment.TopStart).padding(16.dp))
+                        // pendingVertices from the actual pick position of each tap. The Undo
+                        // button proves a dragged vertex is recorded as ONE undoable command
+                        // (see ReduceResult's KDoc on commands vs. previewCommands).
+                        DrawModeOverlay(stateMachine, historyManager, modifier = Modifier.align(Alignment.TopStart).padding(16.dp))
                     }
                 }
             }
@@ -66,8 +69,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun DrawModeOverlay(stateMachine: DrawStateMachine, modifier: Modifier = Modifier) {
+private fun DrawModeOverlay(stateMachine: DrawStateMachine, historyManager: HistoryManager, modifier: Modifier = Modifier) {
     val state by stateMachine.state.collectAsState()
+    val canUndo by historyManager.canUndo.collectAsState()
     val isDrawing = state.mode is DrawMode.Draw
 
     Column(modifier = modifier) {
@@ -76,6 +80,9 @@ private fun DrawModeOverlay(stateMachine: DrawStateMachine, modifier: Modifier =
             stateMachine.onEvent(DrawEvent.ModeChange(nextMode))
         }) {
             Text(if (isDrawing) "Stop Drawing" else "Start Drawing")
+        }
+        Button(onClick = { historyManager.undo() }, enabled = canUndo, modifier = Modifier.padding(top = 4.dp)) {
+            Text("Undo")
         }
         Text(
             text = describeMode(state.mode),
@@ -92,8 +99,12 @@ private fun describeMode(mode: DrawMode): String = when (mode) {
     is DrawMode.Idle -> "Idle"
     is DrawMode.Pan -> "Pan"
     is DrawMode.Draw -> "Draw (${mode.entityType}, ${mode.pendingVertices.size} points)"
-    is DrawMode.Edit -> "Edit (${mode.entityId.id})"
-    is DrawMode.Select -> "Select (${mode.entityId.id})"
+    is DrawMode.Edit -> when (val drag = mode.activeDrag) {
+        is DrawMode.Edit.ActiveDrag.ExistingVertex -> "Edit (${mode.entityId.id}) - dragging ${drag.vertexId.id}"
+        is DrawMode.Edit.ActiveDrag.NewVertex -> "Edit (${mode.entityId.id}) - adding a vertex on edge ${drag.edgeIndex}"
+        null -> "Edit (${mode.entityId.id}) - drag a vertex or midpoint handle"
+    }
+    is DrawMode.Select -> "Select (${mode.entityId.id}) - tap again to edit"
 }
 
 // A rectangle over Turkey, semi-transparent so the base imagery stays visible underneath —
