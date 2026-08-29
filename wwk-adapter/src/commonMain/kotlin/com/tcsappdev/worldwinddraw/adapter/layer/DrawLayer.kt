@@ -6,8 +6,10 @@ import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPolyline
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
+import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 import earth.worldwind.layer.RenderableLayer
+import earth.worldwind.render.Renderable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -20,6 +22,10 @@ import kotlinx.coroutines.flow.onEach
  * Rebuilds the whole layer on every emission rather than diffing old vs. new state. That's
  * the simplest correct thing, and entity lists here are small (shapes a user drew, not bulk
  * data), so the cost is negligible.
+ *
+ * Every renderable is tagged with its originating [EntityId] via [ENTITY_ID_KEY] (see
+ * [Renderable.putUserProperty]) — this is how `adapter.input.PickInputBridge` maps a WWK
+ * pick result back to a [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity].
  */
 class DrawLayer(
     entityRepository: EntityRepository,
@@ -29,10 +35,17 @@ class DrawLayer(
         entityRepository.entities
             .onEach { entities ->
                 clearRenderables()
-                entities.filterIsInstance<DrawnPolygon>().forEach { addRenderable(it.toWwkPolygon()) }
-                entities.filterIsInstance<DrawnPolyline>().forEach { addRenderable(it.toWwkPolyline()) }
-                entities.filterIsInstance<DrawnMarker>().forEach { addRenderable(it.toWwkPlacemark()) }
+                entities.filterIsInstance<DrawnPolygon>().forEach { addRenderable(it.toWwkPolygon().tagged(it.id)) }
+                entities.filterIsInstance<DrawnPolyline>().forEach { addRenderable(it.toWwkPolyline().tagged(it.id)) }
+                entities.filterIsInstance<DrawnMarker>().forEach { addRenderable(it.toWwkPlacemark().tagged(it.id)) }
             }
             .launchIn(scope)
+    }
+
+    private fun <T : Renderable> T.tagged(entityId: EntityId): T = apply { putUserProperty(ENTITY_ID_KEY, entityId) }
+
+    companion object {
+        /** [Renderable.putUserProperty] key every renderable this layer creates is tagged with. */
+        const val ENTITY_ID_KEY = "com.tcsappdev.worldwinddraw.entityId"
     }
 }

@@ -3,10 +3,22 @@ package com.tcsappdev.worldwinddraw.demo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
@@ -14,12 +26,18 @@ import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
+import com.tcsappdev.worldwinddraw.core.history.HistoryManager
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
+import com.tcsappdev.worldwinddraw.core.state.DrawEvent
+import com.tcsappdev.worldwinddraw.core.state.DrawMode
+import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
+import com.tcsappdev.worldwinddraw.core.state.DrawableEntityType
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 
 class MainActivity : ComponentActivity() {
     private val entityRepository = EntityRepository()
+    private val stateMachine = DrawStateMachine(HistoryManager())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,14 +48,52 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    WorldWindowMap(
-                        entityRepository = entityRepository,
-                        initialCameraPosition = GeoPosition(latitude = 39.0, longitude = 35.5, altitude = 3_000_000.0),
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        WorldWindowMap(
+                            entityRepository = entityRepository,
+                            stateMachine = stateMachine,
+                            initialCameraPosition = GeoPosition(latitude = 39.0, longitude = 35.5, altitude = 3_000_000.0),
+                        )
+                        // Visual proof that real map taps reach PickInputBridge -> DrawEngineReducer:
+                        // toggling "Draw" mode here, then tapping the map, accumulates
+                        // pendingVertices from the actual pick position of each tap.
+                        DrawModeOverlay(stateMachine, modifier = Modifier.align(Alignment.TopStart).padding(16.dp))
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun DrawModeOverlay(stateMachine: DrawStateMachine, modifier: Modifier = Modifier) {
+    val state by stateMachine.state.collectAsState()
+    val isDrawing = state.mode is DrawMode.Draw
+
+    Column(modifier = modifier) {
+        Button(onClick = {
+            val nextMode = if (isDrawing) DrawMode.Idle else DrawMode.Draw(DrawableEntityType.Polygon, emptyList())
+            stateMachine.onEvent(DrawEvent.ModeChange(nextMode))
+        }) {
+            Text(if (isDrawing) "Stop Drawing" else "Start Drawing")
+        }
+        Text(
+            text = describeMode(state.mode),
+            color = Color.White,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .background(Color.Black.copy(alpha = 0.5f))
+                .padding(8.dp),
+        )
+    }
+}
+
+private fun describeMode(mode: DrawMode): String = when (mode) {
+    is DrawMode.Idle -> "Idle"
+    is DrawMode.Pan -> "Pan"
+    is DrawMode.Draw -> "Draw (${mode.entityType}, ${mode.pendingVertices.size} points)"
+    is DrawMode.Edit -> "Edit (${mode.entityId.id})"
+    is DrawMode.Select -> "Select (${mode.entityId.id})"
 }
 
 // A rectangle over Turkey, semi-transparent so the base imagery stays visible underneath —
