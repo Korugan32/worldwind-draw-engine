@@ -13,10 +13,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.tcsappdev.worldwinddraw.adapter.input.PickInputBridge
 import com.tcsappdev.worldwinddraw.adapter.layer.DrawLayer
 import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPosition
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
+import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import earth.worldwind.WorldWindow
 import earth.worldwind.layer.BackgroundLayer
 import earth.worldwind.layer.BlueMarbleLayer
@@ -29,10 +31,15 @@ import earth.worldwind.layer.BlueMarbleLayer
  *
  * [initialCameraPosition]'s `altitude` doubles as the camera's viewing distance in meters —
  * WWK has no separate "zoom level" concept, the camera is just a point above the globe.
+ *
+ * Real taps reach [stateMachine] via [PickInputBridge], wired through WWK's own
+ * `selectDragDetector` (see [PickInputBridge]'s KDoc for why that's the right hook, not a
+ * `WorldWindowController` decorator).
  */
 @Composable
 fun WorldWindowMap(
     entityRepository: EntityRepository,
+    stateMachine: DrawStateMachine,
     initialCameraPosition: GeoPosition,
     modifier: Modifier = Modifier,
 ) {
@@ -50,6 +57,7 @@ fun WorldWindowMap(
                 }
                 val camera = initialCameraPosition.toWwkPosition()
                 engine.camera.position.set(camera.latitude, camera.longitude, camera.altitude)
+                selectDragDetector.callback = PickInputBridge(stateMachine)
                 worldWindow = this
             }
         },
