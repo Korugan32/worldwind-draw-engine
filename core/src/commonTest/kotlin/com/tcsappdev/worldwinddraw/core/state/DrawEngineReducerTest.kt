@@ -1,6 +1,8 @@
 package com.tcsappdev.worldwinddraw.core.state
 
+import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
+import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
@@ -285,5 +287,90 @@ class DrawEngineReducerTest {
 
         assertEquals(emptyList(), result.commands)
         assertEquals(DrawMode.Edit(entityId), result.state.mode) // still disarms, just doesn't insert
+    }
+
+    // --- Finishing a draw ---
+
+    @Test
+    fun finishDrawingOutsideDrawModeIsANoOp() {
+        val startState = DrawEngineState(mode = DrawMode.Idle)
+        val result = reduce(startState, DrawEvent.FinishDrawing(EntityId("new"), listOf(VertexId("v1"))))
+        assertEquals(startState, result.state)
+        assertEquals(emptyList(), result.commands)
+    }
+
+    @Test
+    fun finishDrawingWithMismatchedVertexIdCountIsANoOp() {
+        val startState = DrawEngineState(
+            mode = DrawMode.Draw(DrawableEntityType.Polygon, listOf(GeoPosition(0.0, 0.0), GeoPosition(1.0, 0.0), GeoPosition(1.0, 1.0)))
+        )
+        // Only 2 ids for 3 pending vertices.
+        val event = DrawEvent.FinishDrawing(EntityId("new"), listOf(VertexId("v1"), VertexId("v2")))
+        val result = reduce(startState, event)
+        assertEquals(startState, result.state)
+        assertEquals(emptyList(), result.commands)
+    }
+
+    @Test
+    fun finishDrawingAPolygonWithTooFewPointsStaysInDrawMode() {
+        val startState = DrawEngineState(mode = DrawMode.Draw(DrawableEntityType.Polygon, listOf(GeoPosition(0.0, 0.0), GeoPosition(1.0, 0.0))))
+        val event = DrawEvent.FinishDrawing(EntityId("new"), listOf(VertexId("v1"), VertexId("v2")))
+        val result = reduce(startState, event)
+        assertEquals(startState, result.state) // draft kept, not discarded
+        assertEquals(emptyList(), result.commands)
+    }
+
+    @Test
+    fun finishDrawingAPolygonWithEnoughPointsAddsItAndSelectsIt() {
+        val repository = EntityRepository()
+        val style = ShapeStyle.SolidColor(ColorRgba(10, 20, 30))
+        val positions = listOf(GeoPosition(0.0, 0.0), GeoPosition(1.0, 0.0), GeoPosition(1.0, 1.0))
+        val startState = DrawEngineState(mode = DrawMode.Draw(DrawableEntityType.Polygon, positions, style))
+        val entityId = EntityId("new-polygon")
+        val vertexIds = listOf(VertexId("v1"), VertexId("v2"), VertexId("v3"))
+
+        val result = reduce(startState, DrawEvent.FinishDrawing(entityId, vertexIds), repository)
+
+        assertEquals(1, result.commands.size)
+        assertEquals(DrawMode.Select(entityId), result.state.mode)
+        result.commands.forEach { it.execute() }
+        val created = repository.entities.value.first { it.id == entityId } as DrawnPolygon
+        assertEquals(style, created.style)
+        assertEquals(vertexIds, created.vertices.map { it.id })
+        assertEquals(positions, created.vertices.map { it.position })
+
+        // Undo must remove the whole entity, not just some of its vertices.
+        result.commands.forEach { it.undo() }
+        assertTrue(repository.entities.value.none { it.id == entityId })
+    }
+
+    @Test
+    fun finishDrawingAPolylineRequiresAtLeastTwoPoints() {
+        val repository = EntityRepository()
+        val tooFew = DrawEngineState(mode = DrawMode.Draw(DrawableEntityType.Polyline, listOf(GeoPosition(0.0, 0.0))))
+        val tooFewResult = reduce(tooFew, DrawEvent.FinishDrawing(EntityId("new"), listOf(VertexId("v1"))), repository)
+        assertEquals(tooFew, tooFewResult.state)
+
+        val enough = DrawEngineState(mode = DrawMode.Draw(DrawableEntityType.Polyline, listOf(GeoPosition(0.0, 0.0), GeoPosition(1.0, 1.0))))
+        val entityId = EntityId("new-polyline")
+        val enoughResult = reduce(enough, DrawEvent.FinishDrawing(entityId, listOf(VertexId("v1"), VertexId("v2"))), repository)
+        assertEquals(1, enoughResult.commands.size)
+        enoughResult.commands.forEach { it.execute() }
+        assertTrue(repository.entities.value.first { it.id == entityId } is DrawnPolyline)
+    }
+
+    @Test
+    fun finishDrawingAMarkerUsesTheFirstPendingPointAsItsPosition() {
+        val repository = EntityRepository()
+        val position = GeoPosition(12.0, 34.0)
+        val startState = DrawEngineState(mode = DrawMode.Draw(DrawableEntityType.Marker, listOf(position)))
+        val entityId = EntityId("new-marker")
+
+        val result = reduce(startState, DrawEvent.FinishDrawing(entityId, listOf(VertexId("ignored"))), repository)
+
+        assertEquals(1, result.commands.size)
+        result.commands.forEach { it.execute() }
+        val created = repository.entities.value.first { it.id == entityId } as DrawnMarker
+        assertEquals(position, created.position)
     }
 }
