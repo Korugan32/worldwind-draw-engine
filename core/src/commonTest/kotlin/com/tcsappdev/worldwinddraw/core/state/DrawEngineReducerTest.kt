@@ -373,4 +373,167 @@ class DrawEngineReducerTest {
         val created = repository.entities.value.first { it.id == entityId } as DrawnMarker
         assertEquals(position, created.position)
     }
+
+    // -- Reshaping a draft (DrawMode.Draw): drag a point, or drag an edge's midpoint to add one.
+
+    private fun p(lat: Double, lon: Double) = GeoPosition(lat, lon)
+
+    private fun draft(type: DrawableEntityType = DrawableEntityType.Polygon, vararg points: GeoPosition, activeDrag: DrawMode.Draw.ActiveDrag? = null) =
+        DrawEngineState(mode = DrawMode.Draw(type, points.toList(), activeDrag = activeDrag))
+
+    private fun draftOf(state: DrawEngineState) = state.mode as DrawMode.Draw
+
+    @Test
+    fun draggingADraftPointMovesItLiveAndRecordsOneUndoStepOnDrop() {
+        val repository = EntityRepository()
+        var state = draft(DrawableEntityType.Polygon, p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))
+
+        var result = reduce(state, DrawEvent.DragStart(p(1.0, 0.0), hitVertexId = null, hitEntityId = null, hitDraftPointIndex = 1), repository)
+        assertEquals(DrawMode.Draw.ActiveDrag.MovingPoint(1, origin = p(1.0, 0.0)), draftOf(result.state).activeDrag)
+        state = result.state
+
+        result = reduce(state, DrawEvent.DragMove(p(2.0, 0.5)), repository)
+        assertEquals(p(2.0, 0.5), draftOf(result.state).pendingVertices[1], "follows the drag live")
+        assertTrue(result.commands.isEmpty() && result.previewCommands.isEmpty(), "a draft is not an entity: no repository commands")
+        assertEquals(null, result.modeChange, "a live drag step is not an undo step; only the drop is")
+        state = result.state
+
+        result = reduce(state, DrawEvent.DragEnd(p(3.0, 0.5)), repository)
+        assertEquals(listOf(p(0.0, 0.0), p(3.0, 0.5), p(1.0, 1.0)), draftOf(result.state).pendingVertices)
+        assertEquals(null, draftOf(result.state).activeDrag)
+        assertTrue(result.commands.isEmpty())
+        assertTrue(repository.entities.value.isEmpty())
+        // ONE undo step for the whole gesture: back to where the point started, forward to where it was dropped.
+        val change = result.modeChange!!
+        assertEquals(listOf(p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0)), (change.before as DrawMode.Draw).pendingVertices)
+        assertEquals(listOf(p(0.0, 0.0), p(3.0, 0.5), p(1.0, 1.0)), (change.after as DrawMode.Draw).pendingVertices)
+    }
+
+    @Test
+    fun draggingADraftMidpointInsertsOneNewPointAfterItsEdgeOnlyWhenDropped() {
+        var state = draft(DrawableEntityType.Polygon, p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))
+
+        state = reduce(state, DrawEvent.DragStart(p(0.5, 0.0), hitVertexId = null, hitEntityId = null, hitDraftEdgeIndex = 0)).state
+        assertEquals(DrawMode.Draw.ActiveDrag.InsertingPoint(0, p(0.5, 0.0)), draftOf(state).activeDrag)
+
+        state = reduce(state, DrawEvent.DragMove(p(0.6, -0.3))).state
+        assertEquals(3, draftOf(state).pendingVertices.size, "nothing is inserted while dragging")
+        assertEquals(p(0.6, -0.3), (draftOf(state).activeDrag as DrawMode.Draw.ActiveDrag.InsertingPoint).position)
+
+        state = reduce(state, DrawEvent.DragEnd(p(0.7, -0.4))).state
+        assertEquals(listOf(p(0.0, 0.0), p(0.7, -0.4), p(1.0, 0.0), p(1.0, 1.0)), draftOf(state).pendingVertices)
+        assertEquals(null, draftOf(state).activeDrag)
+    }
+
+    @Test
+    fun theClosingEdgeOfAPolygonDraftCanGrowAPointToo() {
+        // 3 points = 3 edges; edge 2 is the wrap-around from the last point back to the first.
+        var state = draft(DrawableEntityType.Polygon, p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))
+        state = reduce(state, DrawEvent.DragStart(p(0.5, 0.5), hitVertexId = null, hitEntityId = null, hitDraftEdgeIndex = 2)).state
+        state = reduce(state, DrawEvent.DragEnd(p(0.4, 0.6))).state
+
+        assertEquals(listOf(p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0), p(0.4, 0.6)), draftOf(state).pendingVertices)
+    }
+
+    @Test
+    fun aDraftWithTooFewPointsToCloseHasNoClosingEdge() {
+        val polygonOfTwo = DrawMode.Draw(DrawableEntityType.Polygon, listOf(p(0.0, 0.0), p(1.0, 0.0)))
+        assertFalse(polygonOfTwo.isClosed)
+        assertEquals(1, polygonOfTwo.edgeCount)
+        assertEquals(3, DrawMode.Draw(DrawableEntityType.Polygon, listOf(p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))).edgeCount)
+        assertEquals(2, DrawMode.Draw(DrawableEntityType.Polyline, listOf(p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))).edgeCount)
+        assertEquals(0, DrawMode.Draw(DrawableEntityType.Marker, listOf(p(0.0, 0.0), p(1.0, 0.0))).edgeCount)
+        assertEquals(0, DrawMode.Draw(DrawableEntityType.Polygon, emptyList()).edgeCount)
+    }
+
+    @Test
+    fun draftDragsWithAnOutOfRangeIndexOrNoTargetAreIgnored() {
+        val state = draft(DrawableEntityType.Polyline, p(0.0, 0.0), p(1.0, 0.0))
+
+        // A polyline of 2 points has 1 edge (index 0) and 2 points (indices 0..1).
+        val badPoint = reduce(state, DrawEvent.DragStart(p(0.0, 0.0), null, null, hitDraftPointIndex = 2)).state
+        val badEdge = reduce(state, DrawEvent.DragStart(p(0.0, 0.0), null, null, hitDraftEdgeIndex = 1)).state
+        val nothing = reduce(state, DrawEvent.DragStart(p(0.0, 0.0), null, null)).state
+
+        assertEquals(state, badPoint)
+        assertEquals(state, badEdge)
+        assertEquals(state, nothing)
+    }
+
+    @Test
+    fun draftDragMoveAndEndWithNoDragStartedAreNoOps() {
+        val state = draft(DrawableEntityType.Polygon, p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))
+
+        assertEquals(state, reduce(state, DrawEvent.DragMove(p(5.0, 5.0))).state)
+        assertEquals(state, reduce(state, DrawEvent.DragEnd(p(5.0, 5.0))).state)
+    }
+
+    @Test
+    fun aReshapedDraftIsWhatFinishDrawingCommits() {
+        var state = draft(DrawableEntityType.Polygon, p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))
+        state = reduce(state, DrawEvent.DragStart(p(0.5, 0.0), null, null, hitDraftEdgeIndex = 0)).state
+        state = reduce(state, DrawEvent.DragEnd(p(0.5, -0.5))).state
+        val repository = EntityRepository()
+
+        val ids = List(4) { VertexId("v$it") }
+        val result = reduce(state, DrawEvent.FinishDrawing(EntityId("new"), ids), repository)
+        result.commands.forEach { it.execute() }
+
+        val polygon = repository.entities.value.single() as DrawnPolygon
+        assertEquals(listOf(p(0.0, 0.0), p(0.5, -0.5), p(1.0, 0.0), p(1.0, 1.0)), polygon.vertices.map { it.position })
+    }
+
+    // -- Which steps are undo steps (UndoableModeChange)
+
+    @Test
+    fun placingADraftPointIsAnUndoStep() {
+        val before = DrawMode.Draw(DrawableEntityType.Polygon, listOf(p(0.0, 0.0)))
+        val result = reduce(DrawEngineState(mode = before), DrawEvent.Click(p(1.0, 1.0), null))
+
+        val change = result.modeChange!!
+        assertEquals(before, change.before)
+        assertEquals(listOf(p(0.0, 0.0), p(1.0, 1.0)), (change.after as DrawMode.Draw).pendingVertices)
+    }
+
+    @Test
+    fun startingAndStoppingDrawingAreDescribedAsModeChanges() {
+        val draw = DrawMode.Draw(DrawableEntityType.Polygon, emptyList())
+
+        val start = reduce(DrawEngineState(mode = DrawMode.Idle), DrawEvent.ModeChange(draw)).modeChange!!
+        assertEquals(DrawMode.Idle, start.before)
+        assertEquals(draw, start.after)
+
+        val stop = reduce(DrawEngineState(mode = draw), DrawEvent.ModeChange(DrawMode.Idle)).modeChange!!
+        assertEquals(draw, stop.before)
+        assertEquals(DrawMode.Idle, stop.after)
+    }
+
+    @Test
+    fun navigationBetweenSelectAndEditIsNotAnUndoStep() {
+        assertEquals(null, reduce(DrawEngineState(mode = DrawMode.Idle), DrawEvent.ModeChange(DrawMode.Pan)).modeChange)
+        assertEquals(null, reduce(DrawEngineState(mode = DrawMode.Idle), DrawEvent.Click(p(0.0, 0.0), EntityId("x"))).modeChange)
+        assertEquals(null, reduce(DrawEngineState(mode = DrawMode.Select(EntityId("x"))), DrawEvent.Click(p(0.0, 0.0), EntityId("x"))).modeChange)
+    }
+
+    @Test
+    fun aDropThatChangedNothingIsNotAnUndoStep() {
+        var state = draft(DrawableEntityType.Polygon, p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))
+        state = reduce(state, DrawEvent.DragStart(p(1.0, 0.0), null, null, hitDraftPointIndex = 1)).state
+
+        val result = reduce(state, DrawEvent.DragEnd(p(1.0, 0.0)))
+
+        assertEquals(null, result.modeChange)
+    }
+
+    @Test
+    fun finishingAddsTheEntityButIsNotReportedAsAnUndoStep() {
+        val state = draft(DrawableEntityType.Polygon, p(0.0, 0.0), p(1.0, 0.0), p(1.0, 1.0))
+
+        val result = reduce(state, DrawEvent.FinishDrawing(EntityId("new"), List(3) { VertexId("v$it") }))
+
+        assertEquals(1, result.commands.size, "the AddEntityCommand")
+        // Finishing ends the drawing session (see DrawStateMachine); it must not leave a step that
+        // undo could use to delete the whole shape.
+        assertEquals(null, result.modeChange)
+    }
 }

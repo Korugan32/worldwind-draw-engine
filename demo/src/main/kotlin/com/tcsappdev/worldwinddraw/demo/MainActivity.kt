@@ -6,8 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -15,6 +17,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,8 +38,35 @@ import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import com.tcsappdev.worldwinddraw.core.state.DrawableEntityType
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
+import com.tcsappdev.worldwinddraw.core.style.HandleStyle
+import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import kotlin.random.Random
+
+private class Palette(val label: String, val highlight: HighlightStyle, val ring: ColorRgba, val plus: ColorRgba)
+
+// HighlightStyle/HandleStyle colours can be changed live too: this cycles through three palettes.
+private val PALETTES = listOf(
+    Palette("Default", HighlightStyle(), HandleStyle().ringColor, HandleStyle().plusColor),
+    Palette(
+        "Amber/Violet",
+        HighlightStyle(selectedColor = ColorRgba(255, 193, 7), editingColor = ColorRgba(156, 39, 176)),
+        ring = ColorRgba(74, 20, 140),
+        plus = ColorRgba(156, 39, 176),
+    ),
+    Palette(
+        "Mono",
+        HighlightStyle(selectedColor = ColorRgba(255, 255, 255), editingColor = ColorRgba(255, 255, 255, 220)),
+        ring = ColorRgba(0, 0, 0),
+        plus = ColorRgba(0, 0, 0),
+    ),
+)
+
+private val HANDLE_SIZES = listOf(
+    "S" to HandleStyle(vertexDiameter = 18f, midpointDiameter = 16f),
+    "M" to HandleStyle(),
+    "L" to HandleStyle(vertexDiameter = 40f, midpointDiameter = 36f),
+)
 
 class MainActivity : ComponentActivity() {
     private val entityRepository = EntityRepository()
@@ -48,6 +80,10 @@ class MainActivity : ComponentActivity() {
         entityRepository.add(demoMarker())
 
         setContent {
+            // DrawLayer.handleStyle can be changed live: this cycles it through three presets.
+            var handleSizeIndex by remember { mutableStateOf(1) }
+            var paletteIndex by remember { mutableStateOf(0) }
+            val palette = PALETTES[paletteIndex]
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -55,13 +91,23 @@ class MainActivity : ComponentActivity() {
                             entityRepository = entityRepository,
                             stateMachine = stateMachine,
                             initialCameraPosition = GeoPosition(latitude = 39.0, longitude = 35.5, altitude = 3_000_000.0),
+                            handleStyle = HANDLE_SIZES[handleSizeIndex].second.copy(ringColor = palette.ring, plusColor = palette.plus),
+                            highlightStyle = palette.highlight,
                         )
                         // Visual proof that real map taps reach PickInputBridge -> DrawEngineReducer:
                         // toggling "Draw" mode here, then tapping the map, accumulates
                         // pendingVertices from the actual pick position of each tap. The Undo
                         // button proves a dragged vertex is recorded as ONE undoable command
                         // (see ReduceResult's KDoc on commands vs. previewCommands).
-                        DrawModeOverlay(stateMachine, historyManager, modifier = Modifier.align(Alignment.TopStart).padding(16.dp))
+                        DrawModeOverlay(
+                            stateMachine,
+                            historyManager,
+                            handleSizeLabel = HANDLE_SIZES[handleSizeIndex].first,
+                            onCycleHandleSize = { handleSizeIndex = (handleSizeIndex + 1) % HANDLE_SIZES.size },
+                            paletteLabel = palette.label,
+                            onCyclePalette = { paletteIndex = (paletteIndex + 1) % PALETTES.size },
+                            modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(16.dp),
+                        )
                     }
                 }
             }
@@ -70,9 +116,18 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun DrawModeOverlay(stateMachine: DrawStateMachine, historyManager: HistoryManager, modifier: Modifier = Modifier) {
+private fun DrawModeOverlay(
+    stateMachine: DrawStateMachine,
+    historyManager: HistoryManager,
+    handleSizeLabel: String,
+    onCycleHandleSize: () -> Unit,
+    paletteLabel: String,
+    onCyclePalette: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val state by stateMachine.state.collectAsState()
     val canUndo by historyManager.canUndo.collectAsState()
+    val canRedo by historyManager.canRedo.collectAsState()
     val drawMode = state.mode as? DrawMode.Draw
     val isDrawing = drawMode != null
 
@@ -100,8 +155,19 @@ private fun DrawModeOverlay(stateMachine: DrawStateMachine, historyManager: Hist
         ) {
             Text("Finish")
         }
-        Button(onClick = { historyManager.undo() }, enabled = canUndo, modifier = Modifier.padding(top = 4.dp)) {
-            Text("Undo")
+        Row(modifier = Modifier.padding(top = 4.dp)) {
+            Button(onClick = { historyManager.undo() }, enabled = canUndo) {
+                Text("Undo")
+            }
+            Button(onClick = { historyManager.redo() }, enabled = canRedo, modifier = Modifier.padding(start = 4.dp)) {
+                Text("Redo")
+            }
+        }
+        Button(onClick = onCycleHandleSize, modifier = Modifier.padding(top = 4.dp)) {
+            Text("Handles: $handleSizeLabel")
+        }
+        Button(onClick = onCyclePalette, modifier = Modifier.padding(top = 4.dp)) {
+            Text("Colors: $paletteLabel")
         }
         Text(
             text = describeMode(state.mode),
@@ -117,7 +183,11 @@ private fun DrawModeOverlay(stateMachine: DrawStateMachine, historyManager: Hist
 private fun describeMode(mode: DrawMode): String = when (mode) {
     is DrawMode.Idle -> "Idle"
     is DrawMode.Pan -> "Pan"
-    is DrawMode.Draw -> "Draw (${mode.entityType}, ${mode.pendingVertices.size} points)"
+    is DrawMode.Draw -> "Draw (${mode.entityType}, ${mode.pendingVertices.size} points)" + when (val drag = mode.activeDrag) {
+        is DrawMode.Draw.ActiveDrag.MovingPoint -> " - moving point ${drag.index}"
+        is DrawMode.Draw.ActiveDrag.InsertingPoint -> " - adding a point on edge ${drag.edgeIndex}"
+        null -> ""
+    }
     is DrawMode.Edit -> when (val drag = mode.activeDrag) {
         is DrawMode.Edit.ActiveDrag.ExistingVertex -> "Edit (${mode.entityId.id}) - dragging ${drag.vertexId.id}"
         is DrawMode.Edit.ActiveDrag.NewVertex -> "Edit (${mode.entityId.id}) - adding a vertex on edge ${drag.edgeIndex}"

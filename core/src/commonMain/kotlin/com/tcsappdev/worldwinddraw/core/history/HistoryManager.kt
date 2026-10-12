@@ -54,6 +54,13 @@ class HistoryManager(private val capacity: Int = 100) {
         }
     }
 
+    /** Forgets every step, undoable and redoable. */
+    fun clear() {
+        undoStack.clear()
+        redoStack.clear()
+        updateFlags()
+    }
+
     private fun updateFlags() {
         _canUndo.value = undoStack.isNotEmpty()
         _canRedo.value = redoStack.isNotEmpty()

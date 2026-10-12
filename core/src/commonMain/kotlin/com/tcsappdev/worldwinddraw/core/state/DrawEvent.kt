@@ -24,12 +24,18 @@ sealed interface DrawEvent {
      * [DrawMode.Edit.ActiveDrag.NewVertex][DrawMode.Edit.ActiveDrag]) should be set for a
      * drag the reducer acts on; both `null` (with [hitEntityId] also often `null`) means
      * empty space or a whole-shape grab this library doesn't support yet.
+     *
+     * While a shape is still being drawn ([DrawMode.Draw]) there is no entity and no vertex ids,
+     * so the draft's own points are addressed by index instead: [hitDraftPointIndex] is a point
+     * of the draft, [hitDraftEdgeIndex] a midpoint handle on one of its edges.
      */
     data class DragStart(
         val position: GeoPosition,
         val hitVertexId: VertexId?,
         val hitEntityId: EntityId?,
         val hitEdgeIndex: Int? = null,
+        val hitDraftPointIndex: Int? = null,
+        val hitDraftEdgeIndex: Int? = null,
     ) : DrawEvent
 
     /** The drag continues at [position]. What's being dragged is already known from the [DragStart] that began it. */

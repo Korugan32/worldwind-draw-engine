@@ -3,6 +3,7 @@ package com.tcsappdev.worldwinddraw.core.state
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
+import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.history.Command
 import com.tcsappdev.worldwinddraw.core.history.commands.AddEntityCommand
@@ -26,7 +27,21 @@ data class ReduceResult(
     val state: DrawEngineState,
     val commands: List<Command> = emptyList(),
     val previewCommands: List<Command> = emptyList(),
+    val modeChange: UndoableModeChange? = null,
 )
+
+/**
+ * A change of [DrawMode] that belongs on the undo stack: the [before] and [after] modes, with
+ * any in-progress drag cleared from both. The reducer only *describes* it (it stays pure); the
+ * `DrawStateMachine` turns it into a command.
+ *
+ * Only steps of sketching a new shape are described this way — placing, moving and inserting
+ * points (and switching what is being drawn) — because a draft lives in the mode, not in the
+ * repository, so there is no entity command that could undo it. Starting and stopping drawing are
+ * described too, but they are session boundaries, which the `DrawStateMachine` does not record
+ * (see its KDoc). Switching between select/edit is navigation, not an edit, and is not described.
+ */
+data class UndoableModeChange(val before: DrawMode, val after: DrawMode)
 
 /**
  * The pure `(state, event) -> new state` core of the draw engine. Has no side effects
@@ -37,7 +52,7 @@ data class ReduceResult(
  */
 object DrawEngineReducer {
     fun reduce(state: DrawEngineState, event: DrawEvent, repository: EntityRepository): ReduceResult = when (event) {
-        is DrawEvent.ModeChange -> ReduceResult(state.copy(mode = event.mode))
+        is DrawEvent.ModeChange -> ReduceResult(state.copy(mode = event.mode), modeChange = recordedIfDraft(state.mode, event.mode))
         is DrawEvent.Click -> reduceClick(state, event)
         is DrawEvent.DragStart -> reduceDragStart(state, event)
         is DrawEvent.DragMove -> reduceDragMove(state, event, repository)
@@ -47,8 +62,11 @@ object DrawEngineReducer {
 
     private fun reduceClick(state: DrawEngineState, event: DrawEvent.Click): ReduceResult {
         val currentMode = state.mode
+        if (currentMode is DrawMode.Draw) {
+            val added = currentMode.copy(pendingVertices = currentMode.pendingVertices + event.position)
+            return ReduceResult(state.copy(mode = added), modeChange = recordedIfDraft(currentMode, added))
+        }
         val newMode = when {
-            currentMode is DrawMode.Draw -> currentMode.copy(pendingVertices = currentMode.pendingVertices + event.position)
 
             currentMode is DrawMode.Idle && event.hitEntityId != null -> DrawMode.Select(event.hitEntityId)
 
@@ -78,6 +96,7 @@ object DrawEngineReducer {
      */
     private fun reduceDragStart(state: DrawEngineState, event: DrawEvent.DragStart): ReduceResult {
         val mode = state.mode
+        if (mode is DrawMode.Draw) return reduceDraftDragStart(state, mode, event)
         if (mode !is DrawMode.Edit || mode.entityId != event.hitEntityId) return ReduceResult(state)
 
         val drag = when {
@@ -89,6 +108,7 @@ object DrawEngineReducer {
     }
 
     private fun reduceDragMove(state: DrawEngineState, event: DrawEvent.DragMove, repository: EntityRepository): ReduceResult {
+        (state.mode as? DrawMode.Draw)?.let { return reduceDraftDragMove(state, it, event) }
         val mode = state.mode as? DrawMode.Edit ?: return ReduceResult(state)
         return when (val drag = mode.activeDrag) {
             null -> ReduceResult(state)
@@ -109,6 +129,7 @@ object DrawEngineReducer {
     }
 
     private fun reduceDragEnd(state: DrawEngineState, event: DrawEvent.DragEnd, repository: EntityRepository): ReduceResult {
+        (state.mode as? DrawMode.Draw)?.let { return reduceDraftDragEnd(state, it, event) }
         val mode = state.mode as? DrawMode.Edit ?: return ReduceResult(state)
         val drag = mode.activeDrag ?: return ReduceResult(state)
         val disarmed = state.copy(mode = mode.copy(activeDrag = null))
@@ -124,6 +145,59 @@ object DrawEngineReducer {
         }
         return ReduceResult(disarmed, commands = listOf(command))
     }
+
+    // -- Reshaping a draft ([DrawMode.Draw]). Pure state changes: the draft isn't an entity, so
+    // there is no repository to write to and nothing to record in the undo history.
+
+    private fun reduceDraftDragStart(state: DrawEngineState, mode: DrawMode.Draw, event: DrawEvent.DragStart): ReduceResult {
+        val drag = when {
+            event.hitDraftPointIndex != null && event.hitDraftPointIndex in mode.pendingVertices.indices ->
+                DrawMode.Draw.ActiveDrag.MovingPoint(event.hitDraftPointIndex, origin = mode.pendingVertices[event.hitDraftPointIndex])
+            event.hitDraftEdgeIndex != null && event.hitDraftEdgeIndex in 0 until mode.edgeCount ->
+                DrawMode.Draw.ActiveDrag.InsertingPoint(event.hitDraftEdgeIndex, event.position)
+            else -> return ReduceResult(state)
+        }
+        return ReduceResult(state.copy(mode = mode.copy(activeDrag = drag)))
+    }
+
+    private fun reduceDraftDragMove(state: DrawEngineState, mode: DrawMode.Draw, event: DrawEvent.DragMove): ReduceResult {
+        val newMode = when (val drag = mode.activeDrag) {
+            null -> return ReduceResult(state)
+            is DrawMode.Draw.ActiveDrag.MovingPoint ->
+                mode.copy(pendingVertices = mode.pendingVertices.replacedAt(drag.index, event.position))
+            is DrawMode.Draw.ActiveDrag.InsertingPoint -> mode.copy(activeDrag = drag.copy(position = event.position))
+        }
+        return ReduceResult(state.copy(mode = newMode))
+    }
+
+    private fun reduceDraftDragEnd(state: DrawEngineState, mode: DrawMode.Draw, event: DrawEvent.DragEnd): ReduceResult {
+        val drag = mode.activeDrag ?: return ReduceResult(state)
+        val (before, after) = when (drag) {
+            is DrawMode.Draw.ActiveDrag.MovingPoint -> Pair(
+                mode.copy(pendingVertices = mode.pendingVertices.replacedAt(drag.index, drag.origin), activeDrag = null),
+                mode.copy(pendingVertices = mode.pendingVertices.replacedAt(drag.index, event.position), activeDrag = null),
+            )
+            is DrawMode.Draw.ActiveDrag.InsertingPoint -> Pair(
+                mode.copy(activeDrag = null),
+                mode.copy(
+                    pendingVertices = mode.pendingVertices.toMutableList().apply { add(drag.edgeIndex + 1, event.position) },
+                    activeDrag = null,
+                ),
+            )
+        }
+        return ReduceResult(state.copy(mode = after), modeChange = recordedIfDraft(before, after))
+    }
+
+    /** A [DrawMode] change as an undo step, if it involves a draft and actually changes something (see [UndoableModeChange]). */
+    private fun recordedIfDraft(before: DrawMode, after: DrawMode): UndoableModeChange? {
+        if (before !is DrawMode.Draw && after !is DrawMode.Draw) return null
+        val normalizedBefore = if (before is DrawMode.Draw) before.copy(activeDrag = null) else before
+        val normalizedAfter = if (after is DrawMode.Draw) after.copy(activeDrag = null) else after
+        return if (normalizedBefore == normalizedAfter) null else UndoableModeChange(normalizedBefore, normalizedAfter)
+    }
+
+    private fun List<GeoPosition>.replacedAt(index: Int, position: GeoPosition): List<GeoPosition> =
+        toMutableList().apply { this[index] = position }
 
     /**
      * Commits [DrawMode.Draw]'s `pendingVertices` as a real entity — see
@@ -153,6 +227,8 @@ object DrawEngineReducer {
         }
 
         val command = AddEntityCommand(repository, entity)
+        // Finishing ends the drawing session, so this is deliberately NOT reported as an undo step
+        // (see DrawStateMachine): undo would otherwise delete the whole shape just finished.
         return ReduceResult(state.copy(mode = DrawMode.Select(event.entityId)), commands = listOf(command))
     }
 }

@@ -1,10 +1,16 @@
 package com.tcsappdev.worldwinddraw.adapter.layer
 
-import com.tcsappdev.worldwinddraw.adapter.mapper.toGeoPosition
+import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkHighlight
 import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPlacemark
 import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPolygon
 import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPolyline
 import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPosition
+import com.tcsappdev.worldwinddraw.core.animation.AnimatedProperty
+import com.tcsappdev.worldwinddraw.core.animation.Animatable
+import com.tcsappdev.worldwinddraw.core.animation.AnimationSpec
+import com.tcsappdev.worldwinddraw.core.animation.Easing
+import com.tcsappdev.worldwinddraw.core.animation.RepeatMode
+import com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
@@ -13,17 +19,16 @@ import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
+import com.tcsappdev.worldwinddraw.core.state.DrawEngineState
 import com.tcsappdev.worldwinddraw.core.state.DrawMode
+import com.tcsappdev.worldwinddraw.core.style.ColorRgba
+import com.tcsappdev.worldwinddraw.core.style.HandleStyle
+import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
-import earth.worldwind.geom.AltitudeMode
-import earth.worldwind.geom.Position
 import earth.worldwind.layer.RenderableLayer
-import earth.worldwind.render.Color
 import earth.worldwind.render.Renderable
-import earth.worldwind.shape.PathType
-import earth.worldwind.shape.Placemark
-import earth.worldwind.shape.PlacemarkAttributes
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -43,6 +48,11 @@ import kotlinx.coroutines.flow.onEach
  * Every renderable is tagged with its originating [EntityId] via [ENTITY_ID_KEY] (see
  * [Renderable.putUserProperty]) — this is how `adapter.input.PickInputBridge` maps a WWK
  * pick result back to a [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity].
+ *
+ * The entity [DrawMode.Select]/[DrawMode.Edit] names also gets a selection highlight (see
+ * `HighlightMapper.kt`): a separate, non-pickable outline/halo renderable, so the entity's own
+ * fill and style are never modified. These highlight renderables are deliberately NOT tagged
+ * with [ENTITY_ID_KEY] — they are never pick results.
  *
  * While [stateMachine] reports [DrawMode.Edit] for a polygon/polyline, this layer also adds:
  * - one small, individually pickable+[Movable][earth.worldwind.shape.Movable] "vertex
@@ -73,23 +83,73 @@ class DrawLayer(
     stateMachine: DrawStateMachine,
     scope: CoroutineScope,
     private val onContentChanged: () -> Unit = {},
-) : RenderableLayer("Draw Layer") {
+    handleStyle: HandleStyle = HandleStyle(),
+    highlightStyle: HighlightStyle = HighlightStyle(),
+) : RenderableLayer("Draw Layer"), Animatable {
+    private val handleStyleFlow = MutableStateFlow(handleStyle)
+    private val highlightStyleFlow = MutableStateFlow(highlightStyle)
+
+    /**
+     * How big and what colour the edit handles are (see [HandleStyle]). Safe to change at any
+     * time — e.g. from a host app's settings screen — the layer rebuilds and redraws right away.
+     */
+    var handleStyle: HandleStyle
+        get() = handleStyleFlow.value
+        set(value) {
+            handleStyleFlow.value = value
+        }
+
+    /** The colours of the selected/edited shape's outline (see [HighlightStyle]). Live-changeable, like [handleStyle]. */
+    var highlightStyle: HighlightStyle
+        get() = highlightStyleFlow.value
+        set(value) {
+            highlightStyleFlow.value = value
+        }
+
+    private val highlightAlphaSetters = mutableListOf<(Float) -> Unit>()
+
+    private val pulse = AnimatedProperty(
+        startValue = 1f,
+        targetValue = PULSE_MIN_ALPHA,
+        spec = AnimationSpec(PULSE_DURATION_MS, Easing { f -> f * f * (3f - 2f * f) }, RepeatMode.Reverse),
+    ) { start, target, fraction -> start + (target - start) * fraction }
+
     init {
-        combine(entityRepository.entities, stateMachine.state) { entities, engineState -> entities to engineState }
-            .onEach { (entities, engineState) ->
+        combine(entityRepository.entities, stateMachine.state, handleStyleFlow, highlightStyleFlow) { entities, engineState, handles, highlights ->
+            Inputs(entities, engineState, handles, highlights)
+        }
+            .onEach { (entities, engineState, handles, highlights) ->
                 clearRenderables()
+                highlightAlphaSetters.clear()
                 val editMode = engineState.mode as? DrawMode.Edit
                 val newVertexDrag = editMode?.activeDrag as? DrawMode.Edit.ActiveDrag.NewVertex
 
                 entities.filterIsInstance<DrawnPolygon>().forEach { polygon ->
                     val renderVertices = livePreviewVertices(polygon.id, polygon.vertices, editMode, newVertexDrag)
-                    addRenderable(polygon.copy(vertices = renderVertices).toWwkPolygon().tagged(polygon.id))
+                    val rendered = polygon.copy(vertices = renderVertices)
+                    addRenderable(rendered.toWwkPolygon().tagged(polygon.id))
+                    highlights.colorFor(engineState.mode.styleStateFor(polygon.id))?.let { color ->
+                        addHighlight(rendered.toWwkHighlight(color), color) { shape, alpha -> shape.attributes.outlineColor.alpha = alpha }
+                    }
                 }
                 entities.filterIsInstance<DrawnPolyline>().forEach { polyline ->
                     val renderVertices = livePreviewVertices(polyline.id, polyline.vertices, editMode, newVertexDrag)
-                    addRenderable(polyline.copy(vertices = renderVertices).toWwkPolyline().tagged(polyline.id))
+                    val rendered = polyline.copy(vertices = renderVertices)
+                    highlights.colorFor(engineState.mode.styleStateFor(polyline.id))?.let { color ->
+                        addHighlight(rendered.toWwkHighlight(color), color) { shape, alpha -> shape.attributes.outlineColor.alpha = alpha }
+                    }
+                    addRenderable(rendered.toWwkPolyline().tagged(polyline.id))
                 }
-                entities.filterIsInstance<DrawnMarker>().forEach { addRenderable(it.toWwkPlacemark().tagged(it.id)) }
+                entities.filterIsInstance<DrawnMarker>().forEach { marker ->
+                    highlights.colorFor(engineState.mode.styleStateFor(marker.id))?.let { color ->
+                        addHighlight(marker.toWwkHighlight(color), color) { placemark, alpha -> placemark.attributes.imageColor.alpha = alpha }
+                    }
+                    addRenderable(marker.toWwkPlacemark().tagged(marker.id))
+                }
+
+                (engineState.mode as? DrawMode.Draw)?.let { draft ->
+                    draftPreviewRenderables(draft, handles, highlights).forEach { addRenderable(it) }
+                }
 
                 if (editMode != null) {
                     val editedEntity = entities.firstOrNull { it.id == editMode.entityId }
@@ -99,16 +159,53 @@ class DrawLayer(
                         is DrawnMarker, null -> null to false
                     }
                     if (vertices != null) {
-                        vertices.forEach { vertex -> addRenderable(vertexHandle(editMode.entityId, vertex)) }
+                        vertices.forEach { vertex ->
+                            vertexHandleRenderables(vertex.position, handles) {
+                                putUserProperty(ENTITY_ID_KEY, editMode.entityId)
+                                putUserProperty(VERTEX_ID_KEY, vertex.id)
+                            }.forEach { addRenderable(it) }
+                        }
                         val skipEdgeIndex = newVertexDrag?.edgeIndex
-                        edgeMidpoints(vertices, isClosed).forEach { (edgeIndex, midpoint) ->
-                            if (edgeIndex != skipEdgeIndex) addRenderable(midpointHandle(editMode.entityId, edgeIndex, midpoint))
+                        edgeMidpoints(vertices.map { it.position }, isClosed).forEach { (edgeIndex, midpoint) ->
+                            if (edgeIndex != skipEdgeIndex) {
+                                midpointHandleRenderables(midpoint, handles) {
+                                    putUserProperty(ENTITY_ID_KEY, editMode.entityId)
+                                    putUserProperty(EDGE_INDEX_KEY, edgeIndex)
+                                }.forEach { addRenderable(it) }
+                            }
                         }
                     }
                 }
                 onContentChanged()
             }
             .launchIn(scope)
+    }
+
+    /**
+     * Adds [highlight] and remembers how to set its alpha, so [onTick] can pulse it without
+     * rebuilding the layer. The pulse scales the colour's own opacity ([color]'s alpha) rather
+     * than replacing it, so a deliberately translucent highlight stays translucent. Starts at
+     * the pulse's current alpha, so a highlight that appears mid-cycle doesn't flash back to
+     * full opacity for a frame.
+     */
+    private fun <T : Renderable> addHighlight(highlight: T, color: ColorRgba, setAlpha: (T, Float) -> Unit) {
+        addRenderable(highlight)
+        val baseAlpha = color.alpha / 255f
+        setAlpha(highlight, baseAlpha * pulse.value)
+        highlightAlphaSetters += { pulseAlpha -> setAlpha(highlight, baseAlpha * pulseAlpha) }
+    }
+
+    /**
+     * Pulses the selection highlight's opacity (see [PULSE_DURATION_MS]/[PULSE_MIN_ALPHA]).
+     * Register this layer with the host's `AnimationController` and tick that once per frame.
+     * Does nothing — and, importantly, asks for no redraw — while nothing is highlighted, so an
+     * idle map isn't redrawn every frame (WWK renders on demand, see [onContentChanged]).
+     */
+    override fun onTick(deltaMs: Long) {
+        if (highlightAlphaSetters.isEmpty()) return
+        pulse.onTick(deltaMs)
+        highlightAlphaSetters.forEach { it(pulse.value) }
+        onContentChanged()
     }
 
     /**
@@ -127,56 +224,7 @@ class DrawLayer(
         return vertices.toMutableList().apply { add(drag.edgeIndex + 1, phantom) }
     }
 
-    /**
-     * Every edge's index paired with its midpoint. [isClosed] adds the wraparound edge (last
-     * vertex back to the first) for a polygon; a polyline has one fewer edge than vertices.
-     *
-     * Uses WWK's own [Position.interpolateAlongPath] (with [PathType.GREAT_CIRCLE] — the
-     * default `pathType` [PolygonMapper][com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPolygon]/
-     * [PolylineMapper][com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPolyline] leave every
-     * shape at) rather than a plain lat/lon average: WWK renders an edge as a great-circle
-     * arc, which is *not* the same curve a naive planar midpoint sits on — over a long edge
-     * the two visibly diverge, so a `core`-side pure-math midpoint would float off the
-     * actual rendered line. This is why the computation lives here in `wwk-adapter` and not
-     * in `core.geometry.GeometryOps`: it only stays correct by depending on the exact same
-     * WWK math the shape itself is drawn with.
-     */
-    private fun edgeMidpoints(vertices: List<Vertex>, isClosed: Boolean): List<Pair<Int, GeoPosition>> {
-        val edgeCount = if (isClosed) vertices.size else vertices.size - 1
-        val scratch = Position()
-        return (0 until edgeCount).map { i ->
-            val start = vertices[i].position.toWwkPosition()
-            val end = vertices[(i + 1) % vertices.size].position.toWwkPosition()
-            start.interpolateAlongPath(end, PathType.GREAT_CIRCLE, 0.5, scratch)
-            i to scratch.toGeoPosition()
-        }
-    }
-
     private fun <T : Renderable> T.tagged(entityId: EntityId): T = apply { putUserProperty(ENTITY_ID_KEY, entityId) }
-
-    private fun vertexHandle(entityId: EntityId, vertex: Vertex): Placemark {
-        val attributes = PlacemarkAttributes().apply {
-            imageColor = VERTEX_HANDLE_COLOR
-            imageScale = VERTEX_HANDLE_SIZE
-        }
-        return Placemark(vertex.position.toWwkPosition(), attributes).apply {
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-            putUserProperty(ENTITY_ID_KEY, entityId)
-            putUserProperty(VERTEX_ID_KEY, vertex.id)
-        }
-    }
-
-    private fun midpointHandle(entityId: EntityId, edgeIndex: Int, position: GeoPosition): Placemark {
-        val attributes = PlacemarkAttributes().apply {
-            imageColor = MIDPOINT_HANDLE_COLOR
-            imageScale = MIDPOINT_HANDLE_SIZE
-        }
-        return Placemark(position.toWwkPosition(), attributes).apply {
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-            putUserProperty(ENTITY_ID_KEY, entityId)
-            putUserProperty(EDGE_INDEX_KEY, edgeIndex)
-        }
-    }
 
     companion object {
         /** [Renderable.putUserProperty] key every renderable this layer creates is tagged with. */
@@ -188,12 +236,28 @@ class DrawLayer(
         /** [Renderable.putUserProperty] key a midpoint-handle [Placemark] is additionally tagged with. */
         const val EDGE_INDEX_KEY = "com.tcsappdev.worldwinddraw.edgeIndex"
 
+        /**
+         * Keys for the handles of a shape that is still being drawn (`DrawMode.Draw`). There is no
+         * entity or vertex id yet, so these handles carry no [ENTITY_ID_KEY]; they are addressed by
+         * index into the draft's points / edges instead.
+         */
+        const val DRAFT_POINT_INDEX_KEY = "com.tcsappdev.worldwinddraw.draftPointIndex"
+
+        /** See [DRAFT_POINT_INDEX_KEY]. */
+        const val DRAFT_EDGE_INDEX_KEY = "com.tcsappdev.worldwinddraw.draftEdgeIndex"
+
         /** Placeholder id for the rendering-only phantom vertex spliced in during a live [DrawMode.Edit.ActiveDrag.NewVertex] preview — never persisted, discarded on the next rebuild. */
         private val PHANTOM_VERTEX_ID = VertexId("__phantom__")
 
-        private val VERTEX_HANDLE_COLOR = Color(1f, 1f, 1f, 1f)
-        private const val VERTEX_HANDLE_SIZE = 14.0
-        private val MIDPOINT_HANDLE_COLOR = Color(1f, 1f, 1f, 0.5f)
-        private const val MIDPOINT_HANDLE_SIZE = 9.0
+        private const val PULSE_DURATION_MS = 700L
+        private const val PULSE_MIN_ALPHA = 0.2f
+
     }
 }
+
+private data class Inputs(
+    val entities: List<DrawableEntity>,
+    val engineState: DrawEngineState,
+    val handles: HandleStyle,
+    val highlights: HighlightStyle,
+)

@@ -75,4 +75,22 @@ class HistoryManagerTest {
         assertFalse(history.canUndo.value)
         assertEquals(listOf(EntityId("A")), repository.entities.value.map { it.id })
     }
+
+    @Test
+    fun clearForgetsBothUndoAndRedoWithoutTouchingTheState() {
+        val repository = EntityRepository()
+        val history = HistoryManager()
+        history.execute(AddEntityCommand(repository, DrawnMarker(EntityId("A"), style, GeoPosition(1.0, 1.0))))
+        history.execute(AddEntityCommand(repository, DrawnMarker(EntityId("B"), style, GeoPosition(2.0, 2.0))))
+        history.undo()
+        assertTrue(history.canUndo.value && history.canRedo.value)
+
+        history.clear()
+
+        assertFalse(history.canUndo.value)
+        assertFalse(history.canRedo.value)
+        assertEquals(listOf(EntityId("A")), repository.entities.value.map { it.id }, "clearing history changes no entities")
+        history.undo() // nothing left to undo: a no-op, not a crash
+        assertEquals(1, repository.entities.value.size)
+    }
 }
