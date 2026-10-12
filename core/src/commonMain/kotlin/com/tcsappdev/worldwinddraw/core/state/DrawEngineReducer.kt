@@ -1,7 +1,11 @@
 package com.tcsappdev.worldwinddraw.core.state
 
+import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
+import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
+import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.history.Command
+import com.tcsappdev.worldwinddraw.core.history.commands.AddEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexCommand
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
@@ -38,6 +42,7 @@ object DrawEngineReducer {
         is DrawEvent.DragStart -> reduceDragStart(state, event)
         is DrawEvent.DragMove -> reduceDragMove(state, event, repository)
         is DrawEvent.DragEnd -> reduceDragEnd(state, event, repository)
+        is DrawEvent.FinishDrawing -> reduceFinishDrawing(state, event, repository)
     }
 
     private fun reduceClick(state: DrawEngineState, event: DrawEvent.Click): ReduceResult {
@@ -118,5 +123,36 @@ object DrawEngineReducer {
             }
         }
         return ReduceResult(disarmed, commands = listOf(command))
+    }
+
+    /**
+     * Commits [DrawMode.Draw]'s `pendingVertices` as a real entity — see
+     * [DrawEvent.FinishDrawing]'s KDoc for why [event] carries pre-generated ids instead of
+     * the reducer minting its own, and for the no-op conditions this guards against
+     * (wrong mode, id-count mismatch). Below that, each [DrawableEntityType] has its own
+     * minimum: fewer points than that is *also* a no-op — the draft just stays open so the
+     * user can keep adding points and try finishing again, rather than losing their work.
+     */
+    private fun reduceFinishDrawing(state: DrawEngineState, event: DrawEvent.FinishDrawing, repository: EntityRepository): ReduceResult {
+        val mode = state.mode as? DrawMode.Draw ?: return ReduceResult(state)
+        if (event.vertexIds.size != mode.pendingVertices.size) return ReduceResult(state)
+        val vertices = mode.pendingVertices.zip(event.vertexIds) { position, vertexId -> Vertex(vertexId, position) }
+
+        val entity = when (mode.entityType) {
+            DrawableEntityType.Polygon ->
+                if (vertices.size < 3) return ReduceResult(state)
+                else DrawnPolygon(event.entityId, mode.style, vertices)
+
+            DrawableEntityType.Polyline ->
+                if (vertices.size < 2) return ReduceResult(state)
+                else DrawnPolyline(event.entityId, mode.style, vertices)
+
+            DrawableEntityType.Marker ->
+                if (vertices.isEmpty()) return ReduceResult(state)
+                else DrawnMarker(event.entityId, mode.style, vertices.first().position)
+        }
+
+        val command = AddEntityCommand(repository, entity)
+        return ReduceResult(state.copy(mode = DrawMode.Select(event.entityId)), commands = listOf(command))
     }
 }

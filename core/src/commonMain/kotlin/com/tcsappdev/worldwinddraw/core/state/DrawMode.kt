@@ -3,6 +3,8 @@ package com.tcsappdev.worldwinddraw.core.state
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
+import com.tcsappdev.worldwinddraw.core.style.ColorRgba
+import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 
 /**
  * The interaction mode the draw engine is currently in. Sealed so every place that
@@ -22,9 +24,18 @@ sealed interface DrawMode {
      * This is a draft, not yet a real entity — it isn't subject to
      * [com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon]/
      * [com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline]'s minimum-vertex-count
-     * rules until it's actually committed as one.
+     * rules until [DrawEvent.FinishDrawing] actually commits it as one (see
+     * `DrawEngineReducer`), using [style] for the new entity.
      */
-    data class Draw(val entityType: DrawableEntityType, val pendingVertices: List<GeoPosition>) : DrawMode
+    data class Draw(
+        val entityType: DrawableEntityType,
+        val pendingVertices: List<GeoPosition>,
+        val style: ShapeStyle = DEFAULT_STYLE,
+    ) : DrawMode {
+        companion object {
+            private val DEFAULT_STYLE = ShapeStyle.SolidColor(ColorRgba(red = 66, green = 133, blue = 244, alpha = 180))
+        }
+    }
 
     /**
      * [entityId]'s vertices are being edited (selected, dragged, or having points inserted).

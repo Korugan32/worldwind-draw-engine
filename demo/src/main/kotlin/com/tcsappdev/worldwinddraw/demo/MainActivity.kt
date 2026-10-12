@@ -34,6 +34,7 @@ import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import com.tcsappdev.worldwinddraw.core.state.DrawableEntityType
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     private val entityRepository = EntityRepository()
@@ -72,7 +73,8 @@ class MainActivity : ComponentActivity() {
 private fun DrawModeOverlay(stateMachine: DrawStateMachine, historyManager: HistoryManager, modifier: Modifier = Modifier) {
     val state by stateMachine.state.collectAsState()
     val canUndo by historyManager.canUndo.collectAsState()
-    val isDrawing = state.mode is DrawMode.Draw
+    val drawMode = state.mode as? DrawMode.Draw
+    val isDrawing = drawMode != null
 
     Column(modifier = modifier) {
         Button(onClick = {
@@ -80,6 +82,23 @@ private fun DrawModeOverlay(stateMachine: DrawStateMachine, historyManager: Hist
             stateMachine.onEvent(DrawEvent.ModeChange(nextMode))
         }) {
             Text(if (isDrawing) "Stop Drawing" else "Start Drawing")
+        }
+        // Only enabled once there are enough points for the entity type being drawn — see
+        // DrawnPolygon/DrawnPolyline's own minimum-vertex-count rules, which
+        // DrawEngineReducer.reduceFinishDrawing re-checks anyway (this is just so the button
+        // doesn't invite a tap it's going to silently ignore).
+        val canFinish = drawMode != null && drawMode.pendingVertices.size >= minimumPointsFor(drawMode.entityType)
+        Button(
+            onClick = {
+                val vertices = drawMode?.pendingVertices ?: return@Button
+                val entityId = EntityId(Random.nextLong().toString())
+                val vertexIds = vertices.map { VertexId(Random.nextLong().toString()) }
+                stateMachine.onEvent(DrawEvent.FinishDrawing(entityId, vertexIds))
+            },
+            enabled = canFinish,
+            modifier = Modifier.padding(top = 4.dp),
+        ) {
+            Text("Finish")
         }
         Button(onClick = { historyManager.undo() }, enabled = canUndo, modifier = Modifier.padding(top = 4.dp)) {
             Text("Undo")
@@ -105,6 +124,14 @@ private fun describeMode(mode: DrawMode): String = when (mode) {
         null -> "Edit (${mode.entityId.id}) - drag a vertex or midpoint handle"
     }
     is DrawMode.Select -> "Select (${mode.entityId.id}) - tap again to edit"
+}
+
+// Mirrors DrawEngineReducer.reduceFinishDrawing's per-type minimum-vertex guard, just so
+// the "Finish" button's enabled state doesn't invite a tap it's going to silently ignore.
+private fun minimumPointsFor(entityType: DrawableEntityType): Int = when (entityType) {
+    DrawableEntityType.Polygon -> 3
+    DrawableEntityType.Polyline -> 2
+    DrawableEntityType.Marker -> 1
 }
 
 // A rectangle over Turkey, semi-transparent so the base imagery stays visible underneath —
