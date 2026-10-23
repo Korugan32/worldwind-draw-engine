@@ -1,5 +1,9 @@
 package com.tcsappdev.worldwinddraw.demo
 
+import android.os.Handler
+import android.os.Looper
+import android.view.MotionEvent
+import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,6 +31,8 @@ import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import earth.worldwind.WorldWindow
 import earth.worldwind.layer.BackgroundLayer
 import earth.worldwind.layer.BlueMarbleLayer
+import earth.worldwind.layer.CompassLayer
+import earth.worldwind.layer.ViewControlsLayer
 
 /**
  * Embeds WWK's `WorldWindow` (a `GLSurfaceView`, not a native Compose widget) via
@@ -49,6 +55,7 @@ fun WorldWindowMap(
     modifier: Modifier = Modifier,
     handleStyle: HandleStyle = HandleStyle(),
     highlightStyle: HighlightStyle = HighlightStyle(),
+    onWorldWindow: (WorldWindow) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -72,6 +79,8 @@ fun WorldWindowMap(
         }
     }
 
+    val controls = remember { ViewControlsLayer().apply { zoomIncrement = 0.02; headingIncrement = 0.5; tiltIncrement = 0.5 } }
+
     AndroidView(
         factory = { context ->
             WorldWindow(context).apply {
@@ -82,11 +91,16 @@ fun WorldWindowMap(
                     animationController.register(layer)
                     addLayer(layer)
                     drawLayer = layer
+                    // WWK's own on-screen camera controls (pan pad, zoom, heading, tilt) and compass, on top of everything.
+                    addLayer(controls)
+                    addLayer(CompassLayer())
                 }
+                setOnTouchListener(ViewControlsTouch(controls, this))
                 val camera = initialCameraPosition.toWwkPosition()
                 engine.camera.position.set(camera.latitude, camera.longitude, camera.altitude)
                 selectDragDetector.callback = PickInputBridge(stateMachine)
                 worldWindow = this
+                onWorldWindow(this)
             }
         },
         modifier = modifier.fillMaxSize(),
@@ -102,5 +116,54 @@ fun WorldWindowMap(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+}
+
+/**
+ * Feeds touches that land on WWK's [ViewControlsLayer] to it, and keeps them away from the map underneath (so pressing a
+ * control neither pans the camera nor selects what's below). The layer only has [ViewControlsLayer.handleClick], which
+ * does one small step, so holding a control repeats it.
+ */
+private class ViewControlsTouch(private val controls: ViewControlsLayer, private val worldWindow: WorldWindow) : View.OnTouchListener {
+    private val handler = Handler(Looper.getMainLooper())
+    private var holding = false
+    private var x = 0.0
+    private var y = 0.0
+
+    private val repeat = object : Runnable {
+        override fun run() {
+            if (!holding) return
+            step()
+            handler.postDelayed(this, REPEAT_INTERVAL_MS)
+        }
+    }
+
+    // The layer's control rectangles are rewritten on the render thread; a click racing that rewrite is just ignored.
+    private fun step(): Boolean = try {
+        controls.handleClick(x, y, worldWindow.height, worldWindow.engine).also { if (it) worldWindow.requestRedraw() }
+    } catch (_: ConcurrentModificationException) {
+        false
+    }
+
+    override fun onTouch(view: View, event: MotionEvent): Boolean = when (event.actionMasked) {
+        MotionEvent.ACTION_DOWN -> {
+            x = event.x.toDouble()
+            y = event.y.toDouble()
+            holding = step()
+            if (holding) handler.postDelayed(repeat, REPEAT_DELAY_MS)
+            holding
+        }
+        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            val wasHolding = holding
+            holding = false
+            handler.removeCallbacks(repeat)
+            wasHolding
+        }
+        else -> holding
+    }
+
+    private companion object {
+        const val REPEAT_DELAY_MS = 300L
+        const val REPEAT_INTERVAL_MS = 40L
     }
 }

@@ -43,6 +43,7 @@ import com.tcsappdev.worldwinddraw.core.style.ImageFit
 import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
+import earth.worldwind.WorldWindow
 import kotlin.random.Random
 
 private class Palette(val label: String, val highlight: HighlightStyle, val ring: ColorRgba, val plus: ColorRgba)
@@ -74,6 +75,7 @@ class MainActivity : ComponentActivity() {
     private val entityRepository = EntityRepository()
     private val historyManager = HistoryManager()
     private val stateMachine = DrawStateMachine(historyManager, entityRepository)
+    private var worldWindow: WorldWindow? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,6 +101,7 @@ class MainActivity : ComponentActivity() {
                             initialCameraPosition = GeoPosition(latitude = 39.0, longitude = 35.5, altitude = 3_000_000.0),
                             handleStyle = HANDLE_SIZES[handleSizeIndex].second.copy(ringColor = palette.ring, plusColor = palette.plus),
                             highlightStyle = palette.highlight,
+                            onWorldWindow = { worldWindow = it },
                         )
                         // Visual proof that real map taps reach PickInputBridge -> DrawEngineReducer:
                         // toggling "Draw" mode here, then tapping the map, accumulates
@@ -113,6 +116,7 @@ class MainActivity : ComponentActivity() {
                             onCycleHandleSize = { handleSizeIndex = (handleSizeIndex + 1) % HANDLE_SIZES.size },
                             paletteLabel = palette.label,
                             onCyclePalette = { paletteIndex = (paletteIndex + 1) % PALETTES.size },
+                            onEvictTextures = { worldWindow?.let { android.util.Log.i("Demo", "evicted ${it.engine.renderResourceCache.trimToAge(Long.MAX_VALUE)} bytes of textures"); it.requestRedraw() } },
                             modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(16.dp),
                         )
                     }
@@ -131,6 +135,7 @@ private fun DrawModeOverlay(
     onCycleHandleSize: () -> Unit,
     paletteLabel: String,
     onCyclePalette: () -> Unit,
+    onEvictTextures: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by stateMachine.state.collectAsState()
@@ -202,6 +207,8 @@ private fun DrawModeOverlay(
                 modifier = Modifier.padding(start = 4.dp),
             ) { Text("Size +") }
         }
+        // Debug aid: evicts every texture from WWK's cache the way it does for stale ones or under memory pressure (they are released on the next frame), so every picture is made again.
+        Button(onClick = onEvictTextures, modifier = Modifier.padding(top = 4.dp)) { Text("Evict textures") }
         Text(
             text = describeMode(state.mode),
             color = Color.White,
