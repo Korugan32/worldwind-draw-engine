@@ -209,4 +209,58 @@ class DrawStateMachineTest {
 
         assertFalse(s.history.canUndo.value, "A's edits are no longer undoable from inside B's session")
     }
+
+    // -- Deleting
+
+    @Test
+    fun deletingASelectedShapeIsUndoableAndRedoable() {
+        val s = Setup()
+        s.addPolygon("A")
+        s.machine.onEvent(DrawEvent.Click(p(0.0, 0.0), EntityId("A"))) // Select(A)
+        assertFalse(s.history.canUndo.value)
+
+        s.machine.onEvent(DrawEvent.DeleteSelected)
+
+        assertTrue(s.repository.entities.value.isEmpty())
+        assertEquals(DrawMode.Idle, s.mode())
+        assertTrue(s.history.canUndo.value, "an accidental delete needs a way out")
+
+        s.history.undo()
+        assertEquals(1, s.repository.entities.value.size)
+        s.history.redo()
+        assertTrue(s.repository.entities.value.isEmpty())
+    }
+
+    @Test
+    fun deletingWhileEditingLeavesTheEditSessionButStaysUndoableAsExactlyOneStep() {
+        val s = Setup()
+        s.addPolygon("A")
+        s.startEditing("A")
+        s.dragVertex("A", "b", p(1.0, 0.0), p(2.0, 0.0))
+        assertTrue(s.history.canUndo.value)
+
+        s.machine.onEvent(DrawEvent.DeleteSelected)
+
+        assertEquals(DrawMode.Idle, s.mode())
+        assertTrue(s.repository.entities.value.isEmpty())
+        // The edit session ended, so the move is no longer separately undoable — but the delete is.
+        s.history.undo()
+        assertEquals(1, s.repository.entities.value.size)
+        assertEquals(p(2.0, 0.0), s.vertexPositions("A")[1], "restored as it was when deleted, with the edit")
+        assertFalse(s.history.canUndo.value, "only the delete was undoable, not the earlier move")
+    }
+
+    @Test
+    fun startingANewSessionAfterADeleteForgetsItsUndo() {
+        val s = Setup()
+        s.addPolygon("A")
+        s.machine.onEvent(DrawEvent.Click(p(0.0, 0.0), EntityId("A")))
+        s.machine.onEvent(DrawEvent.DeleteSelected)
+        assertTrue(s.history.canUndo.value)
+
+        s.startPolygon()
+
+        assertFalse(s.history.canUndo.value)
+        assertTrue(s.repository.entities.value.isEmpty())
+    }
 }

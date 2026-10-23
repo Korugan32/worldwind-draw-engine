@@ -143,17 +143,27 @@ private fun DrawModeOverlay(
         // DrawEngineReducer.reduceFinishDrawing re-checks anyway (this is just so the button
         // doesn't invite a tap it's going to silently ignore).
         val canFinish = drawMode != null && drawMode.pendingVertices.size >= minimumPointsFor(drawMode.entityType)
-        Button(
-            onClick = {
-                val vertices = drawMode?.pendingVertices ?: return@Button
-                val entityId = EntityId(Random.nextLong().toString())
-                val vertexIds = vertices.map { VertexId(Random.nextLong().toString()) }
-                stateMachine.onEvent(DrawEvent.FinishDrawing(entityId, vertexIds))
-            },
-            enabled = canFinish,
-            modifier = Modifier.padding(top = 4.dp),
-        ) {
-            Text("Finish")
+        val canDelete = state.mode is DrawMode.Select || state.mode is DrawMode.Edit
+        Row(modifier = Modifier.padding(top = 4.dp)) {
+            Button(
+                onClick = {
+                    val vertices = drawMode?.pendingVertices ?: return@Button
+                    val entityId = EntityId(Random.nextLong().toString())
+                    val vertexIds = vertices.map { VertexId(Random.nextLong().toString()) }
+                    stateMachine.onEvent(DrawEvent.FinishDrawing(entityId, vertexIds))
+                },
+                enabled = canFinish,
+            ) {
+                Text("Finish")
+            }
+            // Deletes the selected/edited shape; Undo brings it back.
+            Button(
+                onClick = { stateMachine.onEvent(DrawEvent.DeleteSelected) },
+                enabled = canDelete,
+                modifier = Modifier.padding(start = 4.dp),
+            ) {
+                Text("Delete")
+            }
         }
         Row(modifier = Modifier.padding(top = 4.dp)) {
             Button(onClick = { historyManager.undo() }, enabled = canUndo) {

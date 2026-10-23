@@ -8,6 +8,7 @@ import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.history.Command
 import com.tcsappdev.worldwinddraw.core.history.commands.AddEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.DeleteEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexCommand
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 
@@ -58,6 +59,7 @@ object DrawEngineReducer {
         is DrawEvent.DragMove -> reduceDragMove(state, event, repository)
         is DrawEvent.DragEnd -> reduceDragEnd(state, event, repository)
         is DrawEvent.FinishDrawing -> reduceFinishDrawing(state, event, repository)
+        is DrawEvent.DeleteSelected -> reduceDeleteSelected(state, repository)
     }
 
     private fun reduceClick(state: DrawEngineState, event: DrawEvent.Click): ReduceResult {
@@ -144,6 +146,15 @@ object DrawEngineReducer {
             }
         }
         return ReduceResult(disarmed, commands = listOf(command))
+    }
+
+    private fun reduceDeleteSelected(state: DrawEngineState, repository: EntityRepository): ReduceResult {
+        val entityId = when (val mode = state.mode) {
+            is DrawMode.Select -> mode.entityId
+            is DrawMode.Edit -> mode.entityId
+            else -> return ReduceResult(state)
+        }
+        return ReduceResult(state.copy(mode = DrawMode.Idle), commands = listOf(DeleteEntityCommand(repository, entityId)))
     }
 
     // -- Reshaping a draft ([DrawMode.Draw]). Pure state changes: the draft isn't an entity, so

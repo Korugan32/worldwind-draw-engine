@@ -68,4 +68,13 @@ sealed interface DrawEvent {
      * a host should gate its "Finish" button on both, but the reducer doesn't trust it to.
      */
     data class FinishDrawing(val entityId: EntityId, val vertexIds: List<VertexId>) : DrawEvent
+
+    /**
+     * An explicit request (e.g. a host UI "Delete" button) to delete the shape that is currently
+     * selected or being edited. A no-op in any other mode — there is no "current shape" then, and
+     * deleting is deliberately not by-id so a host can't delete something the user isn't looking
+     * at by passing a stale id. Leaves the engine idle. Unlike finishing a drawing, this *is* an
+     * undo step: undo brings the shape back (see `DrawStateMachine`).
+     */
+    object DeleteSelected : DrawEvent
 }

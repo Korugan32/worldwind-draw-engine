@@ -40,9 +40,26 @@ sealed interface ShapeStyle {
     /** A single, flat color. */
     data class SolidColor(val color: ColorRgba) : ShapeStyle
 
-    /** An image/texture, at the given [scale] (`1f` = original size). */
-    data class ImagePattern(val imageUrl: String, val scale: Float = 1f) : ShapeStyle
+    /**
+     * The shape is filled with the image at [imageUrl], repeated as a pattern.
+     *
+     * What WWK does with it (verified on Android): the image is tiled across the shape and sized
+     * in *screen* pixels — a tile comes out about the size of the image's own pixels, not a
+     * fixed geographic size — and drawn unmodified, so the shape is as opaque as the image is
+     * (a shape's fill opacity cannot be adjusted separately; use an image with its own alpha).
+     * There is no scale setting: WWK doesn't offer one for patterns.
+     *
+     * [imageUrl] must be an `http`/`https` URL the device can reach — WWK downloads it, and
+     * nothing else (not a file path) is accepted on Android. A host app targeting a recent
+     * Android must also allow cleartext traffic itself if it uses plain `http`. The image is
+     * fetched lazily, so the shape shows nothing until it has downloaded.
+     */
+    data class ImagePattern(val imageUrl: String) : ShapeStyle
 
-    /** A [base] style whose appearance is animated over time (e.g. the water-masking effect). */
+    /**
+     * Reserved for a fill whose appearance changes over time: [base] is what is drawn today —
+     * the animation itself isn't wired to rendering yet (and the water-masking effect it was
+     * first meant for is out of scope, see docs/PLAN.md).
+     */
     data class AnimatedFill(val base: ShapeStyle, val animationId: String) : ShapeStyle
 }
