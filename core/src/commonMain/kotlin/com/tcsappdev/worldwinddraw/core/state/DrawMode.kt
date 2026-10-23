@@ -127,6 +127,14 @@ sealed interface DrawMode {
              * exactly the kind of state a pure reducer can't safely fake.
              */
             data class NewVertex(val edgeIndex: Int, val position: GeoPosition) : ActiveDrag
+
+            /**
+             * The marker being edited is being moved. [origin] is where it was when the drag began: the
+             * "old" position of the single [com.tcsappdev.worldwinddraw.core.history.commands.MoveMarkerCommand]
+             * recorded when the gesture finishes. Unlike a new vertex, the marker really exists, so it
+             * follows the drag live (through preview commands) like an existing vertex does.
+             */
+            data class MovingMarker(val origin: GeoPosition) : ActiveDrag
         }
     }
 

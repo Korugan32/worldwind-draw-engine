@@ -1,6 +1,7 @@
 package com.tcsappdev.worldwinddraw.adapter.input
 
 import com.tcsappdev.worldwinddraw.adapter.layer.DrawLayer
+import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
@@ -304,5 +305,57 @@ class PickInputBridgeTest {
         assertEquals(4, points.size)
         assertEquals(0.1, points[1].longitude, 1e-9) // handle (0.0) + the finger's travel since the first move (0.3 - 0.2)
         assertEquals(0.5, points[1].latitude, 1e-9)
+    }
+
+    // -- Moving the marker being edited
+
+    private class MarkerSetup(val bridge: PickInputBridge, val history: HistoryManager, val repository: EntityRepository)
+
+    /** A marker "M" at (1, 1), already in edit mode. */
+    private fun markerSetup(): MarkerSetup {
+        val id = EntityId("M")
+        val repository = EntityRepository().apply {
+            add(DrawnMarker(id, ShapeStyle.SolidColor(ColorRgba(0, 0, 0)), GeoPosition(1.0, 1.0), size = 20f))
+        }
+        val history = HistoryManager()
+        val stateMachine = DrawStateMachine(history, repository)
+        stateMachine.onEvent(DrawEvent.Click(GeoPosition(1.0, 1.0), id))
+        stateMachine.onEvent(DrawEvent.Click(GeoPosition(1.0, 1.0), id))
+        return MarkerSetup(PickInputBridge(stateMachine), history, repository)
+    }
+
+    private fun markerMoveTarget() = Polygon().apply {
+        putUserProperty(DrawLayer.ENTITY_ID_KEY, EntityId("M"))
+        putUserProperty(DrawLayer.MARKER_MOVE_KEY, true)
+    }
+
+    private fun EntityRepository.markerPosition() = (entities.value.single() as DrawnMarker).position
+
+    @Test
+    fun theMarkerMoveTargetCanBeDragged() {
+        assertTrue(markerSetup().bridge.canMoveObjects(markerMoveTarget()))
+    }
+
+    @Test
+    fun draggingAMarkerGrabbedOffCentreDoesNotMakeItLeapToTheFingerAndIsOneUndoableStep() {
+        val (bridge, history, repository) = markerSetup().let { Triple(it.bridge, it.history, it.repository) }
+        val target = markerMoveTarget()
+
+        // WWK reports the marker's own position as `from`; the cursor is already 0.2/0.3 degrees away on the first move.
+        bridge.onObjectMoved(target, Position.fromDegrees(1.0, 1.0, 0.0), Position.fromDegrees(1.2, 1.3, 0.0))
+        assertEquals(GeoPosition(1.0, 1.0), repository.markerPosition(), "no leap on the first move")
+
+        bridge.onObjectMoved(target, Position.fromDegrees(1.2, 1.3, 0.0), Position.fromDegrees(1.5, 1.8, 0.0))
+        assertEquals(1.3, repository.markerPosition().latitude, 1e-9) // 1.0 + (1.5 - 1.2)
+        assertEquals(1.5, repository.markerPosition().longitude, 1e-9) // 1.0 + (1.8 - 1.3)
+
+        bridge.onObjectMovingFinished(target, Position.fromDegrees(1.6, 2.0, 0.0))
+        assertEquals(1.4, repository.markerPosition().latitude, 1e-9)
+        assertEquals(1.7, repository.markerPosition().longitude, 1e-9)
+        assertTrue(history.canUndo.value)
+
+        history.undo()
+        assertEquals(GeoPosition(1.0, 1.0), repository.markerPosition(), "one undo goes back to where it started")
+        assertFalse(history.canUndo.value)
     }
 }

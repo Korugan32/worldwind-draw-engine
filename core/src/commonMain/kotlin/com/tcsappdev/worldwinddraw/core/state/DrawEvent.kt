@@ -28,6 +28,9 @@ sealed interface DrawEvent {
      * While a shape is still being drawn ([DrawMode.Draw]) there is no entity and no vertex ids,
      * so the draft's own points are addressed by index instead: [hitDraftPointIndex] is a point
      * of the draft, [hitDraftEdgeIndex] a midpoint handle on one of its edges.
+     *
+     * A marker has no vertices, so grabbing the marker being edited ([hitMarker], with [hitEntityId])
+     * is how it is moved.
      */
     data class DragStart(
         val position: GeoPosition,
@@ -36,6 +39,7 @@ sealed interface DrawEvent {
         val hitEdgeIndex: Int? = null,
         val hitDraftPointIndex: Int? = null,
         val hitDraftEdgeIndex: Int? = null,
+        val hitMarker: Boolean = false,
     ) : DrawEvent
 
     /** The drag continues at [position]. What's being dragged is already known from the [DragStart] that began it. */
@@ -68,6 +72,17 @@ sealed interface DrawEvent {
      * a host should gate its "Finish" button on both, but the reducer doesn't trust it to.
      */
     data class FinishDrawing(val entityId: EntityId, val vertexIds: List<VertexId>) : DrawEvent
+
+    /**
+     * An explicit request (e.g. a host UI "+" / "-" button) to set the size of the marker that is
+     * currently selected or being edited to [size] (screen pixels, the marker's longest side). A no-op
+     * in any other mode, and if the selected shape isn't a marker. Undoable.
+     */
+    data class ResizeMarker(val size: Float) : DrawEvent {
+        init {
+            require(size > 0f) { "size must be positive, was $size" }
+        }
+    }
 
     /**
      * An explicit request (e.g. a host UI "Delete" button) to delete the shape that is currently

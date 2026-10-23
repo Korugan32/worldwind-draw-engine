@@ -12,6 +12,7 @@ import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -567,5 +568,84 @@ class DrawEngineReducerTest {
             assertEquals(state, result.state, "mode $mode")
             assertTrue(result.commands.isEmpty())
         }
+    }
+
+    // -- Moving and resizing a marker
+
+    private val markerId = EntityId("marker")
+
+    private fun repositoryWithMarker() = EntityRepository().apply {
+        add(DrawnMarker(markerId, ShapeStyle.SolidColor(ColorRgba(0, 0, 0)), GeoPosition(1.0, 1.0), size = 20f))
+    }
+
+    private fun EntityRepository.markerPosition() = (entities.value.single { it.id == markerId } as DrawnMarker).position
+    private fun EntityRepository.markerSize() = (entities.value.single { it.id == markerId } as DrawnMarker).size
+
+    @Test
+    fun draggingTheEditedMarkerMovesItLiveAndRecordsOneStepOnDrop() {
+        val repository = repositoryWithMarker()
+        var state = DrawEngineState(mode = DrawMode.Edit(markerId))
+
+        var result = reduce(state, DrawEvent.DragStart(GeoPosition(1.0, 1.0), hitVertexId = null, hitEntityId = markerId, hitMarker = true), repository)
+        assertEquals(DrawMode.Edit.ActiveDrag.MovingMarker(origin = GeoPosition(1.0, 1.0)), (result.state.mode as DrawMode.Edit).activeDrag)
+        state = result.state
+
+        result = reduce(state, DrawEvent.DragMove(GeoPosition(2.0, 3.0)), repository)
+        assertTrue(result.commands.isEmpty(), "a live step is not an undo step")
+        result.previewCommands.forEach { it.execute() }
+        assertEquals(GeoPosition(2.0, 3.0), repository.markerPosition(), "follows the drag live")
+        state = result.state
+
+        result = reduce(state, DrawEvent.DragEnd(GeoPosition(4.0, 5.0)), repository)
+        assertEquals(null, (result.state.mode as DrawMode.Edit).activeDrag)
+        val command = result.commands.single()
+        command.execute()
+        assertEquals(GeoPosition(4.0, 5.0), repository.markerPosition())
+        command.undo()
+        assertEquals(GeoPosition(1.0, 1.0), repository.markerPosition(), "undo goes back to where the drag began, not to the last live step")
+    }
+
+    @Test
+    fun aMarkerDragIsIgnoredUnlessThatMarkerIsBeingEdited() {
+        val other = DrawEngineState(mode = DrawMode.Edit(EntityId("other")))
+        val selectedOnly = DrawEngineState(mode = DrawMode.Select(markerId))
+        val event = DrawEvent.DragStart(GeoPosition(1.0, 1.0), null, markerId, hitMarker = true)
+
+        assertEquals(other, reduce(other, event, repositoryWithMarker()).state)
+        assertEquals(selectedOnly, reduce(selectedOnly, event, repositoryWithMarker()).state)
+    }
+
+    @Test
+    fun resizeMarkerAppliesToTheSelectedOrEditedMarkerAndIsUndoable() {
+        listOf(DrawMode.Select(markerId), DrawMode.Edit(markerId)).forEach { mode ->
+            val repository = repositoryWithMarker()
+
+            val result = reduce(DrawEngineState(mode = mode), DrawEvent.ResizeMarker(64f), repository)
+
+            assertEquals(mode, result.state.mode, "resizing doesn't change the mode")
+            val command = result.commands.single()
+            command.execute()
+            assertEquals(64f, repository.markerSize(), "mode $mode")
+            command.undo()
+            assertEquals(20f, repository.markerSize())
+        }
+    }
+
+    @Test
+    fun resizeMarkerIsANoOpWhenNothingIsSelected() {
+        listOf(DrawMode.Idle, DrawMode.Pan, DrawMode.Draw(DrawableEntityType.Marker, emptyList())).forEach { mode ->
+            val state = DrawEngineState(mode = mode)
+
+            val result = reduce(state, DrawEvent.ResizeMarker(64f), repositoryWithMarker())
+
+            assertEquals(state, result.state)
+            assertTrue(result.commands.isEmpty())
+        }
+    }
+
+    @Test
+    fun aResizeNeedsAPositiveSize() {
+        assertFailsWith<IllegalArgumentException> { DrawEvent.ResizeMarker(0f) }
+        assertFailsWith<IllegalArgumentException> { DrawEvent.ResizeMarker(-1f) }
     }
 }

@@ -39,6 +39,8 @@ import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import com.tcsappdev.worldwinddraw.core.state.DrawableEntityType
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.HandleStyle
+import com.tcsappdev.worldwinddraw.core.style.ImageFit
+import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import kotlin.random.Random
@@ -78,6 +80,10 @@ class MainActivity : ComponentActivity() {
         entityRepository.add(demoPolygon())
         entityRepository.add(demoPolyline())
         entityRepository.add(demoMarker())
+        entityRepository.add(demoPatternPolygon())
+        entityRepository.add(demoFlagMarker())
+        entityRepository.add(demoFlagPatternPolygon())
+        entityRepository.add(demoFlagFillPolygon())
 
         setContent {
             // DrawLayer.handleStyle can be changed live: this cycles it through three presets.
@@ -102,6 +108,7 @@ class MainActivity : ComponentActivity() {
                         DrawModeOverlay(
                             stateMachine,
                             historyManager,
+                            entityRepository,
                             handleSizeLabel = HANDLE_SIZES[handleSizeIndex].first,
                             onCycleHandleSize = { handleSizeIndex = (handleSizeIndex + 1) % HANDLE_SIZES.size },
                             paletteLabel = palette.label,
@@ -119,6 +126,7 @@ class MainActivity : ComponentActivity() {
 private fun DrawModeOverlay(
     stateMachine: DrawStateMachine,
     historyManager: HistoryManager,
+    entityRepository: EntityRepository,
     handleSizeLabel: String,
     onCycleHandleSize: () -> Unit,
     paletteLabel: String,
@@ -179,6 +187,21 @@ private fun DrawModeOverlay(
         Button(onClick = onCyclePalette, modifier = Modifier.padding(top = 4.dp)) {
             Text("Colors: $paletteLabel")
         }
+        // Resizes the selected/edited marker (undoable while editing); drag it in edit mode to move it.
+        val entities by entityRepository.entities.collectAsState()
+        val selectedId = (state.mode as? DrawMode.Select)?.entityId ?: (state.mode as? DrawMode.Edit)?.entityId
+        val selectedMarker = entities.firstOrNull { it.id == selectedId } as? DrawnMarker
+        Row(modifier = Modifier.padding(top = 4.dp)) {
+            Button(
+                onClick = { selectedMarker?.let { stateMachine.onEvent(DrawEvent.ResizeMarker((it.size * 0.8f).coerceAtLeast(8f))) } },
+                enabled = selectedMarker != null,
+            ) { Text("Size -") }
+            Button(
+                onClick = { selectedMarker?.let { stateMachine.onEvent(DrawEvent.ResizeMarker((it.size * 1.25f).coerceAtMost(240f))) } },
+                enabled = selectedMarker != null,
+                modifier = Modifier.padding(start = 4.dp),
+            ) { Text("Size +") }
+        }
         Text(
             text = describeMode(state.mode),
             color = Color.White,
@@ -201,7 +224,8 @@ private fun describeMode(mode: DrawMode): String = when (mode) {
     is DrawMode.Edit -> when (val drag = mode.activeDrag) {
         is DrawMode.Edit.ActiveDrag.ExistingVertex -> "Edit (${mode.entityId.id}) - dragging ${drag.vertexId.id}"
         is DrawMode.Edit.ActiveDrag.NewVertex -> "Edit (${mode.entityId.id}) - adding a vertex on edge ${drag.edgeIndex}"
-        null -> "Edit (${mode.entityId.id}) - drag a vertex or midpoint handle"
+        is DrawMode.Edit.ActiveDrag.MovingMarker -> "Edit (${mode.entityId.id}) - moving the marker"
+        null -> "Edit (${mode.entityId.id}) - drag a vertex, a midpoint handle or a marker"
     }
     is DrawMode.Select -> "Select (${mode.entityId.id}) - tap again to edit"
 }
@@ -253,4 +277,117 @@ private fun demoMarker(): DrawnMarker = DrawnMarker(
     style = ShapeStyle.SolidColor(ColorRgba(red = 0, green = 255, blue = 120, alpha = 255)),
     position = GeoPosition(latitude = 41.0082, longitude = 28.9784),
     size = 30f,
+)
+
+// A water-like tile, built here as the bytes of a PNG: stands in for what a real app gets from a photo
+// picker, a file or its own assets (see ImageRef.Bytes). No network is involved.
+private fun demoPatternBytes(): ByteArray {
+    val size = 96
+    val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    canvas.drawColor(android.graphics.Color.rgb(30, 110, 190))
+    val wave = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.rgb(140, 200, 245)
+        style = android.graphics.Paint.Style.STROKE
+        strokeWidth = 5f
+        strokeCap = android.graphics.Paint.Cap.ROUND
+    }
+    for (row in 0 until 3) {
+        val y = 16f + row * 32f
+        val path = android.graphics.Path().apply {
+            moveTo(0f, y)
+            quadTo(size / 4f, y - 12f, size / 2f, y)
+            quadTo(size * 3 / 4f, y + 12f, size.toFloat(), y)
+        }
+        canvas.drawPath(path, wave)
+    }
+    return java.io.ByteArrayOutputStream().also { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
+}
+
+// Filled with that tile at 60% opacity, so the map shows through the pattern.
+private fun demoPatternPolygon(): DrawnPolygon = DrawnPolygon(
+    id = EntityId("demo-pattern-polygon"),
+    style = ShapeStyle.ImagePattern(ImageRef.Bytes(key = "demo-water-tile", data = demoPatternBytes()), opacity = 0.6f),
+    vertices = listOf(
+        Vertex(VertexId("w1"), GeoPosition(latitude = 43.2, longitude = 33.0)),
+        Vertex(VertexId("w2"), GeoPosition(latitude = 46.0, longitude = 33.0)),
+        Vertex(VertexId("w3"), GeoPosition(latitude = 46.0, longitude = 40.0)),
+        Vertex(VertexId("w4"), GeoPosition(latitude = 43.2, longitude = 40.0)),
+    ),
+    outlineStyle = ShapeStyle.SolidColor(ColorRgba(255, 255, 255, 255)),
+    outlineWidth = 2f,
+)
+
+// The Turkish flag (3:2) drawn at [width] pixels, as the bytes of a PNG — a stylised version: the
+// crescent and star are close to the official construction, not exact. Flags are a good test image:
+// recognisable, and asymmetric, so mirroring or rotating would show.
+private fun turkishFlagBytes(width: Int): ByteArray {
+    val height = width * 2 / 3
+    val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    val u = height / 2f // the flag is 3 units wide and 2 units tall
+    val red = android.graphics.Color.rgb(227, 10, 23)
+    canvas.drawColor(red)
+    val white = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.WHITE }
+    val redPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = red }
+    canvas.drawCircle(1.0f * u, 1.0f * u, 0.5f * u, white)       // crescent: a white disc...
+    canvas.drawCircle(1.125f * u, 1.0f * u, 0.4f * u, redPaint)  // ...with a smaller red disc cut out, opening to the right
+    val star = android.graphics.Path()
+    val centerX = 1.65f * u
+    val centerY = 1.0f * u
+    val outer = 0.25f * u
+    val inner = outer * 0.382f
+    for (i in 0 until 10) {
+        val radius = if (i % 2 == 0) outer else inner
+        val angle = Math.PI + i * Math.PI / 5 // a point faces left, toward the crescent
+        val x = centerX + (radius * Math.cos(angle)).toFloat()
+        val y = centerY + (radius * Math.sin(angle)).toFloat()
+        if (i == 0) star.moveTo(x, y) else star.lineTo(x, y)
+    }
+    star.close()
+    canvas.drawPath(star, white)
+    return java.io.ByteArrayOutputStream().also { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
+}
+
+// One flag as a marker icon, 64 px wide on screen whatever size the source image is (see ImageRef.Bytes).
+private fun demoFlagMarker(): DrawnMarker = DrawnMarker(
+    id = EntityId("demo-flag-marker"),
+    style = ShapeStyle.ImagePattern(ImageRef.Bytes(key = "flag-tr", data = turkishFlagBytes(width = 300))),
+    position = GeoPosition(latitude = 39.93, longitude = 32.86), // Ankara
+    size = 64f,
+)
+
+// A small flag tiled across a polygon at 55% opacity: this is what a pattern does with ANY image. Showing one flag
+// stretched over a whole shape is a different feature (see docs/PLAN.md, Faz 10).
+private fun demoFlagPatternPolygon(): DrawnPolygon = DrawnPolygon(
+    id = EntityId("demo-flag-pattern-polygon"),
+    style = ShapeStyle.ImagePattern(ImageRef.Bytes(key = "flag-tr-tile", data = turkishFlagBytes(width = 90)), opacity = 0.55f),
+    vertices = listOf(
+        Vertex(VertexId("f1"), GeoPosition(latitude = 33.2, longitude = 29.0)),
+        Vertex(VertexId("f2"), GeoPosition(latitude = 35.0, longitude = 29.0)),
+        Vertex(VertexId("f3"), GeoPosition(latitude = 35.0, longitude = 37.0)),
+        Vertex(VertexId("f4"), GeoPosition(latitude = 33.2, longitude = 37.0)),
+    ),
+    outlineStyle = ShapeStyle.SolidColor(ColorRgba(255, 255, 255, 255)),
+    outlineWidth = 2f,
+)
+
+// ONE flag, centred in the shape's bounding box and cut to the shape (a concave one, with a notch in its
+// south edge) — not repeated. Contain keeps the whole flag and its proportions; opacity lets the map through.
+private fun demoFlagFillPolygon(): DrawnPolygon = DrawnPolygon(
+    id = EntityId("demo-flag-fill-polygon"),
+    style = ShapeStyle.ImageFill(
+        image = ImageRef.Bytes(key = "flag-tr", data = turkishFlagBytes(width = 300)),
+        fit = ImageFit.Contain,
+        opacity = 0.9f,
+    ),
+    vertices = listOf(
+        Vertex(VertexId("g1"), GeoPosition(latitude = 28.8, longitude = 26.0)),
+        Vertex(VertexId("g2"), GeoPosition(latitude = 32.8, longitude = 26.0)),
+        Vertex(VertexId("g3"), GeoPosition(latitude = 32.8, longitude = 38.0)),
+        Vertex(VertexId("g4"), GeoPosition(latitude = 28.8, longitude = 38.0)),
+        Vertex(VertexId("g5"), GeoPosition(latitude = 30.6, longitude = 32.0)),
+    ),
+    outlineStyle = ShapeStyle.SolidColor(ColorRgba(255, 255, 255, 255)),
+    outlineWidth = 2f,
 )

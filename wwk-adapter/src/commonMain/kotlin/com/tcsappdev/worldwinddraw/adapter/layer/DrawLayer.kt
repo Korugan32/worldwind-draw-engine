@@ -24,6 +24,7 @@ import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.HandleStyle
 import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
+import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import earth.worldwind.layer.RenderableLayer
 import earth.worldwind.render.Renderable
@@ -126,7 +127,7 @@ class DrawLayer(
 
                 entities.filterIsInstance<DrawnPolygon>().forEach { polygon ->
                     val renderVertices = livePreviewVertices(polygon.id, polygon.vertices, editMode, newVertexDrag)
-                    val rendered = polygon.copy(vertices = renderVertices)
+                    val rendered = withImageFillBelow(polygon.copy(vertices = renderVertices), polygon, editMode)
                     addRenderable(rendered.toWwkPolygon().tagged(polygon.id))
                     highlights.colorFor(engineState.mode.styleStateFor(polygon.id))?.let { color ->
                         addHighlight(rendered.toWwkHighlight(color), color) { shape, alpha -> shape.attributes.outlineColor.alpha = alpha }
@@ -144,7 +145,10 @@ class DrawLayer(
                     highlights.colorFor(engineState.mode.styleStateFor(marker.id))?.let { color ->
                         addHighlight(marker.toWwkHighlight(color), color) { placemark, alpha -> placemark.attributes.imageColor.alpha = alpha }
                     }
-                    addRenderable(marker.toWwkPlacemark().tagged(marker.id))
+                    // While the marker is being edited its own icon is not pickable: the move target above it
+                    // (below) is what is grabbed, and two pickable placemarks on one spot could let the wrong one win.
+                    val beingEdited = editMode?.entityId == marker.id
+                    addRenderable(marker.toWwkPlacemark().tagged(marker.id).apply { if (beingEdited) isPickEnabled = false })
                 }
 
                 (engineState.mode as? DrawMode.Draw)?.let { draft ->
@@ -157,6 +161,14 @@ class DrawLayer(
                         is DrawnPolygon -> editedEntity.vertices to true
                         is DrawnPolyline -> editedEntity.vertices to false
                         is DrawnMarker, null -> null to false
+                    }
+                    if (editedEntity is DrawnMarker) {
+                        addRenderable(
+                            markerMoveTarget(editedEntity.position, editedEntity.size, handles) {
+                                putUserProperty(ENTITY_ID_KEY, editMode.entityId)
+                                putUserProperty(MARKER_MOVE_KEY, true)
+                            }
+                        )
                     }
                     if (vertices != null) {
                         vertices.forEach { vertex ->
@@ -179,6 +191,24 @@ class DrawLayer(
                 onContentChanged()
             }
             .launchIn(scope)
+    }
+
+    /**
+     * For a polygon with a [ShapeStyle.ImageFill], adds the picture (clipped to the shape) below it and
+     * returns [rendered] unchanged; if the picture can't be produced, returns [rendered] with a grey
+     * placeholder fill in its place so the shape isn't invisible. Any other polygon is returned as is.
+     *
+     * While a vertex of this very polygon is being dragged the picture is left out: it is cut to the
+     * shape, so it would have to be produced again on every step of the drag (tens of milliseconds
+     * each); it comes back as soon as the drag ends and the shape settles.
+     */
+    private fun withImageFillBelow(rendered: DrawnPolygon, original: DrawnPolygon, editMode: DrawMode.Edit?): DrawnPolygon {
+        val fill = original.style as? ShapeStyle.ImageFill ?: return rendered
+        if (editMode?.entityId == original.id && editMode.activeDrag != null) return rendered
+        val surface = imageFillSurface(original, fill)
+        if (surface == null) return rendered.copy(style = IMAGE_FILL_PLACEHOLDER)
+        addRenderable(surface)
+        return rendered
     }
 
     /**
@@ -236,6 +266,9 @@ class DrawLayer(
         /** [Renderable.putUserProperty] key a midpoint-handle [Placemark] is additionally tagged with. */
         const val EDGE_INDEX_KEY = "com.tcsappdev.worldwinddraw.edgeIndex"
 
+        /** [Renderable.putUserProperty] key the move target of the marker being edited is additionally tagged with. */
+        const val MARKER_MOVE_KEY = "com.tcsappdev.worldwinddraw.markerMove"
+
         /**
          * Keys for the handles of a shape that is still being drawn (`DrawMode.Draw`). There is no
          * entity or vertex id yet, so these handles carry no [ENTITY_ID_KEY]; they are addressed by
@@ -248,6 +281,9 @@ class DrawLayer(
 
         /** Placeholder id for the rendering-only phantom vertex spliced in during a live [DrawMode.Edit.ActiveDrag.NewVertex] preview — never persisted, discarded on the next rebuild. */
         private val PHANTOM_VERTEX_ID = VertexId("__phantom__")
+
+        /** Drawn in place of an image fill whose picture can't be produced (see [withImageFillBelow]). */
+        private val IMAGE_FILL_PLACEHOLDER = ShapeStyle.SolidColor(ColorRgba(128, 128, 128, 128))
 
         private const val PULSE_DURATION_MS = 700L
         private const val PULSE_MIN_ALPHA = 0.2f

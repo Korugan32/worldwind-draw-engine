@@ -3,6 +3,7 @@ package com.tcsappdev.worldwinddraw.core.state
 import com.tcsappdev.worldwinddraw.core.history.HistoryManager
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 import kotlin.test.Test
+import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
@@ -262,5 +263,52 @@ class DrawStateMachineTest {
 
         assertFalse(s.history.canUndo.value)
         assertTrue(s.repository.entities.value.isEmpty())
+    }
+
+    // -- Marker move / resize inside an edit session
+
+    private fun Setup.addMarker(id: String) = repository.add(
+        DrawnMarker(EntityId(id), ShapeStyle.SolidColor(ColorRgba(0, 0, 0)), p(1.0, 1.0), size = 20f)
+    )
+
+    private fun Setup.marker(id: String) = repository.entities.value.single { it.id == EntityId(id) } as DrawnMarker
+
+    @Test
+    fun aMarkerCanBeMovedAndResizedWhileEditingAndEachIsAnUndoStep() {
+        val s = Setup()
+        s.addMarker("M")
+        s.startEditing("M")
+
+        s.machine.onEvent(DrawEvent.DragStart(p(1.0, 1.0), null, EntityId("M"), hitMarker = true))
+        s.machine.onEvent(DrawEvent.DragMove(p(2.0, 2.0)))
+        s.machine.onEvent(DrawEvent.DragMove(p(3.0, 4.0)))
+        s.machine.onEvent(DrawEvent.DragEnd(p(3.0, 4.0)))
+        s.machine.onEvent(DrawEvent.ResizeMarker(50f))
+        assertEquals(p(3.0, 4.0), s.marker("M").position)
+        assertEquals(50f, s.marker("M").size)
+
+        s.history.undo()
+        assertEquals(20f, s.marker("M").size, "the resize is undone first")
+        assertEquals(p(3.0, 4.0), s.marker("M").position)
+        s.history.undo()
+        assertEquals(p(1.0, 1.0), s.marker("M").position, "the whole drag was ONE step")
+        s.history.redo()
+        s.history.redo()
+        assertEquals(p(3.0, 4.0), s.marker("M").position)
+        assertEquals(50f, s.marker("M").size)
+    }
+
+    @Test
+    fun leavingEditModeForgetsTheMarkerEditsUndoButKeepsTheirResult() {
+        val s = Setup()
+        s.addMarker("M")
+        s.startEditing("M")
+        s.machine.onEvent(DrawEvent.ResizeMarker(50f))
+        assertTrue(s.history.canUndo.value)
+
+        s.machine.onEvent(DrawEvent.Click(p(9.0, 9.0), null)) // leave edit mode
+
+        assertFalse(s.history.canUndo.value)
+        assertEquals(50f, s.marker("M").size)
     }
 }
