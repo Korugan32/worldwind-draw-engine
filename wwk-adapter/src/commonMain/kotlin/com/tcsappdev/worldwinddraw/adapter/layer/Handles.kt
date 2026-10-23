@@ -52,6 +52,15 @@ internal fun midpointHandleRenderables(position: GeoPosition, style: HandleStyle
     return listOf(dot, hitTarget(position, style.touchSizeFor(style.midpointDiameter)).apply(tag))
 }
 
+/**
+ * What a finger grabs to move the marker being edited: a transparent, pickable square over the marker
+ * itself, [HandleStyle.touchSizeFor] its size (so a small marker still has a finger-sized target).
+ * There is no visible dot — the marker's own icon is what is being dragged. [tag] labels it for
+ * `PickInputBridge`, like the other handles.
+ */
+internal fun markerMoveTarget(position: GeoPosition, markerSize: Float, style: HandleStyle, tag: Placemark.() -> Unit): Renderable =
+    hitTarget(position, style.touchSizeFor(markerSize)).apply(tag)
+
 /** A fully transparent, image-less square [size] pixels wide: draws nothing, but is pickable. */
 private fun hitTarget(position: GeoPosition, size: Float): Placemark =
     Placemark(position.toWwkPosition(), PlacemarkAttributes().apply { imageColor = TRANSPARENT; imageScale = size.toDouble() }).apply {

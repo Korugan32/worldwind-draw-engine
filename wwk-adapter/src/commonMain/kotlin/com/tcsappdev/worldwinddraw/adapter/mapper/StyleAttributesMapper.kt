@@ -1,9 +1,9 @@
 package com.tcsappdev.worldwinddraw.adapter.mapper
 
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
+import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import earth.worldwind.render.Color
-import earth.worldwind.render.image.ImageSource
 import earth.worldwind.shape.PlacemarkAttributes
 import earth.worldwind.shape.ShapeAttributes
 
@@ -25,9 +25,10 @@ fun ShapeStyle.toWwkShapeAttributes(): ShapeAttributes {
         is ShapeStyle.SolidColor -> ShapeAttributes().apply {
             interiorColor = color.toWwkColor()
         }
-        is ShapeStyle.ImagePattern -> ShapeAttributes().apply {
-            interiorImageSource = ImageSource.fromUrlString(imageUrl)
-        }
+        is ShapeStyle.ImagePattern -> imageInterior(image, opacity)
+        // The picture is drawn by a separate surface image under the polygon (see DrawLayer), so
+        // the polygon's own interior is left invisible — but still there, so it can be picked.
+        is ShapeStyle.ImageFill -> ShapeAttributes().apply { interiorColor = Color(1f, 1f, 1f, 0f) }
         is ShapeStyle.AnimatedFill -> base.toWwkShapeAttributes()
     }
 }
@@ -45,18 +46,16 @@ fun ShapeStyle.toWwkLineAttributes(width: Float): ShapeAttributes {
             outlineColor = color.toWwkColor()
             outlineWidth = width
         }
-        is ShapeStyle.ImagePattern -> ShapeAttributes().apply {
-            outlineImageSource = ImageSource.fromUrlString(imageUrl)
-            outlineWidth = width
-        }
+        is ShapeStyle.ImagePattern -> imageOutline(image, opacity, width)
+        is ShapeStyle.ImageFill -> imageOutline(image, opacity, width)
         is ShapeStyle.AnimatedFill -> base.toWwkLineAttributes(width)
     }
 }
 
 /**
  * Converts to [PlacemarkAttributes] with this style applied to the marker's icon at the
- * given [size] (a square's side length in screen pixels, used when there's no image — see
- * [PlacemarkAttributes.imageSource]'s KDoc). Same interior-vs-outline reasoning as
+ * given [size] (a square's side length in screen pixels; for an image, the length of its longest side
+ * when the image's size is known — see the comment on the image case below). Same interior-vs-outline reasoning as
  * [toWwkLineAttributes]: a marker has no interior, so this writes `imageColor`/
  * `imageSource`/`imageScale` rather than `interior*`.
  */
@@ -66,9 +65,51 @@ fun ShapeStyle.toWwkPlacemarkAttributes(size: Float): PlacemarkAttributes {
             imageColor = color.toWwkColor()
             imageScale = size.toDouble()
         }
-        is ShapeStyle.ImagePattern -> PlacemarkAttributes.createWithImage(ImageSource.fromUrlString(imageUrl)).apply {
+        is ShapeStyle.ImagePattern -> imageIcon(image, opacity, size)
+        is ShapeStyle.ImageFill -> imageIcon(image, opacity, size)
+        is ShapeStyle.AnimatedFill -> base.toWwkPlacemarkAttributes(size)
+    }
+}
+
+/** Drawn instead of an image that could not be produced (undecodable bytes, or a platform with no decoder yet). */
+private val PLACEHOLDER_COLOR = Color(0.5f, 0.5f, 0.5f, 0.5f)
+
+private fun imageInterior(image: ImageRef, opacity: Float): ShapeAttributes = ShapeAttributes().apply {
+    val loaded = image.toLoadedImage()
+    if (loaded == null) {
+        interiorColor = PLACEHOLDER_COLOR
+    } else {
+        interiorImageSource = loaded.source
+        // WWK multiplies each image pixel by the interior colour: white leaves the pixels
+        // untinted and its alpha is the pattern's opacity.
+        interiorColor = Color(1f, 1f, 1f, opacity)
+    }
+}
+
+private fun imageOutline(image: ImageRef, opacity: Float, width: Float): ShapeAttributes = ShapeAttributes().apply {
+    outlineWidth = width
+    val loaded = image.toLoadedImage()
+    if (loaded == null) {
+        outlineColor = PLACEHOLDER_COLOR
+    } else {
+        outlineImageSource = loaded.source
+        outlineColor = Color(1f, 1f, 1f, opacity)
+    }
+}
+
+private fun imageIcon(image: ImageRef, opacity: Float, size: Float): PlacemarkAttributes {
+    val loaded = image.toLoadedImage()
+    if (loaded == null) {
+        return PlacemarkAttributes().apply {
+            imageColor = PLACEHOLDER_COLOR
             imageScale = size.toDouble()
         }
-        is ShapeStyle.AnimatedFill -> base.toWwkPlacemarkAttributes(size)
+    }
+    return PlacemarkAttributes.createWithImage(loaded.source).apply {
+        imageColor = Color(1f, 1f, 1f, opacity)
+        // With an image, WWK's scale is a MULTIPLIER of the image's own pixels (without one it is the
+        // square's side in pixels). So `size` can only be honoured as pixels when the image's size is
+        // known — decoded bytes; a URL is only downloaded later, so it is drawn at its natural size.
+        imageScale = if (loaded.width > 0) size.toDouble() / maxOf(loaded.width, loaded.height) else 1.0
     }
 }

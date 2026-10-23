@@ -9,7 +9,9 @@ import com.tcsappdev.worldwinddraw.core.history.Command
 import com.tcsappdev.worldwinddraw.core.history.commands.AddEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.DeleteEntityCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.MoveMarkerCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.ResizeMarkerCommand
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 
 /**
@@ -60,6 +62,7 @@ object DrawEngineReducer {
         is DrawEvent.DragEnd -> reduceDragEnd(state, event, repository)
         is DrawEvent.FinishDrawing -> reduceFinishDrawing(state, event, repository)
         is DrawEvent.DeleteSelected -> reduceDeleteSelected(state, repository)
+        is DrawEvent.ResizeMarker -> reduceResizeMarker(state, event, repository)
     }
 
     private fun reduceClick(state: DrawEngineState, event: DrawEvent.Click): ReduceResult {
@@ -102,6 +105,7 @@ object DrawEngineReducer {
         if (mode !is DrawMode.Edit || mode.entityId != event.hitEntityId) return ReduceResult(state)
 
         val drag = when {
+            event.hitMarker -> DrawMode.Edit.ActiveDrag.MovingMarker(origin = event.position)
             event.hitVertexId != null -> DrawMode.Edit.ActiveDrag.ExistingVertex(event.hitVertexId, event.position)
             event.hitEdgeIndex != null -> DrawMode.Edit.ActiveDrag.NewVertex(event.hitEdgeIndex, event.position)
             else -> return ReduceResult(state)
@@ -117,6 +121,11 @@ object DrawEngineReducer {
 
             is DrawMode.Edit.ActiveDrag.ExistingVertex -> {
                 val command = MoveVertexCommand(repository, mode.entityId, drag.vertexId, drag.origin, event.position)
+                ReduceResult(state, previewCommands = listOf(command))
+            }
+
+            is DrawMode.Edit.ActiveDrag.MovingMarker -> {
+                val command = MoveMarkerCommand(repository, mode.entityId, drag.origin, event.position)
                 ReduceResult(state, previewCommands = listOf(command))
             }
 
@@ -140,12 +149,24 @@ object DrawEngineReducer {
             is DrawMode.Edit.ActiveDrag.ExistingVertex ->
                 MoveVertexCommand(repository, mode.entityId, drag.vertexId, drag.origin, event.position)
 
+            is DrawMode.Edit.ActiveDrag.MovingMarker ->
+                MoveMarkerCommand(repository, mode.entityId, drag.origin, event.position)
+
             is DrawMode.Edit.ActiveDrag.NewVertex -> {
                 val newVertexId = event.newVertexId ?: return ReduceResult(disarmed)
                 AddVertexCommand(repository, mode.entityId, drag.edgeIndex, Vertex(newVertexId, event.position))
             }
         }
         return ReduceResult(disarmed, commands = listOf(command))
+    }
+
+    private fun reduceResizeMarker(state: DrawEngineState, event: DrawEvent.ResizeMarker, repository: EntityRepository): ReduceResult {
+        val entityId = when (val mode = state.mode) {
+            is DrawMode.Select -> mode.entityId
+            is DrawMode.Edit -> mode.entityId
+            else -> return ReduceResult(state)
+        }
+        return ReduceResult(state, commands = listOf(ResizeMarkerCommand(repository, entityId, event.size)))
     }
 
     private fun reduceDeleteSelected(state: DrawEngineState, repository: EntityRepository): ReduceResult {

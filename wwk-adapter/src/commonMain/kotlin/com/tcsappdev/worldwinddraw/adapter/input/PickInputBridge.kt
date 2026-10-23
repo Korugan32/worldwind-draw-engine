@@ -34,7 +34,10 @@ import kotlin.random.Random
  * they carry an index into the draft instead of an entity/vertex id, and dragging them reshapes the
  * draft ([DrawEvent.DragStart.hitDraftPointIndex]/[DrawEvent.DragStart.hitDraftEdgeIndex]).
  *
- * **Grab offset (midpoint drags).** WWK drags a ground-clamped handle by snapping it straight
+ * The marker being edited has a move target too (see [DrawLayer.MARKER_MOVE_KEY]): dragging it moves the
+ * marker ([DrawEvent.DragStart.hitMarker]).
+ *
+ * **Grab offset (midpoint and marker drags).** WWK drags a ground-clamped handle by snapping it straight
  * to the cursor (`toPosition` is the terrain under the finger), keeping no memory of where on
  * the handle it was grabbed, and a drag only starts once the finger has moved past the touch
  * slop. So the first `toPosition` is already some distance — the grab point's offset from the
@@ -81,7 +84,7 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
     override fun canMoveObjects(userObject: Any): Boolean {
         if (isDraftHandle(userObject)) return true
         if (entityIdOf(userObject) == null) return false
-        return vertexIdOf(userObject) != null || edgeIndexOf(userObject) != null
+        return vertexIdOf(userObject) != null || edgeIndexOf(userObject) != null || isMarkerMove(userObject)
     }
 
     override fun onObjectMoved(userObject: Any, fromPosition: Position, toPosition: Position) {
@@ -99,6 +102,13 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
                 draftEdge != null -> {
                     rememberGrabOffset(fromPosition, toPosition)
                     stateMachine.onEvent(DrawEvent.DragStart(fromPosition.toGeoPosition(), null, null, hitDraftEdgeIndex = draftEdge))
+                }
+                isMarkerMove(userObject) -> {
+                    // Like a midpoint handle, the marker must not leap to the finger when grabbed off-centre.
+                    rememberGrabOffset(fromPosition, toPosition)
+                    stateMachine.onEvent(
+                        DrawEvent.DragStart(fromPosition.toGeoPosition(), hitVertexId = null, hitEntityId = entityId, hitMarker = true)
+                    )
                 }
                 vertexId != null ->
                     stateMachine.onEvent(DrawEvent.DragStart(fromPosition.toGeoPosition(), vertexId, entityId))
@@ -145,6 +155,9 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
 
     /** [delta] wrapped into -180..180, so a drag across the antimeridian doesn't produce a ~360 degree offset. */
     private fun shortestLongitudeDelta(delta: Double): Double = ((delta + 540.0) % 360.0) - 180.0
+
+    private fun isMarkerMove(userObject: Any) =
+        (userObject as? Renderable)?.getUserProperty<Boolean>(DrawLayer.MARKER_MOVE_KEY) == true
 
     private fun draftPointIndexOf(userObject: Any): Int? =
         (userObject as? Renderable)?.getUserProperty(DrawLayer.DRAFT_POINT_INDEX_KEY)
