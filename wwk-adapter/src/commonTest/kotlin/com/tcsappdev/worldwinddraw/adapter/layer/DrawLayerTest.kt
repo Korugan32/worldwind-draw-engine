@@ -19,6 +19,8 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class DrawLayerTest {
@@ -107,6 +109,72 @@ class DrawLayerTest {
         stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Idle))
         delay(50)
         assertEquals(1, layer.count, "deselected: the highlight is gone")
+    }
+
+    private fun DrawLayer.shapeOf(id: EntityId) = single { it.getUserProperty<EntityId>(DrawLayer.ENTITY_ID_KEY) == id }
+
+    /**
+     * The point of updating incrementally: selecting one shape must not build the others again (a rebuilt WWK
+     * shape costs its tessellation and buffers once more; with hundreds of big polygons that ran the heap out).
+     */
+    @Test
+    fun selectingOneShapeKeepsEveryShapesRenderableAndOnlyAddsTheHighlight() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val ids = listOf("A", "B", "C").map(::EntityId)
+        ids.forEach { repository.add(triangle(it)) }
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        val before = ids.associateWith { layer.shapeOf(it) }
+
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Select(ids[1])))
+        delay(50)
+
+        ids.forEach { assertSame(before.getValue(it), layer.shapeOf(it), "${it.id} must not be built again") }
+        assertEquals(4, layer.count, "three shapes plus one highlight")
+
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Select(ids[2])))
+        delay(50)
+        ids.forEach { assertSame(before.getValue(it), layer.shapeOf(it)) }
+        assertEquals(4, layer.count, "the highlight moved to C")
+    }
+
+    @Test
+    fun deletingOneShapeKeepsTheOthersRenderables() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val (a, b) = listOf("A", "B").map(::EntityId)
+        repository.add(triangle(a))
+        repository.add(triangle(b))
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        val keptB = layer.shapeOf(b)
+
+        repository.remove(a)
+        delay(50)
+
+        assertEquals(1, layer.count)
+        assertSame(keptB, layer.shapeOf(b))
+    }
+
+    @Test
+    fun changingOneShapeBuildsOnlyThatShapeAgain() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val (a, b) = listOf("A", "B").map(::EntityId)
+        repository.add(triangle(a))
+        repository.add(triangle(b))
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        val oldA = layer.shapeOf(a)
+        val keptB = layer.shapeOf(b)
+
+        val moved = triangle(a)
+        repository.update(moved.copy(vertices = moved.vertices.mapIndexed { i, v -> if (i == 0) v.copy(position = GeoPosition(5.0, 5.0)) else v }))
+        delay(50)
+
+        assertNotSame(oldA, layer.shapeOf(a), "the changed shape is built again")
+        assertSame(keptB, layer.shapeOf(b), "the other one is not")
     }
 
     private fun triangle(id: EntityId) = DrawnPolygon(

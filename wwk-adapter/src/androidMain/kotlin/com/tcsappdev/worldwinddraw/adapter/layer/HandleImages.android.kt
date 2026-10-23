@@ -10,13 +10,19 @@ import earth.worldwind.render.image.ImageSource
 // One image per colour combination, built on first use. Bounded so a host that animates or
 // scrubs a colour (a picker, a slider) can't grow it without limit; when full it is simply
 // emptied and rebuilt as needed — WWK keeps its own texture cache keyed by the ImageSource.
+// The source is an ImageFactory, not ImageSource.fromBitmap: WWK recycles a fromBitmap source's Bitmap when its
+// texture leaves the texture cache, after which that source can't be drawn again (see ImageSources.android.kt).
 private const val MAX_CACHED_IMAGES = 24
 private val imageCache = HashMap<Any, ImageSource>()
 
 private fun cached(key: Any, draw: () -> Bitmap): ImageSource = synchronized(imageCache) {
     imageCache[key] ?: run {
         if (imageCache.size >= MAX_CACHED_IMAGES) imageCache.clear()
-        ImageSource.fromBitmap(draw()).also { imageCache[key] = it }
+        val factory = object : ImageSource.ImageFactory {
+            override val isRunBlocking: Boolean get() = true
+            override suspend fun createBitmap(): Bitmap = draw()
+        }
+        ImageSource.fromImageFactory(factory).also { imageCache[key] = it }
     }
 }
 

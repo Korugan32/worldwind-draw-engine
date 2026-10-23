@@ -88,12 +88,12 @@ private const val MIDPOINT_FALLBACK_OPACITY = 0.75f
  */
 internal fun edgeMidpoints(vertices: List<GeoPosition>, isClosed: Boolean): List<Pair<Int, GeoPosition>> {
     val edgeCount = if (isClosed) vertices.size else vertices.size - 1
-    val scratch = Position()
-    return (0 until edgeCount).map { i ->
-        val start = vertices[i].toWwkPosition()
-        val end = vertices[(i + 1) % vertices.size].toWwkPosition()
-        start.interpolateAlongPath(end, PathType.GREAT_CIRCLE, 0.5, scratch)
-        i to scratch.toGeoPosition()
-    }
+    return (0 until edgeCount).map { i -> i to edgeMidpoint(vertices[i], vertices[(i + 1) % vertices.size]) }
 }
 
+/** The midpoint of the single edge from [start] to [end], by the same math as [edgeMidpoints]. */
+internal fun edgeMidpoint(start: GeoPosition, end: GeoPosition): GeoPosition {
+    val scratch = Position()
+    start.toWwkPosition().interpolateAlongPath(end.toWwkPosition(), PathType.GREAT_CIRCLE, 0.5, scratch)
+    return scratch.toGeoPosition()
+}

@@ -28,6 +28,9 @@ import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import earth.worldwind.layer.RenderableLayer
 import earth.worldwind.render.Renderable
+import earth.worldwind.shape.Path
+import earth.worldwind.shape.Placemark
+import earth.worldwind.shape.Polygon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -39,12 +42,14 @@ import kotlinx.coroutines.flow.onEach
  * host app can add one [DrawLayer] to its `WorldWindow` and never touch WWK renderables
  * directly.
  *
- * Rebuilds the whole layer on every emission rather than diffing old vs. new state. That's
- * the simplest correct thing, and entity lists here are small (shapes a user drew, not bulk
- * data), so the cost is negligible. It does mean a live vertex drag rebuilds the entire
- * layer on every `DragMove` (every entity re-mapped, not just the one being edited) — fine
- * at this scale, but the first thing to revisit if dragging ever feels janky on very large
- * entity lists.
+ * Builds a WWK renderable only for what is new or changed: on every emission each renderable is looked
+ * up by what it was made from (the entity, whether it is selected or being edited, a live drag
+ * preview, the handle or highlight style...) and kept when that is unchanged. So selecting a shape, going
+ * into edit mode, deleting one or dragging a vertex touches only the shapes (and handles) involved, not
+ * every shape on the map — a rebuilt WWK shape costs its tessellation and GPU buffers again, which
+ * with hundreds of large polygons ran the heap out. The layer's content is then just the list of
+ * those renderables in draw order (polygons, then polylines, then markers, then the draft, then the
+ * editing handles), and it is only replaced when that list really differs.
  *
  * Every renderable is tagged with its originating [EntityId] via [ENTITY_ID_KEY] (see
  * [Renderable.putUserProperty]) — this is how `adapter.input.PickInputBridge` maps a WWK
@@ -115,114 +120,139 @@ class DrawLayer(
         spec = AnimationSpec(PULSE_DURATION_MS, Easing { f -> f * f * (3f - 2f * f) }, RepeatMode.Reverse),
     ) { start, target, fraction -> start + (target - start) * fraction }
 
+    // What has been built, kept from one update to the next so that only what changed is built again (see the class KDoc).
+    private val bodies = Reuse<EntityId, Any, List<Renderable>>()
+    private val highlights = Reuse<EntityId, Any, Highlight>()
+    private val vertexHandles = Reuse<Pair<EntityId, VertexId>, Any, List<Renderable>>()
+    private val midpointHandles = Reuse<Pair<EntityId, Int>, Any, List<Renderable>>()
+    private var applied: List<Renderable> = emptyList()
+
     init {
         combine(entityRepository.entities, stateMachine.state, handleStyleFlow, highlightStyleFlow) { entities, engineState, handles, highlights ->
             Inputs(entities, engineState, handles, highlights)
         }
-            .onEach { (entities, engineState, handles, highlights) ->
-                clearRenderables()
-                highlightAlphaSetters.clear()
-                val editMode = engineState.mode as? DrawMode.Edit
-                val newVertexDrag = editMode?.activeDrag as? DrawMode.Edit.ActiveDrag.NewVertex
-
-                entities.filterIsInstance<DrawnPolygon>().forEach { polygon ->
-                    val renderVertices = livePreviewVertices(polygon.id, polygon.vertices, editMode, newVertexDrag)
-                    val rendered = withImageFillBelow(polygon.copy(vertices = renderVertices), polygon, editMode)
-                    addRenderable(rendered.toWwkPolygon().tagged(polygon.id))
-                    highlights.colorFor(engineState.mode.styleStateFor(polygon.id))?.let { color ->
-                        addHighlight(rendered.toWwkHighlight(color), color) { shape, alpha -> shape.attributes.outlineColor.alpha = alpha }
-                    }
-                }
-                entities.filterIsInstance<DrawnPolyline>().forEach { polyline ->
-                    val renderVertices = livePreviewVertices(polyline.id, polyline.vertices, editMode, newVertexDrag)
-                    val rendered = polyline.copy(vertices = renderVertices)
-                    highlights.colorFor(engineState.mode.styleStateFor(polyline.id))?.let { color ->
-                        addHighlight(rendered.toWwkHighlight(color), color) { shape, alpha -> shape.attributes.outlineColor.alpha = alpha }
-                    }
-                    addRenderable(rendered.toWwkPolyline().tagged(polyline.id))
-                }
-                entities.filterIsInstance<DrawnMarker>().forEach { marker ->
-                    highlights.colorFor(engineState.mode.styleStateFor(marker.id))?.let { color ->
-                        addHighlight(marker.toWwkHighlight(color), color) { placemark, alpha -> placemark.attributes.imageColor.alpha = alpha }
-                    }
-                    // While the marker is being edited its own icon is not pickable: the move target above it
-                    // (below) is what is grabbed, and two pickable placemarks on one spot could let the wrong one win.
-                    val beingEdited = editMode?.entityId == marker.id
-                    addRenderable(marker.toWwkPlacemark().tagged(marker.id).apply { if (beingEdited) isPickEnabled = false })
-                }
-
-                (engineState.mode as? DrawMode.Draw)?.let { draft ->
-                    draftPreviewRenderables(draft, handles, highlights).forEach { addRenderable(it) }
-                }
-
-                if (editMode != null) {
-                    val editedEntity = entities.firstOrNull { it.id == editMode.entityId }
-                    val (vertices, isClosed) = when (editedEntity) {
-                        is DrawnPolygon -> editedEntity.vertices to true
-                        is DrawnPolyline -> editedEntity.vertices to false
-                        is DrawnMarker, null -> null to false
-                    }
-                    if (editedEntity is DrawnMarker) {
-                        addRenderable(
-                            markerMoveTarget(editedEntity.position, editedEntity.size, handles) {
-                                putUserProperty(ENTITY_ID_KEY, editMode.entityId)
-                                putUserProperty(MARKER_MOVE_KEY, true)
-                            }
-                        )
-                    }
-                    if (vertices != null) {
-                        vertices.forEach { vertex ->
-                            vertexHandleRenderables(vertex.position, handles) {
-                                putUserProperty(ENTITY_ID_KEY, editMode.entityId)
-                                putUserProperty(VERTEX_ID_KEY, vertex.id)
-                            }.forEach { addRenderable(it) }
-                        }
-                        val skipEdgeIndex = newVertexDrag?.edgeIndex
-                        edgeMidpoints(vertices.map { it.position }, isClosed).forEach { (edgeIndex, midpoint) ->
-                            if (edgeIndex != skipEdgeIndex) {
-                                midpointHandleRenderables(midpoint, handles) {
-                                    putUserProperty(ENTITY_ID_KEY, editMode.entityId)
-                                    putUserProperty(EDGE_INDEX_KEY, edgeIndex)
-                                }.forEach { addRenderable(it) }
-                            }
-                        }
-                    }
-                }
+            .onEach { (entities, engineState, handleStyle, highlightStyle) ->
+                update(entities, engineState, handleStyle, highlightStyle)
                 onContentChanged()
             }
             .launchIn(scope)
     }
 
     /**
-     * For a polygon with a [ShapeStyle.ImageFill], adds the picture (clipped to the shape) below it and
-     * returns [rendered] unchanged; if the picture can't be produced, returns [rendered] with a grey
-     * placeholder fill in its place so the shape isn't invisible. Any other polygon is returned as is.
-     *
-     * While a vertex of this very polygon is being dragged the picture is left out: it is cut to the
-     * shape, so it would have to be produced again on every step of the drag (tens of milliseconds
-     * each); it comes back as soon as the drag ends and the shape settles.
+     * Brings the layer in line with the inputs, building a WWK renderable only for what is new or changed since
+     * the last update. Every renderable is looked up by the thing it was made from (the entity, its style
+     * state, the live drag preview, the handle style...) and kept if that is still the same; the layer then
+     * just receives the list of renderables in their draw order, polygons below polylines below markers, then
+     * the draft, then the editing handles.
      */
-    private fun withImageFillBelow(rendered: DrawnPolygon, original: DrawnPolygon, editMode: DrawMode.Edit?): DrawnPolygon {
-        val fill = original.style as? ShapeStyle.ImageFill ?: return rendered
-        if (editMode?.entityId == original.id && editMode.activeDrag != null) return rendered
-        val surface = imageFillSurface(original, fill)
-        if (surface == null) return rendered.copy(style = IMAGE_FILL_PLACEHOLDER)
-        addRenderable(surface)
-        return rendered
-    }
+    private fun update(entities: List<DrawableEntity>, engineState: DrawEngineState, handleStyle: HandleStyle, highlightStyle: HighlightStyle) {
+        bodies.begin()
+        highlights.begin()
+        vertexHandles.begin()
+        midpointHandles.begin()
+        highlightAlphaSetters.clear()
+        val drawn = ArrayList<Renderable>()
 
-    /**
-     * Adds [highlight] and remembers how to set its alpha, so [onTick] can pulse it without
-     * rebuilding the layer. The pulse scales the colour's own opacity ([color]'s alpha) rather
-     * than replacing it, so a deliberately translucent highlight stays translucent. Starts at
-     * the pulse's current alpha, so a highlight that appears mid-cycle doesn't flash back to
-     * full opacity for a frame.
-     */
-    private fun <T : Renderable> addHighlight(highlight: T, color: ColorRgba, setAlpha: (T, Float) -> Unit) {
-        addRenderable(highlight)
-        val baseAlpha = color.alpha / 255f
-        setAlpha(highlight, baseAlpha * pulse.value)
-        highlightAlphaSetters += { pulseAlpha -> setAlpha(highlight, baseAlpha * pulseAlpha) }
+        val mode = engineState.mode
+        val editMode = mode as? DrawMode.Edit
+        val newVertexDrag = editMode?.activeDrag as? DrawMode.Edit.ActiveDrag.NewVertex
+
+        fun highlightOf(id: EntityId, shape: Any, build: (ColorRgba) -> Renderable, setAlpha: (Renderable, Float) -> Unit): Highlight? {
+            val color = highlightStyle.colorFor(mode.styleStateFor(id)) ?: return null
+            return highlights.get(id, Pair(shape, color)) {
+                val renderable = build(color)
+                // The pulse scales the colour's own opacity rather than replacing it, so a deliberately translucent highlight stays
+                // translucent; it starts at the pulse's current alpha, so a highlight that appears mid-cycle doesn't flash to full.
+                val baseAlpha = color.alpha / 255f
+                setAlpha(renderable, baseAlpha * pulse.value)
+                Highlight(renderable) { pulseAlpha -> setAlpha(renderable, baseAlpha * pulseAlpha) }
+            }.also { highlightAlphaSetters += it.setAlpha }
+        }
+
+        entities.forEach { entity ->
+            if (entity !is DrawnPolygon) return@forEach
+            val renderVertices = livePreviewVertices(entity.id, entity.vertices, editMode, newVertexDrag)
+            val shape = if (renderVertices === entity.vertices) entity else entity.copy(vertices = renderVertices)
+            // While a vertex of this very polygon is being dragged the picture of an image fill is left out (see withImageFillBelow).
+            val dragging = editMode?.entityId == entity.id && editMode.activeDrag != null
+            drawn += bodies.get(entity.id, Pair(shape, dragging)) {
+                // An image fill is a picture laid under the polygon, which then keeps its outline and stays pickable. If the
+                // picture can't be produced the polygon gets a grey placeholder fill instead, so it isn't invisible.
+                val fill = entity.style as? ShapeStyle.ImageFill
+                val fillSurface = if (fill != null && !dragging) imageFillSurface(entity, fill) else null
+                val styled = if (fill != null && !dragging && fillSurface == null) shape.copy(style = IMAGE_FILL_PLACEHOLDER) else shape
+                listOfNotNull(fillSurface, styled.toWwkPolygon().tagged(entity.id))
+            }
+            highlightOf(entity.id, shape, { shape.toWwkHighlight(it) }) { r, a -> (r as Polygon).attributes.outlineColor.alpha = a }
+                ?.let { drawn += it.renderable }
+        }
+        entities.forEach { entity ->
+            if (entity !is DrawnPolyline) return@forEach
+            val renderVertices = livePreviewVertices(entity.id, entity.vertices, editMode, newVertexDrag)
+            val shape = if (renderVertices === entity.vertices) entity else entity.copy(vertices = renderVertices)
+            highlightOf(entity.id, shape, { shape.toWwkHighlight(it) }) { r, a -> (r as Path).attributes.outlineColor.alpha = a }
+                ?.let { drawn += it.renderable }
+            drawn += bodies.get(entity.id, shape) { listOf(shape.toWwkPolyline().tagged(entity.id)) }
+        }
+        entities.forEach { entity ->
+            if (entity !is DrawnMarker) return@forEach
+            highlightOf(entity.id, entity, { entity.toWwkHighlight(it) }) { r, a -> (r as Placemark).attributes.imageColor.alpha = a }
+                ?.let { drawn += it.renderable }
+            // While the marker is being edited its own icon is not pickable: the move target (below) is what is grabbed,
+            // and two pickable placemarks on one spot could let the wrong one win.
+            val beingEdited = editMode?.entityId == entity.id
+            drawn += bodies.get(entity.id, Pair(entity, beingEdited)) {
+                listOf(entity.toWwkPlacemark().tagged(entity.id).apply { if (beingEdited) isPickEnabled = false })
+            }
+        }
+
+        (mode as? DrawMode.Draw)?.let { draft -> drawn += draftPreviewRenderables(draft, handleStyle, highlightStyle) }
+
+        if (editMode != null) {
+            val editedEntity = entities.firstOrNull { it.id == editMode.entityId }
+            if (editedEntity is DrawnMarker) {
+                drawn += markerMoveTarget(editedEntity.position, editedEntity.size, handleStyle) {
+                    putUserProperty(ENTITY_ID_KEY, editMode.entityId)
+                    putUserProperty(MARKER_MOVE_KEY, true)
+                }
+            }
+            val (vertices, isClosed) = when (editedEntity) {
+                is DrawnPolygon -> editedEntity.vertices to true
+                is DrawnPolyline -> editedEntity.vertices to false
+                is DrawnMarker, null -> null to false
+            }
+            if (vertices != null) {
+                vertices.forEach { vertex ->
+                    drawn += vertexHandles.get(editMode.entityId to vertex.id, Pair(vertex.position, handleStyle)) {
+                        vertexHandleRenderables(vertex.position, handleStyle) {
+                            putUserProperty(ENTITY_ID_KEY, editMode.entityId)
+                            putUserProperty(VERTEX_ID_KEY, vertex.id)
+                        }
+                    }
+                }
+                val skipEdgeIndex = newVertexDrag?.edgeIndex
+                val edgeCount = if (isClosed) vertices.size else vertices.size - 1
+                for (edgeIndex in 0 until edgeCount) {
+                    if (edgeIndex == skipEdgeIndex) continue
+                    val start = vertices[edgeIndex].position
+                    val end = vertices[(edgeIndex + 1) % vertices.size].position
+                    drawn += midpointHandles.get(editMode.entityId to edgeIndex, Triple(start, end, handleStyle)) {
+                        midpointHandleRenderables(edgeMidpoint(start, end), handleStyle) {
+                            putUserProperty(ENTITY_ID_KEY, editMode.entityId)
+                            putUserProperty(EDGE_INDEX_KEY, edgeIndex)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Only touch the layer when its content really differs (the common case while something else changes, e.g. a pulse is not a change).
+        val unchanged = drawn.size == applied.size && drawn.indices.all { drawn[it] === applied[it] }
+        if (!unchanged) {
+            clearRenderables()
+            addAllRenderables(drawn)
+            applied = drawn
+        }
     }
 
     /**
@@ -288,6 +318,31 @@ class DrawLayer(
         private const val PULSE_DURATION_MS = 700L
         private const val PULSE_MIN_ALPHA = 0.2f
 
+    }
+}
+
+/** A selection highlight, and how to set its alpha (see [DrawLayer.onTick]). */
+private class Highlight(val renderable: Renderable, val setAlpha: (Float) -> Unit)
+
+/**
+ * Remembers what was built for each id during the last [begin]..now round and hands it back when asked again for the
+ * same id with an equal [S] (the thing it was built from): [get] builds only on a miss. Whatever a round did not ask
+ * for is dropped at the next [begin], so a deleted entity (or a handle that is gone) doesn't linger.
+ */
+private class Reuse<I, S, V> {
+    private var previous = HashMap<I, Pair<S, V>>()
+    private var current = HashMap<I, Pair<S, V>>()
+
+    fun begin() {
+        previous = current
+        current = HashMap()
+    }
+
+    fun get(id: I, source: S, build: () -> V): V {
+        val kept = previous[id]
+        val value = if (kept != null && kept.first == source) kept.second else build()
+        current[id] = Pair(source, value)
+        return value
     }
 }
 
