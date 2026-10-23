@@ -23,7 +23,8 @@ private val DRAWING_SESSION = Any()
  * vertex of the entity being edited — is an undo step. When the session ends (finishing or
  * abandoning the drawing, leaving edit mode, or editing a different entity) the history is
  * cleared, and so is what could be undone: finishing a shape is not itself something undo can
- * take back, so undo can never delete a whole shape you just finished. Starting a session is
+ * take back, so undo can never delete a whole shape you just finished. (Deleting a shape is the
+ * one thing that ends a session AND stays undoable — undo restores it.) Starting a session is
  * likewise not a step. A host that runs its own commands through the same [HistoryManager] loses
  * them at these boundaries too.
  *
@@ -49,8 +50,15 @@ class DrawStateMachine(
             // A session started or ended — see the class KDoc. Its effects still have to happen
             // (finishing a drawing adds the entity), but they are not an undo step: they are the
             // boundary itself. Then the history of the finished session is forgotten.
-            result.commands.forEach { it.execute() }
             historyManager.clear()
+            if (event is DrawEvent.DeleteSelected) {
+                // Deleting leaves the edit session, but unlike finishing a drawing it must stay
+                // undoable: undo just brings the shape back, so there is nothing to protect the
+                // user from, and an accidental delete needs a way out.
+                result.commands.forEach { historyManager.execute(it) }
+            } else {
+                result.commands.forEach { it.execute() }
+            }
             return
         }
 

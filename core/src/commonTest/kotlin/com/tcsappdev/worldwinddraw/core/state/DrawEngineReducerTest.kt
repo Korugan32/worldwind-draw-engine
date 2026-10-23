@@ -536,4 +536,36 @@ class DrawEngineReducerTest {
         // undo could use to delete the whole shape.
         assertEquals(null, result.modeChange)
     }
+
+    // -- Deleting the selected shape
+
+    @Test
+    fun deleteSelectedRemovesTheSelectedOrEditedShapeAndGoesIdle() {
+        val id = EntityId("A")
+        listOf(DrawMode.Select(id), DrawMode.Edit(id)).forEach { mode ->
+            val repository = EntityRepository()
+            repository.add(polygonAt(id, VertexId("a") to p(0.0, 0.0), VertexId("b") to p(1.0, 0.0), VertexId("c") to p(1.0, 1.0)))
+
+            val result = reduce(DrawEngineState(mode = mode), DrawEvent.DeleteSelected, repository)
+
+            assertEquals(DrawMode.Idle, result.state.mode, "mode $mode")
+            assertEquals(1, result.commands.size)
+            result.commands.single().execute()
+            assertTrue(repository.entities.value.isEmpty())
+            result.commands.single().undo()
+            assertEquals(1, repository.entities.value.size, "undo brings it back")
+        }
+    }
+
+    @Test
+    fun deleteSelectedIsANoOpWhenNothingIsSelected() {
+        listOf(DrawMode.Idle, DrawMode.Pan, DrawMode.Draw(DrawableEntityType.Polygon, listOf(p(0.0, 0.0)))).forEach { mode ->
+            val state = DrawEngineState(mode = mode)
+
+            val result = reduce(state, DrawEvent.DeleteSelected)
+
+            assertEquals(state, result.state, "mode $mode")
+            assertTrue(result.commands.isEmpty())
+        }
+    }
 }
