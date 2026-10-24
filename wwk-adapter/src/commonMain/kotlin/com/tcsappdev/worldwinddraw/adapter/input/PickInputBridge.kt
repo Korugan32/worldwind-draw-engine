@@ -111,7 +111,13 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
                     )
                 }
                 vertexId != null ->
-                    stateMachine.onEvent(DrawEvent.DragStart(fromPosition.toGeoPosition(), vertexId, entityId))
+                    stateMachine.onEvent(
+                        DrawEvent.DragStart(
+                            fromPosition.toGeoPosition(), vertexId, entityId,
+                            hitSpanPrevId = spanOf(userObject, DrawLayer.SPAN_PREV_KEY),
+                            hitSpanNextId = spanOf(userObject, DrawLayer.SPAN_NEXT_KEY),
+                        )
+                    )
                 edgeIndex != null -> {
                     pendingNewVertexId = VertexId(Random.nextLong().toString())
                     rememberGrabOffset(fromPosition, toPosition)
@@ -172,6 +178,9 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
 
     private fun vertexIdOf(userObject: Any): VertexId? =
         (userObject as? Renderable)?.getUserProperty(DrawLayer.VERTEX_ID_KEY)
+
+    private fun spanOf(userObject: Any, key: String): VertexId? =
+        (userObject as? Renderable)?.getUserProperty(key)
 
     private fun edgeIndexOf(userObject: Any): Int? =
         (userObject as? Renderable)?.getUserProperty(DrawLayer.EDGE_INDEX_KEY)

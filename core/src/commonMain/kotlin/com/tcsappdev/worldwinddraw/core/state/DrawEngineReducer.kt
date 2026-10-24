@@ -3,6 +3,7 @@ package com.tcsappdev.worldwinddraw.core.state
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
+import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.history.Command
@@ -11,6 +12,8 @@ import com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.DeleteEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveMarkerCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexWithSpanCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.VertexSpan
 import com.tcsappdev.worldwinddraw.core.history.commands.ResizeMarkerCommand
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 
@@ -106,7 +109,11 @@ object DrawEngineReducer {
 
         val drag = when {
             event.hitMarker -> DrawMode.Edit.ActiveDrag.MovingMarker(origin = event.position)
-            event.hitVertexId != null -> DrawMode.Edit.ActiveDrag.ExistingVertex(event.hitVertexId, event.position)
+            event.hitVertexId != null -> DrawMode.Edit.ActiveDrag.ExistingVertex(
+                event.hitVertexId,
+                event.position,
+                span = if (event.hitSpanPrevId != null || event.hitSpanNextId != null) VertexSpan(event.hitSpanPrevId, event.hitSpanNextId) else null,
+            )
             event.hitEdgeIndex != null -> DrawMode.Edit.ActiveDrag.NewVertex(event.hitEdgeIndex, event.position)
             else -> return ReduceResult(state)
         }
@@ -120,8 +127,7 @@ object DrawEngineReducer {
             null -> ReduceResult(state)
 
             is DrawMode.Edit.ActiveDrag.ExistingVertex -> {
-                val command = MoveVertexCommand(repository, mode.entityId, drag.vertexId, drag.origin, event.position)
-                ReduceResult(state, previewCommands = listOf(command))
+                ReduceResult(state, previewCommands = listOf(moveVertexCommand(repository, mode.entityId, drag, event.position)))
             }
 
             is DrawMode.Edit.ActiveDrag.MovingMarker -> {
@@ -146,8 +152,7 @@ object DrawEngineReducer {
         val disarmed = state.copy(mode = mode.copy(activeDrag = null))
 
         val command: Command = when (drag) {
-            is DrawMode.Edit.ActiveDrag.ExistingVertex ->
-                MoveVertexCommand(repository, mode.entityId, drag.vertexId, drag.origin, event.position)
+            is DrawMode.Edit.ActiveDrag.ExistingVertex -> moveVertexCommand(repository, mode.entityId, drag, event.position)
 
             is DrawMode.Edit.ActiveDrag.MovingMarker ->
                 MoveMarkerCommand(repository, mode.entityId, drag.origin, event.position)
@@ -159,6 +164,11 @@ object DrawEngineReducer {
         }
         return ReduceResult(disarmed, commands = listOf(command))
     }
+
+    /** A plain one-vertex move, or one that carries the hidden vertices next to it along ([DrawMode.Edit.ActiveDrag.ExistingVertex.span]). */
+    private fun moveVertexCommand(repository: EntityRepository, entityId: EntityId, drag: DrawMode.Edit.ActiveDrag.ExistingVertex, position: GeoPosition): Command =
+        if (drag.span != null) MoveVertexWithSpanCommand(repository, entityId, drag.vertexId, position, drag.span)
+        else MoveVertexCommand(repository, entityId, drag.vertexId, drag.origin, position)
 
     private fun reduceResizeMarker(state: DrawEngineState, event: DrawEvent.ResizeMarker, repository: EntityRepository): ReduceResult {
         val entityId = when (val mode = state.mode) {

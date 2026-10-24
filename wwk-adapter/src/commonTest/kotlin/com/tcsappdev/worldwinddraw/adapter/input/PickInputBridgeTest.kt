@@ -135,6 +135,42 @@ class PickInputBridgeTest {
     }
 
     @Test
+    fun draggingAHandleWithHiddenNeighboursCarriesThemAlongAsOneUndoableStep() {
+        val entityId = EntityId("A")
+        // Five vertices in a line; v0 and v4 are the handled ones, v1..v3 are hidden between them, and v2 has a handle too.
+        val repository = EntityRepository().apply {
+            add(
+                DrawnPolygon(
+                    id = entityId,
+                    style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0)),
+                    vertices = (0 until 5).map { Vertex(VertexId("v$it"), GeoPosition(0.0, it.toDouble())) },
+                )
+            )
+        }
+        val historyManager = HistoryManager()
+        val stateMachine = DrawStateMachine(historyManager, repository)
+        stateMachine.onEvent(DrawEvent.Click(GeoPosition(0.0, 0.0), entityId))
+        stateMachine.onEvent(DrawEvent.Click(GeoPosition(0.0, 0.0), entityId))
+
+        val bridge = PickInputBridge(stateMachine)
+        val handle = Polygon().apply {
+            putUserProperty(DrawLayer.ENTITY_ID_KEY, entityId)
+            putUserProperty(DrawLayer.VERTEX_ID_KEY, VertexId("v2"))
+            putUserProperty(DrawLayer.SPAN_PREV_KEY, VertexId("v0"))
+            putUserProperty(DrawLayer.SPAN_NEXT_KEY, VertexId("v4"))
+        }
+        fun latitudes() = (repository.entities.value.first { it.id == entityId } as DrawnPolygon).vertices.map { it.position.latitude }
+
+        bridge.onObjectMoved(handle, Position.fromDegrees(0.0, 2.0, 0.0), Position.fromDegrees(2.0, 2.0, 0.0))
+        assertEquals(listOf(0.0, 1.0, 2.0, 1.0, 0.0), latitudes(), "v2 dragged 2 degrees north; the hidden v1 and v3 follow by half")
+
+        bridge.onObjectMovingFinished(handle, Position.fromDegrees(2.0, 2.0, 0.0))
+        assertEquals(listOf(0.0, 1.0, 2.0, 1.0, 0.0), latitudes(), "finishing does not move them again")
+        historyManager.undo()
+        assertEquals(listOf(0.0, 0.0, 0.0, 0.0, 0.0), latitudes(), "one undo puts the whole stretch back")
+    }
+
+    @Test
     fun draggingAMidpointHandleInsertsExactlyOneVertexAtTheFinalPositionOnRelease() {
         val entityId = EntityId("A")
         val repository = EntityRepository().apply {

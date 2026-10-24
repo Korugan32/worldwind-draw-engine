@@ -15,7 +15,7 @@ import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
-import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
+import com.tcsappdev.worldwinddraw.core.geometry.PathSimplifier
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
@@ -27,6 +27,7 @@ import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import earth.worldwind.layer.RenderableLayer
+import earth.worldwind.render.RenderContext
 import earth.worldwind.render.Renderable
 import earth.worldwind.shape.Path
 import earth.worldwind.shape.Placemark
@@ -91,6 +92,7 @@ class DrawLayer(
     private val onContentChanged: () -> Unit = {},
     handleStyle: HandleStyle = HandleStyle(),
     highlightStyle: HighlightStyle = HighlightStyle(),
+    buildOnFirstFrame: Boolean = false,
 ) : RenderableLayer("Draw Layer"), Animatable {
     private val handleStyleFlow = MutableStateFlow(handleStyle)
     private val highlightStyleFlow = MutableStateFlow(highlightStyle)
@@ -125,15 +127,39 @@ class DrawLayer(
     private val highlights = Reuse<EntityId, Any, Highlight>()
     private val vertexHandles = Reuse<Pair<EntityId, VertexId>, Any, List<Renderable>>()
     private val midpointHandles = Reuse<Pair<EntityId, Int>, Any, List<Renderable>>()
+    private val simplifiedVertices = Reuse<EntityId, Any, List<Vertex>>()
     private var applied: List<Renderable> = emptyList()
+
+    // How coarsely shapes are drawn for the current camera (see [LodLevel]); chosen each frame in doRender.
+    private var lodLevel = LodLevel.NONE
+
+    // The level each shape was last built at. A shape that is off screen keeps its old level until it comes
+    // into view: building it again for a camera that can't see it would be wasted work and memory churn.
+    private val shapeLevels = HashMap<EntityId, Int>()
+    private val shapeBounds = HashMap<EntityId, Pair<List<Vertex>, GeoBounds>>()
+    private var lodPending = false
+
+    // False until the first frame when [buildOnFirstFrame]: nothing is built before the camera, and with it the level of detail, is known.
+    private var ready = !buildOnFirstFrame
+    private val handleAnchorIndices = Reuse<EntityId, Any, List<Int>>()
+
+    // How coarsely the edit handles are laid out for the current camera (a LodLevel, with a much bigger tolerance than drawing).
+    private var handleLevel = LodLevel.NONE
+
+    /** Whether the last [applyLod] left shapes at their old level (over its per-call budget); the next call carries on. */
+    internal val hasPendingLod: Boolean get() = lodPending
+    private var latest: Inputs? = null
 
     init {
         combine(entityRepository.entities, stateMachine.state, handleStyleFlow, highlightStyleFlow) { entities, engineState, handles, highlights ->
             Inputs(entities, engineState, handles, highlights)
         }
-            .onEach { (entities, engineState, handleStyle, highlightStyle) ->
-                update(entities, engineState, handleStyle, highlightStyle)
-                onContentChanged()
+            .onEach { inputs ->
+                latest = inputs
+                if (ready) {
+                    update(inputs.entities, inputs.engineState, inputs.handles, inputs.highlights)
+                    onContentChanged()
+                }
             }
             .launchIn(scope)
     }
@@ -150,7 +176,10 @@ class DrawLayer(
         highlights.begin()
         vertexHandles.begin()
         midpointHandles.begin()
+        simplifiedVertices.begin()
+        handleAnchorIndices.begin()
         highlightAlphaSetters.clear()
+        trackShapes(entities)
         val drawn = ArrayList<Renderable>()
 
         val mode = engineState.mode
@@ -171,7 +200,7 @@ class DrawLayer(
 
         entities.forEach { entity ->
             if (entity !is DrawnPolygon) return@forEach
-            val renderVertices = livePreviewVertices(entity.id, entity.vertices, editMode, newVertexDrag)
+            val renderVertices = livePreviewVertices(entity.id, drawnVertices(entity.id, entity.vertices, true, editMode), editMode, newVertexDrag)
             val shape = if (renderVertices === entity.vertices) entity else entity.copy(vertices = renderVertices)
             // While a vertex of this very polygon is being dragged the picture of an image fill is left out (see withImageFillBelow).
             val dragging = editMode?.entityId == entity.id && editMode.activeDrag != null
@@ -188,7 +217,7 @@ class DrawLayer(
         }
         entities.forEach { entity ->
             if (entity !is DrawnPolyline) return@forEach
-            val renderVertices = livePreviewVertices(entity.id, entity.vertices, editMode, newVertexDrag)
+            val renderVertices = livePreviewVertices(entity.id, drawnVertices(entity.id, entity.vertices, false, editMode), editMode, newVertexDrag)
             val shape = if (renderVertices === entity.vertices) entity else entity.copy(vertices = renderVertices)
             highlightOf(entity.id, shape, { shape.toWwkHighlight(it) }) { r, a -> (r as Path).attributes.outlineColor.alpha = a }
                 ?.let { drawn += it.renderable }
@@ -222,24 +251,60 @@ class DrawLayer(
                 is DrawnMarker, null -> null to false
             }
             if (vertices != null) {
-                vertices.forEach { vertex ->
-                    drawn += vertexHandles.get(editMode.entityId to vertex.id, Pair(vertex.position, handleStyle)) {
+                // Which vertices have a handle: all of them, or — for a shape with many points seen from far away — only
+                // those that matter at the current handle level, so the user edits a coarse outline with a few handles.
+                val anchors = handleAnchors(editMode.entityId, vertices, isClosed)
+                val n = vertices.size
+                anchors.forEachIndexed { k, index ->
+                    val vertex = vertices[index]
+                    // The handled vertices on either side: dragging this one moves the hidden vertices in between with it.
+                    val prevIndex = if (anchors.size < 2) null else if (k > 0) anchors[k - 1] else if (isClosed) anchors.last() else null
+                    val nextIndex = if (anchors.size < 2) null else if (k < anchors.size - 1) anchors[k + 1] else if (isClosed) anchors.first() else null
+                    val prevId = prevIndex?.takeIf { hiddenBetween(it, index, n) > 0 }?.let { vertices[it].id }
+                    val nextId = nextIndex?.takeIf { hiddenBetween(index, it, n) > 0 }?.let { vertices[it].id }
+                    drawn += vertexHandles.get(editMode.entityId to vertex.id, Triple(vertex.position, handleStyle, Pair(prevId, nextId))) {
                         vertexHandleRenderables(vertex.position, handleStyle) {
                             putUserProperty(ENTITY_ID_KEY, editMode.entityId)
                             putUserProperty(VERTEX_ID_KEY, vertex.id)
+                            if (prevId != null) putUserProperty(SPAN_PREV_KEY, prevId)
+                            if (nextId != null) putUserProperty(SPAN_NEXT_KEY, nextId)
                         }
                     }
                 }
                 val skipEdgeIndex = newVertexDrag?.edgeIndex
-                val edgeCount = if (isClosed) vertices.size else vertices.size - 1
-                for (edgeIndex in 0 until edgeCount) {
-                    if (edgeIndex == skipEdgeIndex) continue
-                    val start = vertices[edgeIndex].position
-                    val end = vertices[(edgeIndex + 1) % vertices.size].position
-                    drawn += midpointHandles.get(editMode.entityId to edgeIndex, Triple(start, end, handleStyle)) {
-                        midpointHandleRenderables(edgeMidpoint(start, end), handleStyle) {
-                            putUserProperty(ENTITY_ID_KEY, editMode.entityId)
-                            putUserProperty(EDGE_INDEX_KEY, edgeIndex)
+                val coarseEdges = if (isClosed) anchors.size else anchors.size - 1
+                for (k in 0 until coarseEdges) {
+                    val from = anchors[k]
+                    val to = anchors[(k + 1) % anchors.size]
+                    val hidden = hiddenBetween(from, to, n)
+                    if (hidden > 0) {
+                        // Hidden vertices lie between these two handled ones. A new vertex dropped among them would stick out of
+                        // their outline like a spike (and make them look important enough to get handles of their own), so the "+"
+                        // sits on the stretch's real middle vertex instead, and dragging it moves that vertex, with its hidden
+                        // neighbours following in proportion (see SpanMover).
+                        val middle = middleVertexIndex(vertices, from, to, n)
+                        val vertex = vertices[middle]
+                        val prevId = vertices[from].id
+                        val nextId = vertices[to].id
+                        drawn += midpointHandles.get(editMode.entityId to k, Triple(vertex.position, handleStyle, Triple(vertex.id, prevId, nextId))) {
+                            midpointHandleRenderables(vertex.position, handleStyle) {
+                                putUserProperty(ENTITY_ID_KEY, editMode.entityId)
+                                putUserProperty(VERTEX_ID_KEY, vertex.id)
+                                putUserProperty(SPAN_PREV_KEY, prevId)
+                                putUserProperty(SPAN_NEXT_KEY, nextId)
+                                putUserProperty(STRETCH_MIDDLE_KEY, true)
+                            }
+                        }
+                    } else {
+                        // Two vertices next to each other: an ordinary edge, and a dragged "+" adds a vertex into it.
+                        if (from == skipEdgeIndex) continue
+                        val start = vertices[from].position
+                        val end = vertices[to].position
+                        drawn += midpointHandles.get(editMode.entityId to k, Triple(Pair(start, end), handleStyle, from)) {
+                            midpointHandleRenderables(edgeMidpoint(start, end), handleStyle) {
+                                putUserProperty(ENTITY_ID_KEY, editMode.entityId)
+                                putUserProperty(EDGE_INDEX_KEY, from)
+                            }
                         }
                     }
                 }
@@ -253,6 +318,158 @@ class DrawLayer(
             addAllRenderables(drawn)
             applied = drawn
         }
+    }
+
+    /**
+     * The indices of the vertices that get an edit handle, in order: every vertex of a shape with few points, otherwise those
+     * that matter at the current [handleLevel] (see [PathSimplifier]). The same list is returned while the vertices and
+     * the level are the same.
+     */
+    private fun handleAnchors(id: EntityId, vertices: List<Vertex>, isClosed: Boolean): List<Int> {
+        if (handleLevel == LodLevel.NONE || vertices.size <= HANDLE_MIN_VERTICES) return vertices.indices.toList()
+        return handleAnchorIndices.get(id, Pair(vertices, handleLevel)) {
+            val tolerance = LodLevel.toleranceMeters(handleLevel)
+            val positions = vertices.map { it.position }
+            if (isClosed) PathSimplifier.simplifyRing(positions, tolerance) else PathSimplifier.simplifyPath(positions, tolerance)
+        }
+    }
+
+    /**
+     * The hidden vertex halfway along the stretch from index [from] to index [to] (going forward, past the end of the list for a ring),
+     * by length along it: on a coastline with points of very different spacing the middle by count would be nowhere near the middle.
+     */
+    private fun middleVertexIndex(vertices: List<Vertex>, from: Int, to: Int, count: Int): Int {
+        val indices = generateSequence(from) { (it + 1) % count }.takeWhile { true }.take(((to - from + count) % count).let { if (it == 0) count else it } + 1).toList()
+        val lengths = DoubleArray(indices.size)
+        for (i in 1 until indices.size) {
+            val a = vertices[indices[i - 1]].position
+            val b = vertices[indices[i]].position
+            val dLat = b.latitude - a.latitude
+            val dLon = (b.longitude - a.longitude) * kotlin.math.cos((a.latitude + b.latitude) / 2 * kotlin.math.PI / 180.0)
+            lengths[i] = lengths[i - 1] + kotlin.math.sqrt(dLat * dLat + dLon * dLon)
+        }
+        val half = lengths.last() / 2
+        // Of the hidden vertices (not the two ends), the one nearest to half the length.
+        var best = 1
+        for (i in 1 until indices.size - 1) if (kotlin.math.abs(lengths[i] - half) < kotlin.math.abs(lengths[best] - half)) best = i
+        return indices[best]
+    }
+
+    /** How many vertices lie strictly between index [from] and index [to] going forward (past the end of the list for a ring). */
+    private fun hiddenBetween(from: Int, to: Int, count: Int): Int = ((to - from + count) % count).let { if (it == 0) count - 1 else it - 1 }
+
+    /** Remembers the box of every shape the level applies to (a box is recomputed only when the shape's vertices change), and forgets the removed ones. */
+    private fun trackShapes(entities: List<DrawableEntity>) {
+        val alive = HashSet<EntityId>()
+        for (entity in entities) {
+            val vertices = when (entity) {
+                is DrawnPolygon -> entity.vertices
+                is DrawnPolyline -> entity.vertices
+                else -> continue
+            }
+            if (vertices.size <= LOD_MIN_VERTICES) continue
+            alive += entity.id
+            val known = shapeBounds[entity.id]
+            if (known == null || known.first !== vertices) shapeBounds[entity.id] = vertices to GeoBounds.of(vertices)
+            shapeLevels.getOrPut(entity.id) { lodLevel } // a new shape is built at the level everything else is at, not whole
+        }
+        shapeBounds.keys.retainAll(alive)
+        shapeLevels.keys.retainAll(alive)
+    }
+
+    /**
+     * The vertices a shape is drawn with: all of them while it is being edited (its handles sit on the real vertices, and
+     * an edit must be exact), otherwise only those that matter at the current [lodLevel] — a continent's border seen
+     * from space doesn't need its thousands of points, and every point costs memory and drawing time. The same
+     * list instance is returned while neither the shape's vertices nor its level change.
+     */
+    private fun drawnVertices(id: EntityId, vertices: List<Vertex>, isClosed: Boolean, editMode: DrawMode.Edit?): List<Vertex> {
+        val level = shapeLevels[id] ?: LodLevel.NONE
+        if (level == LodLevel.NONE || editMode?.entityId == id || vertices.size <= LOD_MIN_VERTICES) return vertices
+        return simplifiedVertices.get(id, Pair(vertices, level)) {
+            val tolerance = LodLevel.toleranceMeters(level)
+            val positions = vertices.map { it.position }
+            val kept = if (isClosed) PathSimplifier.simplifyRing(positions, tolerance) else PathSimplifier.simplifyPath(positions, tolerance)
+            if (kept.size == vertices.size) vertices else kept.map { vertices[it] }
+        }
+    }
+
+    /**
+     * Picks how coarsely to draw for what the camera shows now: one screen pixel's worth of metres at the camera's
+     * distance is the tolerance, so what is dropped could not be seen anyway. Done every frame because the camera
+     * moves outside of this layer's control; shapes are only built again when the level really changes.
+     */
+    override fun doRender(rc: RenderContext) {
+        val pixelMeters = rc.pixelSizeAtDistance(rc.camera.position.altitude)
+        onFrame(
+            LodLevel.forTolerance(pixelMeters * LOD_PIXELS, lodLevel),
+            LodLevel.forTolerance(pixelMeters * HANDLE_PIXELS, handleLevel),
+            visibleBounds(rc),
+        )
+        super.doRender(rc)
+    }
+
+    /**
+     * What each frame does, given what the camera shows. The first frame of a layer made with `buildOnFirstFrame` is where
+     * it builds its shapes at all, straight away at the right level of detail — building them whole and then again, simplified,
+     * would cost the memory and time of both.
+     */
+    internal fun onFrame(level: Int, handleLevel: Int, view: GeoBounds?) {
+        if (!ready) {
+            ready = true
+            lodLevel = level
+            this.handleLevel = handleLevel
+            latest?.let {
+                update(it.entities, it.engineState, it.handles, it.highlights)
+                onContentChanged()
+            }
+            return
+        }
+        applyLod(level, view)
+        applyHandleLevel(handleLevel)
+        if (lodPending) onContentChanged() // more shapes to bring to the new level: ask for another frame
+    }
+
+    /** What the camera sees, as a box grown a little so a pan doesn't show shapes at the old level; `null` when that isn't known yet. */
+    private fun visibleBounds(rc: RenderContext): GeoBounds? {
+        val sector = rc.terrain.sector
+        if (sector.isEmpty) return null
+        return GeoBounds(sector.minLatitude.inDegrees, sector.maxLatitude.inDegrees, sector.minLongitude.inDegrees, sector.maxLongitude.inDegrees)
+            .grownBy(VIEW_MARGIN)
+    }
+
+    /**
+     * Makes [level] the camera's level and brings the shapes in [view] to it ([view] `null`: all of them). Shapes
+     * outside it keep the level they have until they are seen (and a shape added meanwhile is built at [level] at once). At most [LOD_VERTEX_BUDGET] vertices' worth
+     * are built again per call, so a zoom that changes the level for hundreds of big shapes at once doesn't
+     * freeze a frame; [lodPending] says whether some are still waiting for the next call.
+     */
+    /**
+     * Makes [level] the one the edit handles are laid out for. The handles are only built again if a shape is being edited
+     * and not in the middle of a drag (they would move under the finger): then the level is simply kept until the drag ends.
+     */
+    internal fun applyHandleLevel(level: Int) {
+        if (level == handleLevel) return
+        val mode = latest?.engineState?.mode as? DrawMode.Edit
+        if (mode?.activeDrag != null) return
+        handleLevel = level
+        if (mode != null) latest?.let { update(it.entities, it.engineState, it.handles, it.highlights) }
+    }
+
+    internal fun applyLod(level: Int, view: GeoBounds? = null) {
+        lodLevel = level
+        var budget = LOD_VERTEX_BUDGET
+        var changed = false
+        lodPending = false
+        for ((id, entry) in shapeBounds) {
+            if ((shapeLevels[id] ?: LodLevel.NONE) == level) continue
+            if (view != null && !entry.second.intersects(view)) continue
+            if (budget <= 0) { lodPending = true; break }
+            budget -= entry.first.size
+            shapeLevels[id] = level
+            changed = true
+        }
+        if (changed) latest?.let { update(it.entities, it.engineState, it.handles, it.highlights) }
     }
 
     /**
@@ -296,6 +513,15 @@ class DrawLayer(
         /** [Renderable.putUserProperty] key a midpoint-handle [Placemark] is additionally tagged with. */
         const val EDGE_INDEX_KEY = "com.tcsappdev.worldwinddraw.edgeIndex"
 
+        /** Tags on a vertex handle that has hidden vertices next to it: the handled vertex before and after it (see `DrawEvent.DragStart.hitSpanPrevId`). */
+        const val SPAN_PREV_KEY = "com.tcsappdev.worldwinddraw.spanPrev"
+
+        /** Tags the "+" handle that sits on a hidden vertex in the middle of a stretch between two handled vertices (it moves that vertex, it does not add one). */
+        const val STRETCH_MIDDLE_KEY = "com.tcsappdev.worldwinddraw.stretchMiddle"
+
+        /** See [SPAN_PREV_KEY]. */
+        const val SPAN_NEXT_KEY = "com.tcsappdev.worldwinddraw.spanNext"
+
         /** [Renderable.putUserProperty] key the move target of the marker being edited is additionally tagged with. */
         const val MARKER_MOVE_KEY = "com.tcsappdev.worldwinddraw.markerMove"
 
@@ -314,6 +540,24 @@ class DrawLayer(
 
         /** Drawn in place of an image fill whose picture can't be produced (see [withImageFillBelow]). */
         private val IMAGE_FILL_PLACEHOLDER = ShapeStyle.SolidColor(ColorRgba(128, 128, 128, 128))
+
+        /** Shapes are drawn simplified to about this many screen pixels of detail. */
+        private const val LOD_PIXELS = 1.0
+
+        /** A shape with this few vertices (or fewer) is always drawn whole: there's nothing worth dropping. */
+        private const val LOD_MIN_VERTICES = 12
+
+        /** Edit handles are laid out about this many screen pixels apart (as the tolerance of simplifying the outline). */
+        private const val HANDLE_PIXELS = 14.0
+
+        /** A shape with this few vertices (or fewer) gets a handle on every one. */
+        private const val HANDLE_MIN_VERTICES = 12
+
+        /** How many vertices' worth of shapes are brought to a new level in one frame. */
+        private const val LOD_VERTEX_BUDGET = 20_000
+
+        /** The camera's view is grown by this fraction on each side when deciding what is visible. */
+        private const val VIEW_MARGIN = 0.25
 
         private const val PULSE_DURATION_MS = 700L
         private const val PULSE_MIN_ALPHA = 0.2f

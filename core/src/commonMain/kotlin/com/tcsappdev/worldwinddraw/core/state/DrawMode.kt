@@ -3,6 +3,7 @@ package com.tcsappdev.worldwinddraw.core.state
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
+import com.tcsappdev.worldwinddraw.core.history.commands.VertexSpan
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import com.tcsappdev.worldwinddraw.core.style.StyleState
@@ -114,7 +115,12 @@ sealed interface DrawMode {
              * [com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexCommand] that
              * gets recorded once the gesture finishes (see `DrawEngineReducer`).
              */
-            data class ExistingVertex(val vertexId: VertexId, val origin: GeoPosition) : ActiveDrag
+            data class ExistingVertex(
+                val vertexId: VertexId,
+                val origin: GeoPosition,
+                /** Set when the hidden vertices next to this one move with it (see [VertexSpan]); `null` for a plain one-vertex drag. */
+                val span: VertexSpan? = null,
+            ) : ActiveDrag
 
             /**
              * A midpoint handle on edge [edgeIndex] is being dragged into a new vertex.

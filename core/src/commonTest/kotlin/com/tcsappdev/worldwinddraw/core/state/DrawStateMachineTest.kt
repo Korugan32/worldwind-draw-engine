@@ -267,6 +267,41 @@ class DrawStateMachineTest {
 
     // -- Marker move / resize inside an edit session
 
+    @Test
+    fun draggingAVertexWithHiddenNeighboursMovesThemTooAsOneUndoStep() {
+        val s = Setup()
+        s.repository.add(
+            DrawnPolygon(
+                id = EntityId("S"),
+                style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0)),
+                vertices = (0 until 6).map { Vertex(VertexId("S-$it"), p(0.0, it.toDouble())) },
+            )
+        )
+        s.startEditing("S")
+        val before = s.vertexPositions("S")
+
+        // S-2 is dragged 2 degrees north; S-0 and S-4 are the handled vertices on either side, S-1 and S-3 are hidden.
+        s.machine.onEvent(
+            DrawEvent.DragStart(p(0.0, 2.0), VertexId("S-2"), EntityId("S"), hitSpanPrevId = VertexId("S-0"), hitSpanNextId = VertexId("S-4"))
+        )
+        s.machine.onEvent(DrawEvent.DragMove(p(1.0, 2.0)))
+        s.machine.onEvent(DrawEvent.DragMove(p(2.0, 2.0)))
+        s.machine.onEvent(DrawEvent.DragEnd(p(2.0, 2.0)))
+
+        val after = s.vertexPositions("S")
+        assertEquals(p(2.0, 2.0), after[2])
+        assertEquals(1.0, after[1].latitude, "hidden, halfway: follows by half")
+        assertEquals(1.0, after[3].latitude)
+        assertEquals(before[0], after[0])
+        assertEquals(before[4], after[4])
+        assertEquals(before[5], after[5])
+
+        s.history.undo()
+        assertEquals(before, s.vertexPositions("S"), "the whole drag, hidden vertices included, was ONE step")
+        s.history.redo()
+        assertEquals(after, s.vertexPositions("S"))
+    }
+
     private fun Setup.addMarker(id: String) = repository.add(
         DrawnMarker(EntityId(id), ShapeStyle.SolidColor(ColorRgba(0, 0, 0)), p(1.0, 1.0), size = 20f)
     )
