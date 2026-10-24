@@ -7,6 +7,7 @@ import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.raster.ImageFillRasterizer
 import com.tcsappdev.worldwinddraw.core.raster.PixelImage
+import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ImageFit
 import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
@@ -31,12 +32,12 @@ import earth.worldwind.shape.SurfaceImage
 internal fun imageFillSurface(polygon: DrawnPolygon, fill: ShapeStyle.ImageFill): Renderable? {
     val bytes = fill.image as? ImageRef.Bytes ?: return null
     val ring = polygon.vertices.map { it.position }
-    val key = FillKey(bytes.key, fill.fit, fill.scale, fill.opacity, ring)
+    val key = FillKey(bytes.key, fill.fit, fill.scale, fill.opacity, fill.backgroundColor, ring)
 
     val cached = FillCache.results[key]
     val product = cached ?: run {
         val source = FillCache.pixels(bytes) ?: return null
-        val rasterized = ImageFillRasterizer.render(source, listOf(ring), fill.fit, fill.scale, fill.opacity, MAX_IMAGE_DIMENSION)
+        val rasterized = ImageFillRasterizer.render(source, listOf(ring), fill.fit, fill.scale, fill.opacity, MAX_IMAGE_DIMENSION, fill.backgroundColor)
             ?: return null
         val imageSource = imageSourceFromPixels(rasterized.image) ?: return null
         FillProduct(
@@ -58,6 +59,7 @@ private data class FillKey(
     val fit: ImageFit,
     val scale: Float,
     val opacity: Float,
+    val background: ColorRgba?,
     val ring: List<GeoPosition>,
 )
 

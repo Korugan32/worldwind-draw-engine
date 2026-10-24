@@ -27,7 +27,7 @@ object PolygonCenter {
     data class VisualCenter(val position: GeoPosition, val radiusMeters: Double)
 
     /** Meters per degree of latitude (and, after the shrinking, of longitude). */
-    private const val METERS_PER_DEGREE = 111_194.9
+    internal const val METERS_PER_DEGREE = 111_194.9
 
     /** A hard limit on the number of cells looked at, so a pathological shape can't take forever. */
     private const val MAX_CELLS = 200_000

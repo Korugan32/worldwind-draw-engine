@@ -76,7 +76,13 @@ sealed interface ShapeStyle {
      *
      * The image is laid over the shape's bounding box, centred on it (so for a concave shape the
      * centre can fall outside the shape itself), then clipped to the shape. [fit] decides its size
-     * and [scale] shrinks or grows that about the centre (`0.5f` = half the fitted size).
+     * and [scale] shrinks or grows that about the centre (`0.5f` = half the fitted size); with
+     * [ImageFit.Inscribed] the picture goes in the shape's visual centre instead.
+     *
+     * [backgroundColor], when set, fills the rest of the shape under the picture: the part a picture
+     * that doesn't cover the shape leaves empty (the sides a [ImageFit.Contain] picture doesn't reach,
+     * all of the shape around an [ImageFit.Inscribed] one). Its own alpha is its opacity; [opacity] is the picture's.
+     * `null` leaves the shape empty there, so the map shows through.
      *
      * Only [ImageRef.Bytes] are supported: the picture has to be in memory to be clipped to the
      * shape, and a URL is only downloaded later. A URL, an undecodable image, a platform with no
@@ -89,6 +95,7 @@ sealed interface ShapeStyle {
         val fit: ImageFit = ImageFit.Contain,
         val scale: Float = 1f,
         val opacity: Float = 1f,
+        val backgroundColor: ColorRgba? = null,
     ) : ShapeStyle {
         init {
             require(scale > 0f) { "scale must be positive, was $scale" }
@@ -114,4 +121,14 @@ enum class ImageFit {
 
     /** Stretched to exactly the box, ignoring the aspect ratio. */
     Stretch,
+
+    /**
+     * One whole picture in the middle of the shape, not tied to its box: centred on the shape's visual centre
+     * (the point farthest from its edges, see `PolygonCenter`) and just big enough to touch the biggest circle that fits
+     * inside the shape, so it is shown entire, never cut and never repeated. A long, bent or lopsided shape (a country
+     * with a long arm) gets its picture in its body rather than in the middle of its bounding box, which can lie outside
+     * the shape. [ImageFill.scale] sizes it from there: 1 is the whole picture inside that circle, more makes it bigger
+     * and lets the shape cut what sticks out. The first ring given is the outline it is centred in.
+     */
+    Inscribed,
 }

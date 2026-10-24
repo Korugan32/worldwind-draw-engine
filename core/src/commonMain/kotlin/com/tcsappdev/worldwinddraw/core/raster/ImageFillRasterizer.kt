@@ -2,6 +2,8 @@ package com.tcsappdev.worldwinddraw.core.raster
 
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.GreatCircle
+import com.tcsappdev.worldwinddraw.core.geometry.PolygonCenter
+import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ImageFit
 import kotlin.math.PI
 import kotlin.math.ceil
@@ -10,6 +12,7 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 /** An [ImageFillRasterizer] result: the picture, and the geographic box ([minLat]..[maxLat], [minLon]..[maxLon]) its edges correspond to. */
 class RasterizedFill(
@@ -51,6 +54,7 @@ object ImageFillRasterizer {
         scale: Float,
         opacity: Float,
         maxDimension: Int,
+        background: ColorRgba? = null,
     ): RasterizedFill? {
         val points = rings.flatten()
         if (points.size < 3) return null
@@ -69,7 +73,18 @@ object ImageFillRasterizer {
         val height = max(2, (maxDimension * latSpan / longest).roundToInt())
 
         val coverage = coverage(rings, minLat, maxLat, minLon, lonSpan, latSpan, width, height)
-        val placement = placement(source, fit, scale, width, height)
+        // For ImageFit.Inscribed: the visual centre of the first ring and the biggest circle around it, in pixels of this grid.
+        val circle = if (fit == ImageFit.Inscribed) {
+            val center = PolygonCenter.visualCenter(rings.first())
+            Circle(
+                x = ((center.position.longitude - minLon) / lonSpan * width).toFloat(),
+                y = ((maxLat - center.position.latitude) / latSpan * height).toFloat(),
+                // The grid is as tall as the shape is in degrees of latitude, and a degree of longitude is as many pixels as a
+                // degree of latitude after the shrinking above, so one scale turns metres into pixels.
+                radius = (center.radiusMeters / PolygonCenter.METERS_PER_DEGREE * height / latSpan).toFloat(),
+            )
+        } else null
+        val placement = placement(source, fit, scale, width, height, circle)
         val out = IntArray(width * height)
         val opacityScale = opacity.coerceIn(0f, 1f)
         for (y in 0 until height) {
@@ -77,22 +92,53 @@ object ImageFillRasterizer {
                 val cover = coverage[y * width + x]
                 if (cover <= 0f) continue
                 val sample = sample(source, placement, x + 0.5f, y + 0.5f)
-                val alpha = (sample ushr 24) * cover * opacityScale
-                if (alpha <= 0f) continue
-                out[y * width + x] = (alpha.roundToInt().coerceIn(0, 255) shl 24) or (sample and 0x00FFFFFF)
+                if (background == null) {
+                    val alpha = (sample ushr 24) * cover * opacityScale
+                    if (alpha <= 0f) continue
+                    out[y * width + x] = (alpha.roundToInt().coerceIn(0, 255) shl 24) or (sample and 0x00FFFFFF)
+                } else {
+                    out[y * width + x] = over(sample, (sample ushr 24) / 255f * cover * opacityScale, background, cover)
+                }
             }
         }
         return RasterizedFill(PixelImage(width, height, out), minLat, minLon, maxLat, maxLon)
+    }
+
+    /**
+     * The picture's colour [sample] at opacity [imageAlpha] laid over the [background] colour (itself covering [cover] of the pixel):
+     * standard "over" blending, so wherever the picture is opaque it wins, where it is missing the background shows, and in between they mix.
+     */
+    private fun over(sample: Int, imageAlpha: Float, background: ColorRgba, cover: Float): Int {
+        val backgroundAlpha = background.alpha / 255f * cover
+        val alpha = imageAlpha + backgroundAlpha * (1 - imageAlpha)
+        if (alpha <= 0f) return 0
+        val backgroundWeight = backgroundAlpha * (1 - imageAlpha)
+        fun channel(image: Int, back: Int) = ((image * imageAlpha + back * backgroundWeight) / alpha).roundToInt().coerceIn(0, 255)
+        val red = channel((sample shr 16) and 0xFF, background.red)
+        val green = channel((sample shr 8) and 0xFF, background.green)
+        val blue = channel(sample and 0xFF, background.blue)
+        return ((alpha * 255).roundToInt().coerceIn(0, 255) shl 24) or (red shl 16) or (green shl 8) or blue
     }
 
     // -- where the picture sits
 
     private class Placement(val left: Float, val top: Float, val width: Float, val height: Float)
 
-    private fun placement(source: PixelImage, fit: ImageFit, scale: Float, destWidth: Int, destHeight: Int): Placement {
+    /** A circle in pixels of the output grid: its centre and radius. */
+    private class Circle(val x: Float, val y: Float, val radius: Float)
+
+    private fun placement(source: PixelImage, fit: ImageFit, scale: Float, destWidth: Int, destHeight: Int, circle: Circle?): Placement {
+        if (fit == ImageFit.Inscribed && circle != null) {
+            // The picture's corners touch the circle: its half diagonal is the radius, so its width is 2r * a / sqrt(a^2 + 1).
+            val aspect = source.width.toFloat() / source.height
+            val fitted = 2 * circle.radius * aspect / sqrt(aspect * aspect + 1)
+            val width = fitted * scale
+            val height = fitted / aspect * scale
+            return Placement(circle.x - width / 2, circle.y - height / 2, width, height)
+        }
         val (w, h) = when (fit) {
             ImageFit.Stretch -> destWidth.toFloat() to destHeight.toFloat()
-            ImageFit.Contain, ImageFit.Cover -> {
+            ImageFit.Contain, ImageFit.Cover, ImageFit.Inscribed -> {
                 val widthRatio = destWidth.toFloat() / source.width
                 val heightRatio = destHeight.toFloat() / source.height
                 val factor = if (fit == ImageFit.Contain) min(widthRatio, heightRatio) else max(widthRatio, heightRatio)

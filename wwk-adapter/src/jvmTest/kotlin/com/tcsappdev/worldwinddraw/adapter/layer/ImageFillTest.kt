@@ -10,6 +10,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 import com.tcsappdev.worldwinddraw.core.state.DrawEvent
 import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
+import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ImageFit
 import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
@@ -50,8 +51,8 @@ class ImageFillTest {
         ),
     )
 
-    private fun fill(key: String, fit: ImageFit = ImageFit.Contain, scale: Float = 1f, opacity: Float = 1f) =
-        ShapeStyle.ImageFill(ImageRef.Bytes(key, png()), fit, scale, opacity)
+    private fun fill(key: String, fit: ImageFit = ImageFit.Contain, scale: Float = 1f, opacity: Float = 1f, background: ColorRgba? = null) =
+        ShapeStyle.ImageFill(ImageRef.Bytes(key, png()), fit, scale, opacity, background)
 
     // -- the renderable
 
@@ -75,6 +76,17 @@ class ImageFillTest {
         // WWK compares an in-memory image by reference: reusing the instance is what keeps its texture cache working.
         assertSame(first.imageSource, again.imageSource)
         assertNotSame(first.imageSource, fainter.imageSource)
+    }
+
+    @Test
+    fun theBackgroundColourIsPartOfWhatMakesAPictureSoChangingItMakesANewOne() {
+        val plain = imageFillSurface(polygon(fill("bg")), fill("bg")) as SurfaceImage
+        val green = fill("bg", background = ColorRgba(0, 255, 0))
+        val withGreen = imageFillSurface(polygon(green), green) as SurfaceImage
+        val greenAgain = imageFillSurface(polygon(green), green) as SurfaceImage
+
+        assertNotSame(plain.imageSource, withGreen.imageSource)
+        assertSame(withGreen.imageSource, greenAgain.imageSource)
     }
 
     @Test
