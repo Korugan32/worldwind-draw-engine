@@ -31,6 +31,11 @@ sealed interface DrawEvent {
      *
      * A marker has no vertices, so grabbing the marker being edited ([hitMarker], with [hitEntityId])
      * is how it is moved.
+     *
+     * When only some of a shape's vertices have a handle (the others are hidden between them),
+     * [hitSpanPrevId]/[hitSpanNextId] name the handled vertices on either side of [hitVertexId]; dragging it then
+     * also moves the hidden vertices in between, in proportion (see
+     * [com.tcsappdev.worldwinddraw.core.geometry.SpanMover]). Both `null` is an ordinary one-vertex drag.
      */
     data class DragStart(
         val position: GeoPosition,
@@ -40,6 +45,8 @@ sealed interface DrawEvent {
         val hitDraftPointIndex: Int? = null,
         val hitDraftEdgeIndex: Int? = null,
         val hitMarker: Boolean = false,
+        val hitSpanPrevId: VertexId? = null,
+        val hitSpanNextId: VertexId? = null,
     ) : DrawEvent
 
     /** The drag continues at [position]. What's being dragged is already known from the [DragStart] that began it. */

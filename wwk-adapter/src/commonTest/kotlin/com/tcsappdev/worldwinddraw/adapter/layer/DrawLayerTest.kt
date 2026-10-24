@@ -177,6 +177,159 @@ class DrawLayerTest {
         assertSame(keptB, layer.shapeOf(b), "the other one is not")
     }
 
+    /** A polygon whose 200 vertices all lie (to within a few metres) on a 40-degree circle: simplifying has plenty to drop. */
+    private fun roundPolygon(id: EntityId, centerLat: Double = 0.0, centerLon: Double = 0.0, radius: Double = 20.0, vertexCount: Int = 200) = DrawnPolygon(
+        id = id,
+        style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0)),
+        vertices = List(vertexCount) { i ->
+            val angle = 2 * kotlin.math.PI * i / vertexCount
+            Vertex(VertexId("${id.id}$i"), GeoPosition(centerLat + radius * kotlin.math.sin(angle), centerLon + radius * kotlin.math.cos(angle)))
+        },
+    )
+
+    private fun around(lat: Double, lon: Double) = GeoBounds(lat - 30, lat + 30, lon - 30, lon + 30)
+
+    private fun DrawLayer.vertexCountOf(id: EntityId) = (shapeOf(id) as Polygon).getBoundary(0).size
+
+    @Test
+    fun aCoarseLevelDrawsAShapeWithFewerVerticesAndNoneDrawsItWhole() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val id = EntityId("R")
+        repository.add(roundPolygon(id))
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        assertEquals(200, layer.vertexCountOf(id))
+
+        layer.applyLod(LodLevel.forTolerance(300_000.0, LodLevel.NONE)) // a camera far away: a pixel is 300 km
+        // (The count is WWK's boundary, which also holds the points on the long edges that are left: about one every 2.8 degrees of this 125 degree outline.)
+        assertTrue(layer.vertexCountOf(id) in 3..100, "simplified, got ${layer.vertexCountOf(id)}")
+
+        layer.applyLod(LodLevel.NONE) // back to close up
+        assertEquals(200, layer.vertexCountOf(id))
+    }
+
+    @Test
+    fun theSameLevelDoesNotBuildAnythingAgain() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val id = EntityId("R")
+        repository.add(roundPolygon(id))
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        layer.applyLod(5)
+        val coarse = layer.shapeOf(id)
+
+        layer.applyLod(5)
+
+        assertSame(coarse, layer.shapeOf(id))
+    }
+
+    @Test
+    fun aShapeThatTheLevelCannotSimplifyIsNotBuiltAgainWhenTheLevelChanges() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val id = EntityId("A")
+        repository.add(triangle(id)) // 3 vertices: always drawn whole
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        val before = layer.shapeOf(id)
+
+        layer.applyLod(8)
+
+        assertSame(before, layer.shapeOf(id))
+    }
+
+    @Test
+    fun theSimplifiedShapeIsKeptWhenAnotherOneIsSelected() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val (r, a) = listOf("R", "A").map(::EntityId)
+        repository.add(roundPolygon(r))
+        repository.add(triangle(a))
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        layer.applyLod(5)
+        val coarse = layer.shapeOf(r)
+
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Select(a)))
+        delay(50)
+
+        assertSame(coarse, layer.shapeOf(r))
+    }
+
+    @Test
+    fun onlyShapesInViewAreBroughtToTheNewLevelAndTheOthersAreLeftAlone() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val (europe, america) = listOf("EU", "AM").map(::EntityId)
+        repository.add(roundPolygon(europe, centerLat = 50.0, centerLon = 10.0, radius = 10.0))
+        repository.add(roundPolygon(america, centerLat = 40.0, centerLon = -100.0, radius = 10.0))
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        val americaBefore = layer.shapeOf(america)
+
+        layer.applyLod(6, view = around(50.0, 10.0)) // the camera is over Europe
+
+        assertTrue(layer.vertexCountOf(europe) < 200, "what is seen is simplified")
+        assertSame(americaBefore, layer.shapeOf(america), "what is not seen is not built again")
+        assertEquals(200, layer.vertexCountOf(america))
+
+        layer.applyLod(6, view = around(40.0, -100.0)) // the camera moves over America
+
+        assertTrue(layer.vertexCountOf(america) < 200, "it is brought to the level once it is seen")
+    }
+
+    @Test
+    fun aLevelChangeThatIsTooBigForOneFrameIsFinishedOnTheNextCall() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val ids = listOf("A", "B", "C").map(::EntityId)
+        ids.forEachIndexed { i, id -> repository.add(roundPolygon(id, centerLat = 0.0, centerLon = i * 40.0 - 40.0, radius = 10.0, vertexCount = 10_000)) }
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(100)
+
+        layer.applyLod(6)
+        assertTrue(layer.hasPendingLod, "30,000 vertices are more than one call builds")
+        val doneAfterFirst = ids.count { layer.vertexCountOf(it) < 10_000 }
+        assertTrue(doneAfterFirst in 1..2, "some, not all: $doneAfterFirst")
+
+        layer.applyLod(6)
+        assertFalse(layer.hasPendingLod)
+        assertTrue(ids.all { layer.vertexCountOf(it) < 10_000 })
+    }
+
+    @Test
+    fun aLayerThatBuildsOnTheFirstFrameBuildsNothingBeforeItAndThenBuildsAtTheLevelOfThatFrame() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val id = EntityId("R")
+        repository.add(roundPolygon(id))
+        val layer = DrawLayer(repository, stateMachine, backgroundScope, buildOnFirstFrame = true)
+        delay(50)
+        assertEquals(0, layer.count, "before the first frame the camera is not known: nothing is built")
+
+        layer.onFrame(level = 15, handleLevel = LodLevel.NONE, view = null) // 330 km: a round shape of 70 km steps is coarsened
+
+        assertEquals(1, layer.count)
+        assertTrue(layer.vertexCountOf(id) < 200, "built straight away at the frame's level, not whole first")
+    }
+
+    @Test
+    fun aShapeAddedAfterALevelWasChosenIsBuiltAtThatLevelAtOnce() = runTest {
+        val repository = EntityRepository()
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        val layer = DrawLayer(repository, stateMachine, backgroundScope)
+        delay(50)
+        layer.applyLod(15)
+
+        val id = EntityId("NEW")
+        repository.add(roundPolygon(id))
+        delay(50)
+
+        assertTrue(layer.vertexCountOf(id) < 200)
+    }
+
     private fun triangle(id: EntityId) = DrawnPolygon(
         id = id,
         style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0)),

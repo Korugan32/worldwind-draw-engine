@@ -87,7 +87,7 @@ fun WorldWindowMap(
                 engine.layers.apply {
                     addLayer(BackgroundLayer())
                     addLayer(BlueMarbleLayer())
-                    val layer = DrawLayer(entityRepository, stateMachine, scope, onContentChanged = ::requestRedraw, handleStyle = handleStyle, highlightStyle = highlightStyle)
+                    val layer = DrawLayer(entityRepository, stateMachine, scope, onContentChanged = ::requestRedraw, handleStyle = handleStyle, highlightStyle = highlightStyle, buildOnFirstFrame = true)
                     animationController.register(layer)
                     addLayer(layer)
                     drawLayer = layer

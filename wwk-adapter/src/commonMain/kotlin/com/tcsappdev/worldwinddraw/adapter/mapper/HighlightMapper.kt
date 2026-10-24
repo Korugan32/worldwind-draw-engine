@@ -24,9 +24,10 @@ internal fun DrawnPolygon.toWwkHighlight(color: ColorRgba): Polygon {
     val attributes = ShapeStyle.SolidColor(color).toWwkLineAttributes(outlineWidth + HIGHLIGHT_EXTRA_WIDTH).apply {
         isDrawInterior = false
     }
-    return Polygon(vertices.map { it.position.toWwkPosition() }, attributes).apply {
+    return Polygon(densifiedWwkPositions(vertices.map { it.position }, isClosed = true), attributes).apply {
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND
         isFollowTerrain = true
+        disableEdgeSubdivision(this)
         isPickEnabled = false
     }
 }
@@ -39,11 +40,12 @@ internal fun DrawnPolygon.toWwkHighlight(color: ColorRgba): Polygon {
  */
 internal fun DrawnPolyline.toWwkHighlight(color: ColorRgba): Path {
     return Path(
-        vertices.map { it.position.toWwkPosition() },
+        densifiedWwkPositions(vertices.map { it.position }, isClosed = false),
         ShapeStyle.SolidColor(color).toWwkLineAttributes(lineWidth + HIGHLIGHT_EXTRA_WIDTH * 1.5f),
     ).apply {
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND
         isFollowTerrain = true
+        disableEdgeSubdivision(this)
         isPickEnabled = false
     }
 }

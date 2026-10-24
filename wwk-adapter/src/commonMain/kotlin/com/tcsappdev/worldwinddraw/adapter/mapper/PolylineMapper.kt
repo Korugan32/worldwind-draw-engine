@@ -12,7 +12,8 @@ import earth.worldwind.shape.Path
  * higher ground even though it "exists".
  */
 fun DrawnPolyline.toWwkPolyline(): Path =
-    Path(vertices.map { it.position.toWwkPosition() }, style.toWwkLineAttributes(lineWidth)).apply {
+    Path(densifiedWwkPositions(vertices.map { it.position }, isClosed = false), style.toWwkLineAttributes(lineWidth)).apply {
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND
         isFollowTerrain = true
+        disableEdgeSubdivision(this)
     }
