@@ -149,7 +149,7 @@ class DrawEngineReducerTest {
         val event = DrawEvent.DragStart(origin, VertexId("v1"), EntityId("A"))
         val result = reduce(startState, event)
         val expectedDrag = DrawMode.Edit.ActiveDrag.ExistingVertex(VertexId("v1"), origin)
-        assertEquals(DrawMode.Edit(EntityId("A"), expectedDrag), result.state.mode)
+        assertEquals(DrawMode.Edit(EntityId("A"), expectedDrag, selectedVertexId = VertexId("v1")), result.state.mode, "and the grabbed vertex is the selected one")
     }
 
     @Test
@@ -647,5 +647,105 @@ class DrawEngineReducerTest {
     fun aResizeNeedsAPositiveSize() {
         assertFailsWith<IllegalArgumentException> { DrawEvent.ResizeMarker(0f) }
         assertFailsWith<IllegalArgumentException> { DrawEvent.ResizeMarker(-1f) }
+    }
+
+    // -- selecting and deleting a vertex
+
+    private val shapeId = EntityId("S")
+
+    private fun fiveVertexState(): Pair<EntityRepository, DrawEngineState> {
+        val repository = EntityRepository()
+        repository.add(polygonAt(shapeId, *Array(5) { VertexId("s$it") to GeoPosition(it.toDouble(), it * 2.0) }))
+        return repository to DrawEngineState(mode = DrawMode.Edit(shapeId))
+    }
+
+    @Test
+    fun tappingAVertexHandleOfTheEditedShapeSelectsItAndTappingItAgainOrTheBodyClearsIt() {
+        val (repository, state) = fiveVertexState()
+        val tapped = reduce(state, DrawEvent.Click(GeoPosition(1.0, 2.0), shapeId, hitVertexId = VertexId("s1")), repository).state
+        assertEquals(VertexId("s1"), (tapped.mode as DrawMode.Edit).selectedVertexId)
+
+        val other = reduce(tapped, DrawEvent.Click(GeoPosition(2.0, 4.0), shapeId, hitVertexId = VertexId("s2")), repository).state
+        assertEquals(VertexId("s2"), (other.mode as DrawMode.Edit).selectedVertexId, "tapping another vertex moves the selection")
+
+        val again = reduce(other, DrawEvent.Click(GeoPosition(2.0, 4.0), shapeId, hitVertexId = VertexId("s2")), repository).state
+        assertEquals(null, (again.mode as DrawMode.Edit).selectedVertexId, "tapping the selected vertex again clears it")
+
+        val body = reduce(other, DrawEvent.Click(GeoPosition(0.0, 0.0), shapeId), repository).state
+        assertEquals(null, (body.mode as DrawMode.Edit).selectedVertexId, "tapping the body clears it")
+        assertEquals(shapeId, (body.mode as DrawMode.Edit).entityId, "and stays in edit mode")
+    }
+
+    @Test
+    fun grabbingAVertexAlsoSelectsIt() {
+        val (repository, state) = fiveVertexState()
+        val grabbed = reduce(state, DrawEvent.DragStart(GeoPosition(3.0, 6.0), VertexId("s3"), shapeId), repository).state
+        assertEquals(VertexId("s3"), (grabbed.mode as DrawMode.Edit).selectedVertexId)
+    }
+
+    @Test
+    fun deletingTheSelectedVertexRemovesItAsOneCommandAndClearsTheSelection() {
+        val (repository, state) = fiveVertexState()
+        val selected = state.copy(mode = DrawMode.Edit(shapeId, selectedVertexId = VertexId("s2")))
+
+        val result = reduce(selected, DrawEvent.DeleteSelectedVertex, repository)
+
+        assertEquals(1, result.commands.size)
+        assertEquals(null, (result.state.mode as DrawMode.Edit).selectedVertexId)
+        result.commands.single().execute()
+        assertEquals(listOf("s0", "s1", "s3", "s4"), (repository.entities.value.single() as DrawnPolygon).vertices.map { it.id.id })
+    }
+
+    @Test
+    fun deletingIsIgnoredWithNothingSelectedOutsideEditOrMidDragAndWhenTheShapeWouldGetTooSmall() {
+        val (repository, state) = fiveVertexState()
+        assertTrue(reduce(state, DrawEvent.DeleteSelectedVertex, repository).commands.isEmpty(), "nothing selected")
+
+        val idle = state.copy(mode = DrawMode.Idle)
+        assertTrue(reduce(idle, DrawEvent.DeleteSelectedVertex, repository).commands.isEmpty(), "not editing")
+
+        val dragging = state.copy(
+            mode = DrawMode.Edit(shapeId, DrawMode.Edit.ActiveDrag.ExistingVertex(VertexId("s1"), GeoPosition(1.0, 2.0)), VertexId("s1")),
+        )
+        assertTrue(reduce(dragging, DrawEvent.DeleteSelectedVertex, repository).commands.isEmpty(), "while a vertex is being dragged")
+
+        val triangle = EntityRepository()
+        triangle.add(polygonAt(EntityId("T"), VertexId("a") to GeoPosition(0.0, 0.0), VertexId("b") to GeoPosition(0.0, 1.0), VertexId("c") to GeoPosition(1.0, 1.0)))
+        val inTriangle = DrawEngineState(mode = DrawMode.Edit(EntityId("T"), selectedVertexId = VertexId("a")))
+        val refused = reduce(inTriangle, DrawEvent.DeleteSelectedVertex, triangle)
+        assertTrue(refused.commands.isEmpty(), "a polygon needs 3 vertices")
+        assertEquals(VertexId("a"), (refused.state.mode as DrawMode.Edit).selectedVertexId, "and the vertex stays selected")
+    }
+
+    // -- simplifying a shape
+
+    @Test
+    fun simplifyingTheSelectedShapeProducesOneCommandAndClearsTheSelectedVertex() {
+        val repository = EntityRepository()
+        repository.add(polygonAt(shapeId, *Array(40) { VertexId("s$it") to GeoPosition(it * 0.1, kotlin.math.sin(it * 0.3)) }))
+        val editing = DrawEngineState(mode = DrawMode.Edit(shapeId, selectedVertexId = VertexId("s5")))
+
+        val result = reduce(editing, DrawEvent.SimplifyShape(0.5f), repository)
+
+        assertEquals(1, result.commands.size)
+        assertEquals(null, (result.state.mode as DrawMode.Edit).selectedVertexId)
+        result.commands.single().execute()
+        assertEquals(20, (repository.entities.value.single() as DrawnPolygon).vertices.size)
+
+        val selecting = reduce(DrawEngineState(mode = DrawMode.Select(shapeId)), DrawEvent.SimplifyShape(0.5f), EntityRepository().apply {
+            add(polygonAt(shapeId, *Array(40) { VertexId("s$it") to GeoPosition(it * 0.1, kotlin.math.sin(it * 0.3)) }))
+        })
+        assertEquals(1, selecting.commands.size, "a selected (not yet edited) shape can be simplified too")
+    }
+
+    @Test
+    fun simplifyingIsIgnoredWhenItWouldRemoveNothingOrThereIsNoShapeToDoItTo() {
+        val repository = EntityRepository()
+        repository.add(polygonAt(shapeId, *Array(3) { VertexId("s$it") to GeoPosition(it.toDouble(), it * 2.0) }))
+        val editing = DrawEngineState(mode = DrawMode.Edit(shapeId))
+        assertTrue(reduce(editing, DrawEvent.SimplifyShape(0.5f), repository).commands.isEmpty(), "a triangle can't lose a vertex")
+        assertTrue(reduce(editing, DrawEvent.SimplifyShape(1f), repository).commands.isEmpty(), "keeping everything changes nothing")
+        assertTrue(reduce(DrawEngineState(mode = DrawMode.Idle), DrawEvent.SimplifyShape(0.5f), repository).commands.isEmpty(), "nothing selected")
+        assertFailsWith<IllegalArgumentException> { DrawEvent.SimplifyShape(0f) }
     }
 }

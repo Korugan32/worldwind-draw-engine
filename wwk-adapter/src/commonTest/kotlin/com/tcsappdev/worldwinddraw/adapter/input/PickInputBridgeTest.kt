@@ -171,6 +171,41 @@ class PickInputBridgeTest {
     }
 
     @Test
+    fun tappingAVertexHandleSelectsThatVertexButTappingAStretchMiddlePlusDoesNot() {
+        val entityId = EntityId("A")
+        val repository = EntityRepository().apply {
+            add(
+                DrawnPolygon(
+                    id = entityId,
+                    style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0)),
+                    vertices = (0 until 4).map { Vertex(VertexId("v$it"), GeoPosition(it.toDouble(), 0.0)) },
+                )
+            )
+        }
+        val stateMachine = DrawStateMachine(HistoryManager(), repository)
+        stateMachine.onEvent(DrawEvent.Click(GeoPosition(0.0, 0.0), entityId))
+        stateMachine.onEvent(DrawEvent.Click(GeoPosition(0.0, 0.0), entityId))
+        val bridge = PickInputBridge(stateMachine)
+        fun selected() = (stateMachine.state.value.mode as DrawMode.Edit).selectedVertexId
+
+        val vertexHandle = Polygon().apply {
+            putUserProperty(DrawLayer.ENTITY_ID_KEY, entityId)
+            putUserProperty(DrawLayer.VERTEX_ID_KEY, VertexId("v2"))
+        }
+        bridge.onObjectPicked(vertexHandle, Position.fromDegrees(2.0, 0.0, 0.0))
+        assertEquals(VertexId("v2"), selected())
+
+        // The "+" on the middle of a stretch carries a vertex id too, but it is not a handle on that vertex.
+        val plus = Polygon().apply {
+            putUserProperty(DrawLayer.ENTITY_ID_KEY, entityId)
+            putUserProperty(DrawLayer.VERTEX_ID_KEY, VertexId("v1"))
+            putUserProperty(DrawLayer.STRETCH_MIDDLE_KEY, true)
+        }
+        bridge.onObjectPicked(plus, Position.fromDegrees(1.0, 0.0, 0.0))
+        assertEquals(null, selected(), "tapping it clears the selection like any tap on the shape that is not a vertex")
+    }
+
+    @Test
     fun draggingAMidpointHandleInsertsExactlyOneVertexAtTheFinalPositionOnRelease() {
         val entityId = EntityId("A")
         val repository = EntityRepository().apply {

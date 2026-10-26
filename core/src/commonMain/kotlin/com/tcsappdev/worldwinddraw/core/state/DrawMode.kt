@@ -101,6 +101,8 @@ sealed interface DrawMode {
     data class Edit(
         val entityId: EntityId,
         val activeDrag: ActiveDrag? = null,
+        /** The vertex last tapped or grabbed, which [DrawEvent.DeleteSelectedVertex] removes; `null` when none is. */
+        val selectedVertexId: VertexId? = null,
     ) : DrawMode {
         /**
          * What an in-progress drag inside [Edit] is doing. Modeled as two distinct cases

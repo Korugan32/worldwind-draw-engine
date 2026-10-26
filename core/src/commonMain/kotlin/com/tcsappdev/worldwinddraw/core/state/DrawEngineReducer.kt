@@ -13,9 +13,12 @@ import com.tcsappdev.worldwinddraw.core.history.commands.DeleteEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveMarkerCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexWithSpanCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.RemoveVertexCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.SimplifyShapeCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.VertexSpan
 import com.tcsappdev.worldwinddraw.core.history.commands.ResizeMarkerCommand
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
+import kotlin.math.roundToInt
 
 /**
  * The result of running the reducer: the new [state], plus what needs to happen as a
@@ -65,6 +68,8 @@ object DrawEngineReducer {
         is DrawEvent.DragEnd -> reduceDragEnd(state, event, repository)
         is DrawEvent.FinishDrawing -> reduceFinishDrawing(state, event, repository)
         is DrawEvent.DeleteSelected -> reduceDeleteSelected(state, repository)
+        is DrawEvent.DeleteSelectedVertex -> reduceDeleteSelectedVertex(state, repository)
+        is DrawEvent.SimplifyShape -> reduceSimplifyShape(state, event, repository)
         is DrawEvent.ResizeMarker -> reduceResizeMarker(state, event, repository)
     }
 
@@ -84,11 +89,14 @@ object DrawEngineReducer {
                 else -> DrawMode.Select(event.hitEntityId)
             }
 
-            // Clicking the entity already being edited (its body, or a vertex/midpoint
-            // handle) is a no-op — inserting a vertex is done by dragging a midpoint
-            // handle (see reduceDragStart/reduceDragEnd), not by tapping.
+            // Inserting a vertex is done by dragging a midpoint handle (see
+            // reduceDragStart/reduceDragEnd), not by tapping. Tapping a vertex handle of the entity
+            // being edited selects that vertex (tapping the selected one again, or the body, clears it).
             currentMode is DrawMode.Edit && event.hitEntityId == null -> DrawMode.Idle
             currentMode is DrawMode.Edit && event.hitEntityId != currentMode.entityId -> DrawMode.Select(event.hitEntityId!!)
+            currentMode is DrawMode.Edit -> currentMode.copy(
+                selectedVertexId = event.hitVertexId?.takeIf { it != currentMode.selectedVertexId },
+            )
 
             else -> currentMode
         }
@@ -117,7 +125,9 @@ object DrawEngineReducer {
             event.hitEdgeIndex != null -> DrawMode.Edit.ActiveDrag.NewVertex(event.hitEdgeIndex, event.position)
             else -> return ReduceResult(state)
         }
-        return ReduceResult(state.copy(mode = mode.copy(activeDrag = drag)))
+        // Grabbing a vertex also selects it.
+        val selected = (drag as? DrawMode.Edit.ActiveDrag.ExistingVertex)?.vertexId ?: mode.selectedVertexId
+        return ReduceResult(state.copy(mode = mode.copy(activeDrag = drag, selectedVertexId = selected)))
     }
 
     private fun reduceDragMove(state: DrawEngineState, event: DrawEvent.DragMove, repository: EntityRepository): ReduceResult {
@@ -177,6 +187,44 @@ object DrawEngineReducer {
             else -> return ReduceResult(state)
         }
         return ReduceResult(state, commands = listOf(ResizeMarkerCommand(repository, entityId, event.size)))
+    }
+
+    /**
+     * Removes the selected vertex as one undoable command. It first looks at the shape in [repository] (read only) to refuse a
+     * removal that would leave too few vertices: the command itself would otherwise throw on execute.
+     */
+    private fun reduceDeleteSelectedVertex(state: DrawEngineState, repository: EntityRepository): ReduceResult {
+        val mode = state.mode as? DrawMode.Edit ?: return ReduceResult(state)
+        val vertexId = mode.selectedVertexId ?: return ReduceResult(state)
+        if (mode.activeDrag != null) return ReduceResult(state)
+        val (vertices, minimum) = when (val entity = repository.entities.value.firstOrNull { it.id == mode.entityId }) {
+            is DrawnPolygon -> entity.vertices to 3
+            is DrawnPolyline -> entity.vertices to 2
+            else -> return ReduceResult(state)
+        }
+        if (vertices.size <= minimum || vertices.none { it.id == vertexId }) return ReduceResult(state)
+        return ReduceResult(
+            state.copy(mode = mode.copy(selectedVertexId = null)),
+            commands = listOf(RemoveVertexCommand(repository, mode.entityId, vertexId)),
+        )
+    }
+
+    /** Simplifies the selected or edited polygon/polyline; looks at the shape (read only) so a request that would remove nothing leaves no step in the history. */
+    private fun reduceSimplifyShape(state: DrawEngineState, event: DrawEvent.SimplifyShape, repository: EntityRepository): ReduceResult {
+        val entityId = when (val mode = state.mode) {
+            is DrawMode.Select -> mode.entityId
+            is DrawMode.Edit -> if (mode.activeDrag == null) mode.entityId else return ReduceResult(state)
+            else -> return ReduceResult(state)
+        }
+        val (count, minimum) = when (val entity = repository.entities.value.firstOrNull { it.id == entityId }) {
+            is DrawnPolygon -> entity.vertices.size to 3
+            is DrawnPolyline -> entity.vertices.size to 2
+            else -> return ReduceResult(state)
+        }
+        if (maxOf(minimum, (count * event.keepFraction).roundToInt()) >= count) return ReduceResult(state)
+        // Vertices come and go, so the selected vertex of an edit may be gone afterwards.
+        val newState = (state.mode as? DrawMode.Edit)?.let { state.copy(mode = it.copy(selectedVertexId = null)) } ?: state
+        return ReduceResult(newState, commands = listOf(SimplifyShapeCommand(repository, entityId, event.keepFraction)))
     }
 
     private fun reduceDeleteSelected(state: DrawEngineState, repository: EntityRepository): ReduceResult {

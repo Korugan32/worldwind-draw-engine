@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Slider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,12 +40,14 @@ import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import com.tcsappdev.worldwinddraw.core.state.DrawableEntityType
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
+import com.tcsappdev.worldwinddraw.core.style.HandleDetail
 import com.tcsappdev.worldwinddraw.core.style.HandleStyle
 import com.tcsappdev.worldwinddraw.core.style.ImageFit
 import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import earth.worldwind.WorldWindow
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 private class Palette(val label: String, val highlight: HighlightStyle, val ring: ColorRgba, val plus: ColorRgba)
@@ -91,6 +95,8 @@ class MainActivity : ComponentActivity() {
             // DrawLayer.handleStyle can be changed live: this cycles it through three presets.
             var handleSizeIndex by remember { mutableStateOf(1) }
             var paletteIndex by remember { mutableStateOf(0) }
+            // Handles on every point, or only the ones that matter at this zoom (see HandleDetail).
+            var allPoints by remember { mutableStateOf(false) }
             val palette = PALETTES[paletteIndex]
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -99,7 +105,11 @@ class MainActivity : ComponentActivity() {
                             entityRepository = entityRepository,
                             stateMachine = stateMachine,
                             initialCameraPosition = GeoPosition(latitude = 39.0, longitude = 35.5, altitude = 3_000_000.0),
-                            handleStyle = HANDLE_SIZES[handleSizeIndex].second.copy(ringColor = palette.ring, plusColor = palette.plus),
+                            handleStyle = HANDLE_SIZES[handleSizeIndex].second.copy(
+                                ringColor = palette.ring,
+                                plusColor = palette.plus,
+                                detail = if (allPoints) HandleDetail.All else HandleDetail.Adaptive,
+                            ),
                             highlightStyle = palette.highlight,
                             onWorldWindow = { worldWindow = it },
                         )
@@ -116,6 +126,8 @@ class MainActivity : ComponentActivity() {
                             onCycleHandleSize = { handleSizeIndex = (handleSizeIndex + 1) % HANDLE_SIZES.size },
                             paletteLabel = palette.label,
                             onCyclePalette = { paletteIndex = (paletteIndex + 1) % PALETTES.size },
+                            allPoints = allPoints,
+                            onToggleAllPoints = { allPoints = !allPoints },
                             onEvictTextures = { worldWindow?.let { android.util.Log.i("Demo", "evicted ${it.engine.renderResourceCache.trimToAge(Long.MAX_VALUE)} bytes of textures"); it.requestRedraw() } },
                             modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(16.dp),
                         )
@@ -135,6 +147,8 @@ private fun DrawModeOverlay(
     onCycleHandleSize: () -> Unit,
     paletteLabel: String,
     onCyclePalette: () -> Unit,
+    allPoints: Boolean,
+    onToggleAllPoints: () -> Unit,
     onEvictTextures: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -177,6 +191,15 @@ private fun DrawModeOverlay(
             ) {
                 Text("Delete")
             }
+            // Deletes the vertex tapped or grabbed while editing (its handle turns orange); Undo brings it back in place.
+            val canDeletePoint = (state.mode as? DrawMode.Edit)?.selectedVertexId != null
+            Button(
+                onClick = { stateMachine.onEvent(DrawEvent.DeleteSelectedVertex) },
+                enabled = canDeletePoint,
+                modifier = Modifier.padding(start = 4.dp),
+            ) {
+                Text("Delete point")
+            }
         }
         Row(modifier = Modifier.padding(top = 4.dp)) {
             Button(onClick = { historyManager.undo() }, enabled = canUndo) {
@@ -191,6 +214,9 @@ private fun DrawModeOverlay(
         }
         Button(onClick = onCyclePalette, modifier = Modifier.padding(top = 4.dp)) {
             Text("Colors: $paletteLabel")
+        }
+        Button(onClick = onToggleAllPoints, modifier = Modifier.padding(top = 4.dp)) {
+            Text(if (allPoints) "Points: All" else "Points: Auto")
         }
         // Resizes the selected/edited marker (undoable while editing); drag it in edit mode to move it.
         val entities by entityRepository.entities.collectAsState()
@@ -207,10 +233,30 @@ private fun DrawModeOverlay(
                 modifier = Modifier.padding(start = 4.dp),
             ) { Text("Size +") }
         }
+        // Cuts the selected/edited polygon or polyline down to a fraction of its points (one undo step); only offered when there is something to cut.
+        val selectedShape = entities.firstOrNull { it.id == selectedId }
+        val shapeVertexCount = when (selectedShape) {
+            is DrawnPolygon -> selectedShape.vertices.size
+            is DrawnPolyline -> selectedShape.vertices.size
+            else -> null
+        }
+        if (shapeVertexCount != null && shapeVertexCount > 6) {
+            var keepFraction by remember { mutableStateOf(0.5f) }
+            val minimum = if (selectedShape is DrawnPolygon) 3 else 2
+            val target = maxOf(minimum, (shapeVertexCount * keepFraction).roundToInt())
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                Slider(value = keepFraction, onValueChange = { keepFraction = it }, valueRange = 0.05f..1f, modifier = Modifier.width(140.dp))
+                Button(
+                    onClick = { stateMachine.onEvent(DrawEvent.SimplifyShape(keepFraction)) },
+                    enabled = target < shapeVertexCount,
+                    modifier = Modifier.padding(start = 4.dp),
+                ) { Text("$shapeVertexCount → $target") }
+            }
+        }
         // Debug aid: evicts every texture from WWK's cache the way it does for stale ones or under memory pressure (they are released on the next frame), so every picture is made again.
         Button(onClick = onEvictTextures, modifier = Modifier.padding(top = 4.dp)) { Text("Evict textures") }
         Text(
-            text = describeMode(state.mode),
+            text = describeMode(state.mode) + pointCount(state.mode, entities),
             color = Color.White,
             modifier = Modifier
                 .padding(top = 8.dp)
@@ -218,6 +264,17 @@ private fun DrawModeOverlay(
                 .padding(8.dp),
         )
     }
+}
+
+// How many points the shape being edited has, so it is clear when the handles are only some of them.
+private fun pointCount(mode: DrawMode, entities: List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>): String {
+    val id = (mode as? DrawMode.Edit)?.entityId ?: return ""
+    val count = when (val entity = entities.firstOrNull { it.id == id }) {
+        is DrawnPolygon -> entity.vertices.size
+        is DrawnPolyline -> entity.vertices.size
+        else -> return ""
+    }
+    return " [$count points]"
 }
 
 private fun describeMode(mode: DrawMode): String = when (mode) {

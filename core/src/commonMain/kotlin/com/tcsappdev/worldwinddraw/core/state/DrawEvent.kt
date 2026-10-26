@@ -15,7 +15,7 @@ sealed interface DrawEvent {
      * determined was under that point, or `null` for empty space — hit-testing happens
      * in the adapter, not recomputed here.
      */
-    data class Click(val position: GeoPosition, val hitEntityId: EntityId?) : DrawEvent
+    data class Click(val position: GeoPosition, val hitEntityId: EntityId?, val hitVertexId: VertexId? = null) : DrawEvent
 
     /**
      * A drag gesture begins at [position]. [hitEntityId] identifies which shape (if any)
@@ -99,4 +99,23 @@ sealed interface DrawEvent {
      * undo step: undo brings the shape back (see `DrawStateMachine`).
      */
     object DeleteSelected : DrawEvent
+
+    /**
+     * Removes the vertex selected while editing (the one last tapped or grabbed, [DrawMode.Edit.selectedVertexId]) as one
+     * undo step. Ignored when nothing is selected, or when removing it would leave the shape with too few vertices (a
+     * polygon needs 3, a polyline 2): the shape stays as it is and the vertex stays selected.
+     */
+    object DeleteSelectedVertex : DrawEvent
+
+    /**
+     * Cuts the selected (or edited) polygon or polyline down to about [keepFraction] of its vertices, as one undo step: the least
+     * important points go first (see `Visvalingam`), the kept ones are original vertices, and a polygon keeps at least 3 and a
+     * polyline 2. Ignored if no such shape is selected or nothing would be removed. Heavy reductions of a detailed shape can make
+     * its outline cross itself, so a host should not offer to go all the way down.
+     */
+    data class SimplifyShape(val keepFraction: Float) : DrawEvent {
+        init {
+            require(keepFraction > 0f && keepFraction <= 1f) { "keepFraction must be in (0, 1], was $keepFraction" }
+        }
+    }
 }

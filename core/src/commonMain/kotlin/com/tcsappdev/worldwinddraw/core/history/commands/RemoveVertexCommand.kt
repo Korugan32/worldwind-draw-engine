@@ -14,14 +14,39 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * `VertexEditController` in a later phase) are expected to prevent that case in the UI
  * — e.g. disable the remove action — rather than this command swallowing the error.
  */
-class RemoveVertexCommand(
+class RemoveVertexCommand private constructor(
     private val repository: EntityRepository,
     private val entityId: EntityId,
-    private val removedVertex: Vertex,
-    private val removedAtIndex: Int,
+    private val vertexId: VertexId,
+    private var removedVertex: Vertex?,
+    private var removedAtIndex: Int,
 ) : Command {
+    constructor(repository: EntityRepository, entityId: EntityId, removedVertex: Vertex, removedAtIndex: Int) :
+        this(repository, entityId, removedVertex.id, removedVertex, removedAtIndex)
+
+    /**
+     * Removes the vertex with this [vertexId]: the vertex and its position in the list are looked up and remembered when
+     * [execute] runs (so the pure reducer can build one without reading the repository), and undo puts it back exactly
+     * there. If the entity or the vertex isn't there at that moment, executing and undoing do nothing.
+     */
+    constructor(repository: EntityRepository, entityId: EntityId, vertexId: VertexId) :
+        this(repository, entityId, vertexId, null, -1)
+
     override fun execute() {
-        val entity = repository.entities.value.first { it.id == entityId }
+        val entity = repository.entities.value.firstOrNull { it.id == entityId } ?: return
+        if (removedVertex == null) {
+            // Built from an id: find the real vertex and where it sits.
+            val vertices = when (entity) {
+                is DrawnPolygon -> entity.vertices
+                is DrawnPolyline -> entity.vertices
+                is DrawnMarker -> return
+            }
+            val index = vertices.indexOfFirst { it.id == vertexId }
+            if (index < 0) return
+            removedVertex = vertices[index]
+            removedAtIndex = index
+        }
+        val removedVertex = removedVertex ?: return
         val updatedEntity = when (entity) {
             is DrawnPolygon -> entity.copy(vertices = entity.vertices.filter { it.id != removedVertex.id })
             is DrawnPolyline -> entity.copy(vertices = entity.vertices.filter { it.id != removedVertex.id })
@@ -31,7 +56,8 @@ class RemoveVertexCommand(
     }
 
     override fun undo() {
-        val entity = repository.entities.value.first { it.id == entityId }
+        val removedVertex = removedVertex ?: return // execute never found the vertex: nothing was removed
+        val entity = repository.entities.value.firstOrNull { it.id == entityId } ?: return
         val updatedEntity = when (entity) {
             is DrawnPolygon -> {
                 val newList = entity.vertices.toMutableList().apply { add(removedAtIndex, removedVertex) }
