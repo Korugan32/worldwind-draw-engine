@@ -22,6 +22,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 import com.tcsappdev.worldwinddraw.core.state.DrawEngineState
 import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
+import com.tcsappdev.worldwinddraw.core.style.HandleDetail
 import com.tcsappdev.worldwinddraw.core.style.HandleStyle
 import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
@@ -253,7 +254,7 @@ class DrawLayer(
             if (vertices != null) {
                 // Which vertices have a handle: all of them, or — for a shape with many points seen from far away — only
                 // those that matter at the current handle level, so the user edits a coarse outline with a few handles.
-                val anchors = handleAnchors(editMode.entityId, vertices, isClosed)
+                val anchors = handleAnchors(editMode.entityId, vertices, isClosed, handleStyle.detail)
                 val n = vertices.size
                 anchors.forEachIndexed { k, index ->
                     val vertex = vertices[index]
@@ -262,8 +263,10 @@ class DrawLayer(
                     val nextIndex = if (anchors.size < 2) null else if (k < anchors.size - 1) anchors[k + 1] else if (isClosed) anchors.first() else null
                     val prevId = prevIndex?.takeIf { hiddenBetween(it, index, n) > 0 }?.let { vertices[it].id }
                     val nextId = nextIndex?.takeIf { hiddenBetween(index, it, n) > 0 }?.let { vertices[it].id }
-                    drawn += vertexHandles.get(editMode.entityId to vertex.id, Triple(vertex.position, handleStyle, Pair(prevId, nextId))) {
-                        vertexHandleRenderables(vertex.position, handleStyle) {
+                    val selected = editMode.selectedVertexId == vertex.id
+                    val style = if (selected) handleStyle.copy(fillColor = handleStyle.selectedFillColor) else handleStyle
+                    drawn += vertexHandles.get(editMode.entityId to vertex.id, Triple(vertex.position, style, Pair(prevId, nextId))) {
+                        vertexHandleRenderables(vertex.position, style) {
                             putUserProperty(ENTITY_ID_KEY, editMode.entityId)
                             putUserProperty(VERTEX_ID_KEY, vertex.id)
                             if (prevId != null) putUserProperty(SPAN_PREV_KEY, prevId)
@@ -325,8 +328,8 @@ class DrawLayer(
      * that matter at the current [handleLevel] (see [PathSimplifier]). The same list is returned while the vertices and
      * the level are the same.
      */
-    private fun handleAnchors(id: EntityId, vertices: List<Vertex>, isClosed: Boolean): List<Int> {
-        if (handleLevel == LodLevel.NONE || vertices.size <= HANDLE_MIN_VERTICES) return vertices.indices.toList()
+    private fun handleAnchors(id: EntityId, vertices: List<Vertex>, isClosed: Boolean, detail: HandleDetail): List<Int> {
+        if (detail == HandleDetail.All || handleLevel == LodLevel.NONE || vertices.size <= HANDLE_MIN_VERTICES) return vertices.indices.toList()
         return handleAnchorIndices.get(id, Pair(vertices, handleLevel)) {
             val tolerance = LodLevel.toleranceMeters(handleLevel)
             val positions = vertices.map { it.position }

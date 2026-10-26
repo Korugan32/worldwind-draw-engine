@@ -71,7 +71,10 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
         // A tap on a draft's own handle must not add a point under it: dragging is how a handle is
         // used, and a tap landing exactly on an existing point would otherwise just duplicate it.
         if (isDraftHandle(userObject)) return
-        stateMachine.onEvent(DrawEvent.Click(position.toGeoPosition(), entityIdOf(userObject)))
+        // A vertex handle names its vertex, which is how a tap selects it. The "+" on a stretch's middle vertex also carries a vertex id
+        // (dragging it moves that vertex) but is not a handle ON a vertex, so tapping it selects nothing.
+        val vertex = if ((userObject as? Renderable)?.hasUserProperty(DrawLayer.STRETCH_MIDDLE_KEY) == true) null else vertexIdOf(userObject)
+        stateMachine.onEvent(DrawEvent.Click(position.toGeoPosition(), entityIdOf(userObject), hitVertexId = vertex))
     }
 
     override fun onTerrainPicked(position: Position) {

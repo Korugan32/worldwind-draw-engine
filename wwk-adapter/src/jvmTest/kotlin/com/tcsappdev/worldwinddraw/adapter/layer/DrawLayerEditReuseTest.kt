@@ -11,6 +11,8 @@ import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.state.DrawEvent
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
+import com.tcsappdev.worldwinddraw.core.style.HandleDetail
+import com.tcsappdev.worldwinddraw.core.style.HandleStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import earth.worldwind.render.Renderable
 import earth.worldwind.shape.Placemark
@@ -210,5 +212,41 @@ class DrawLayerEditReuseTest {
         layer.applyHandleLevel(LodLevel.NONE) // the camera moved far enough to change it...
 
         assertEquals(handled, layer.vertexHandles().size, "...but the handles stay as they are until the drag ends")
+    }
+
+    @Test
+    fun theSelectedVertexHasItsHandleInTheSelectedColourAndOthersDoNot() = runTest {
+        val (layer, stateMachine, _) = setup(backgroundScope)
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Edit(a, selectedVertexId = VertexId("${a.id}2"))))
+        delay(50)
+
+        // Without a handle image (the JVM has none) the dot is a plain square in the handle's fill colour.
+        fun fill(vertexId: String): Triple<Float, Float, Float> {
+            val target = layer.vertexHandles().single { it.getUserProperty<VertexId>(DrawLayer.VERTEX_ID_KEY)?.id == vertexId }
+            val dot = layer.filterIsInstance<Placemark>().first { it.position.latitude == target.position.latitude && it.position.longitude == target.position.longitude && it !== target }
+            return Triple(dot.attributes.imageColor.red, dot.attributes.imageColor.green, dot.attributes.imageColor.blue)
+        }
+        val selected = com.tcsappdev.worldwinddraw.core.style.HandleStyle().selectedFillColor
+        assertEquals(selected.red / 255f, fill("${a.id}2").first, 1e-3f)
+        assertTrue(fill("${a.id}1").first != fill("${a.id}2").first || fill("${a.id}1").third != fill("${a.id}2").third, "the other handles keep the ordinary colour")
+    }
+
+    @Test
+    fun allDetailGivesEveryVertexAHandleAtACoarseLevelAndCanBeSwitchedLive() = runTest {
+        val (layer, stateMachine, _) = setup(backgroundScope, vertexCount = 200)
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Edit(a)))
+        layer.applyHandleLevel(12) // far away
+        delay(50)
+        val adaptive = layer.vertexHandles().size
+        assertTrue(adaptive < 200, "adaptive: only the vertices that matter, got $adaptive")
+
+        layer.handleStyle = HandleStyle(detail = HandleDetail.All)
+        delay(50)
+        assertEquals(200, layer.vertexHandles().size, "all: a handle on every vertex whatever the zoom")
+        assertTrue(layer.middleHandles().isEmpty(), "and so no stretch has hidden vertices")
+
+        layer.handleStyle = HandleStyle()
+        delay(50)
+        assertEquals(adaptive, layer.vertexHandles().size, "back to adaptive")
     }
 }

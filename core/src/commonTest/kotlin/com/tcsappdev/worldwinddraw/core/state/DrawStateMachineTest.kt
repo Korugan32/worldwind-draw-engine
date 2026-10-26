@@ -302,6 +302,50 @@ class DrawStateMachineTest {
         assertEquals(after, s.vertexPositions("S"))
     }
 
+    @Test
+    fun aSelectedVertexCanBeDeletedAsOneUndoStepAndComesBackInTheSamePlace() {
+        val s = Setup()
+        s.repository.add(
+            DrawnPolygon(
+                id = EntityId("D"),
+                style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0)),
+                vertices = (0 until 5).map { Vertex(VertexId("D-$it"), p(it.toDouble(), 0.0)) },
+            )
+        )
+        s.startEditing("D")
+        fun ids() = (s.repository.entities.value.single { it.id == EntityId("D") } as DrawnPolygon).vertices.map { it.id.id }
+
+        s.machine.onEvent(DrawEvent.Click(p(2.0, 0.0), EntityId("D"), hitVertexId = VertexId("D-2")))
+        s.machine.onEvent(DrawEvent.DeleteSelectedVertex)
+        assertEquals(listOf("D-0", "D-1", "D-3", "D-4"), ids())
+
+        s.history.undo()
+        assertEquals(listOf("D-0", "D-1", "D-2", "D-3", "D-4"), ids(), "back at its old index, not at the end")
+        s.history.redo()
+        assertEquals(listOf("D-0", "D-1", "D-3", "D-4"), ids())
+    }
+
+    @Test
+    fun simplifyingAShapeIsOneUndoStepThatBringsEveryVertexBack() {
+        val s = Setup()
+        s.repository.add(
+            DrawnPolygon(
+                id = EntityId("Q"),
+                style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0)),
+                vertices = (0 until 50).map { Vertex(VertexId("Q-$it"), p(kotlin.math.sin(it * 0.125) * 5, kotlin.math.cos(it * 0.125) * 5)) },
+            )
+        )
+        s.startEditing("Q")
+        fun count() = (s.repository.entities.value.single { it.id == EntityId("Q") } as DrawnPolygon).vertices.size
+
+        s.machine.onEvent(DrawEvent.SimplifyShape(0.2f))
+        assertEquals(10, count())
+        s.history.undo()
+        assertEquals(50, count())
+        s.history.redo()
+        assertEquals(10, count())
+    }
+
     private fun Setup.addMarker(id: String) = repository.add(
         DrawnMarker(EntityId(id), ShapeStyle.SolidColor(ColorRgba(0, 0, 0)), p(1.0, 1.0), size = 20f)
     )

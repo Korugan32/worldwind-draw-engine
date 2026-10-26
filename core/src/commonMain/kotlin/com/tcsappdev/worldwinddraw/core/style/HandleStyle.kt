@@ -34,6 +34,10 @@ data class HandleStyle(
     val fillColor: ColorRgba = ColorRgba(red = 255, green = 255, blue = 255),
     val ringColor: ColorRgba = ColorRgba(red = 16, green = 16, blue = 16),
     val plusColor: ColorRgba = ColorRgba(red = 16, green = 16, blue = 16),
+    /** The fill of the handle of the vertex that is selected (the one [com.tcsappdev.worldwinddraw.core.state.DrawEvent.DeleteSelectedVertex] would remove). */
+    val selectedFillColor: ColorRgba = ColorRgba(red = 255, green = 149, blue = 0),
+    /** How many of a shape's vertices get a handle; see [HandleDetail]. */
+    val detail: HandleDetail = HandleDetail.Adaptive,
 ) {
     init {
         require(vertexDiameter > 0f) { "vertexDiameter must be positive, was $vertexDiameter" }
@@ -43,4 +47,17 @@ data class HandleStyle(
 
     /** The side of the grab area for a handle drawn [visibleDiameter] wide: [touchTargetDiameter], but never smaller than the handle itself. */
     fun touchSizeFor(visibleDiameter: Float): Float = maxOf(touchTargetDiameter, visibleDiameter)
+}
+
+/** How many of a shape's vertices get an editing handle. */
+enum class HandleDetail {
+    /**
+     * Every vertex of a shape with few points; for one with many, seen from far away, only the vertices that matter at that
+     * zoom (about 14 screen pixels apart), with the hidden ones between them following when a handle is dragged. More
+     * handles appear as the camera comes closer, down to every vertex. Keeps a detailed outline editable.
+     */
+    Adaptive,
+
+    /** A handle on every vertex whatever the zoom, so every point can be grabbed (and none moves unseen), at the price of clutter and speed on a detailed outline. */
+    All,
 }
