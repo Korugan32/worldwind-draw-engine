@@ -3,28 +3,19 @@ package com.tcsappdev.worldwinddraw.demo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.Slider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
@@ -35,10 +26,7 @@ import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 import com.tcsappdev.worldwinddraw.core.history.HistoryManager
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
-import com.tcsappdev.worldwinddraw.core.state.DrawEvent
-import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
-import com.tcsappdev.worldwinddraw.core.state.DrawableEntityType
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.HandleDetail
 import com.tcsappdev.worldwinddraw.core.style.HandleStyle
@@ -47,8 +35,6 @@ import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import earth.worldwind.WorldWindow
-import kotlin.math.roundToInt
-import kotlin.random.Random
 
 private class Palette(val label: String, val highlight: HighlightStyle, val ring: ColorRgba, val plus: ColorRgba)
 
@@ -113,210 +99,30 @@ class MainActivity : ComponentActivity() {
                             highlightStyle = palette.highlight,
                             onWorldWindow = { worldWindow = it },
                         )
-                        // Visual proof that real map taps reach PickInputBridge -> DrawEngineReducer:
-                        // toggling "Draw" mode here, then tapping the map, accumulates
-                        // pendingVertices from the actual pick position of each tap. The Undo
-                        // button proves a dragged vertex is recorded as ONE undoable command
-                        // (see ReduceResult's KDoc on commands vs. previewCommands).
-                        DrawModeOverlay(
+                        // The controls: a toolbar that follows what is being done, and the settings behind the gear (see DemoControls).
+                        DemoControls(
                             stateMachine,
                             historyManager,
                             entityRepository,
-                            handleSizeLabel = HANDLE_SIZES[handleSizeIndex].first,
-                            onCycleHandleSize = { handleSizeIndex = (handleSizeIndex + 1) % HANDLE_SIZES.size },
-                            paletteLabel = palette.label,
-                            onCyclePalette = { paletteIndex = (paletteIndex + 1) % PALETTES.size },
-                            allPoints = allPoints,
-                            onToggleAllPoints = { allPoints = !allPoints },
-                            onEvictTextures = { worldWindow?.let { android.util.Log.i("Demo", "evicted ${it.engine.renderResourceCache.trimToAge(Long.MAX_VALUE)} bytes of textures"); it.requestRedraw() } },
-                            modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(16.dp),
+                            settings = DemoSettings(
+                                handleSizes = HANDLE_SIZES.map { it.first },
+                                handleSize = handleSizeIndex,
+                                onHandleSize = { handleSizeIndex = it },
+                                palettes = PALETTES.map { it.label },
+                                palette = paletteIndex,
+                                onPalette = { paletteIndex = it },
+                                allPoints = allPoints,
+                                onAllPoints = { allPoints = it },
+                                onEvictTextures = { worldWindow?.let { android.util.Log.i("Demo", "evicted ${it.engine.renderResourceCache.trimToAge(Long.MAX_VALUE)} bytes of textures"); it.requestRedraw() } },
+                            ),
+                            // Clear of the status bar, the gesture bar and the map's own zoom controls at the bottom left.
+                            modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 88.dp),
                         )
                     }
                 }
             }
         }
     }
-}
-
-@Composable
-private fun DrawModeOverlay(
-    stateMachine: DrawStateMachine,
-    historyManager: HistoryManager,
-    entityRepository: EntityRepository,
-    handleSizeLabel: String,
-    onCycleHandleSize: () -> Unit,
-    paletteLabel: String,
-    onCyclePalette: () -> Unit,
-    allPoints: Boolean,
-    onToggleAllPoints: () -> Unit,
-    onEvictTextures: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val state by stateMachine.state.collectAsState()
-    val canUndo by historyManager.canUndo.collectAsState()
-    val canRedo by historyManager.canRedo.collectAsState()
-    val drawMode = state.mode as? DrawMode.Draw
-    val isDrawing = drawMode != null
-
-    Column(modifier = modifier) {
-        Button(onClick = {
-            val nextMode = if (isDrawing) DrawMode.Idle else DrawMode.Draw(DrawableEntityType.Polygon, emptyList())
-            stateMachine.onEvent(DrawEvent.ModeChange(nextMode))
-        }) {
-            Text(if (isDrawing) "Stop Drawing" else "Start Drawing")
-        }
-        // Only enabled once there are enough points for the entity type being drawn — see
-        // DrawnPolygon/DrawnPolyline's own minimum-vertex-count rules, which
-        // DrawEngineReducer.reduceFinishDrawing re-checks anyway (this is just so the button
-        // doesn't invite a tap it's going to silently ignore).
-        val canFinish = drawMode != null && drawMode.pendingVertices.size >= minimumPointsFor(drawMode.entityType)
-        val canDelete = state.mode is DrawMode.Select || state.mode is DrawMode.Edit
-        Row(modifier = Modifier.padding(top = 4.dp)) {
-            Button(
-                onClick = {
-                    val vertices = drawMode?.pendingVertices ?: return@Button
-                    val entityId = EntityId(Random.nextLong().toString())
-                    val vertexIds = vertices.map { VertexId(Random.nextLong().toString()) }
-                    stateMachine.onEvent(DrawEvent.FinishDrawing(entityId, vertexIds))
-                },
-                enabled = canFinish,
-            ) {
-                Text("Finish")
-            }
-            // Deletes the selected/edited shape; Undo brings it back.
-            Button(
-                onClick = { stateMachine.onEvent(DrawEvent.DeleteSelected) },
-                enabled = canDelete,
-                modifier = Modifier.padding(start = 4.dp),
-            ) {
-                Text("Delete")
-            }
-            // Deletes the vertex tapped or grabbed while editing (its handle turns orange); Undo brings it back in place.
-            val canDeletePoint = (state.mode as? DrawMode.Edit)?.selectedVertexId != null
-            Button(
-                onClick = { stateMachine.onEvent(DrawEvent.DeleteSelectedVertex) },
-                enabled = canDeletePoint,
-                modifier = Modifier.padding(start = 4.dp),
-            ) {
-                Text("Delete point")
-            }
-        }
-        // More rings for the polygon being edited: draw one (tap points, then Finish); inside the shape it makes a hole, away from it another part.
-        // "Delete ring" removes the whole ring of the selected vertex (undoable).
-        val allEntities by entityRepository.entities.collectAsState()
-        val editMode = state.mode as? DrawMode.Edit
-        val editedPolygon = allEntities.firstOrNull { it.id == editMode?.entityId } as? DrawnPolygon
-        Row(modifier = Modifier.padding(top = 4.dp)) {
-            Button(
-                onClick = { editMode?.let { stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Draw(DrawableEntityType.Polygon, emptyList(), targetEntityId = it.entityId))) } },
-                enabled = editedPolygon != null && editMode?.activeDrag == null,
-            ) { Text("Add ring") }
-            Button(
-                onClick = { stateMachine.onEvent(DrawEvent.DeleteSelectedRing) },
-                enabled = editedPolygon != null && editedPolygon.rings.size > 1 && editMode?.selectedVertexId != null,
-                modifier = Modifier.padding(start = 4.dp),
-            ) { Text("Delete ring") }
-        }
-        Row(modifier = Modifier.padding(top = 4.dp)) {
-            Button(onClick = { historyManager.undo() }, enabled = canUndo) {
-                Text("Undo")
-            }
-            Button(onClick = { historyManager.redo() }, enabled = canRedo, modifier = Modifier.padding(start = 4.dp)) {
-                Text("Redo")
-            }
-        }
-        Button(onClick = onCycleHandleSize, modifier = Modifier.padding(top = 4.dp)) {
-            Text("Handles: $handleSizeLabel")
-        }
-        Button(onClick = onCyclePalette, modifier = Modifier.padding(top = 4.dp)) {
-            Text("Colors: $paletteLabel")
-        }
-        Button(onClick = onToggleAllPoints, modifier = Modifier.padding(top = 4.dp)) {
-            Text(if (allPoints) "Points: All" else "Points: Auto")
-        }
-        // Resizes the selected/edited marker (undoable while editing); drag it in edit mode to move it.
-        val entities by entityRepository.entities.collectAsState()
-        val selectedId = (state.mode as? DrawMode.Select)?.entityId ?: (state.mode as? DrawMode.Edit)?.entityId
-        val selectedMarker = entities.firstOrNull { it.id == selectedId } as? DrawnMarker
-        Row(modifier = Modifier.padding(top = 4.dp)) {
-            Button(
-                onClick = { selectedMarker?.let { stateMachine.onEvent(DrawEvent.ResizeMarker((it.size * 0.8f).coerceAtLeast(8f))) } },
-                enabled = selectedMarker != null,
-            ) { Text("Size -") }
-            Button(
-                onClick = { selectedMarker?.let { stateMachine.onEvent(DrawEvent.ResizeMarker((it.size * 1.25f).coerceAtMost(240f))) } },
-                enabled = selectedMarker != null,
-                modifier = Modifier.padding(start = 4.dp),
-            ) { Text("Size +") }
-        }
-        // Cuts the selected/edited polygon or polyline down to a fraction of its points (one undo step); only offered when there is something to cut.
-        val selectedShape = entities.firstOrNull { it.id == selectedId }
-        val shapeVertexCount = when (selectedShape) {
-            is DrawnPolygon -> selectedShape.rings.sumOf { it.size }
-            is DrawnPolyline -> selectedShape.vertices.size
-            else -> null
-        }
-        if (shapeVertexCount != null && shapeVertexCount > 6) {
-            var keepFraction by remember { mutableStateOf(0.5f) }
-            val minimum = if (selectedShape is DrawnPolygon) 3 * selectedShape.rings.size else 2
-            val target = maxOf(minimum, (shapeVertexCount * keepFraction).roundToInt())
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                Slider(value = keepFraction, onValueChange = { keepFraction = it }, valueRange = 0.05f..1f, modifier = Modifier.width(140.dp))
-                Button(
-                    onClick = { stateMachine.onEvent(DrawEvent.SimplifyShape(keepFraction)) },
-                    enabled = target < shapeVertexCount,
-                    modifier = Modifier.padding(start = 4.dp),
-                ) { Text("$shapeVertexCount → $target") }
-            }
-        }
-        // Debug aid: evicts every texture from WWK's cache the way it does for stale ones or under memory pressure (they are released on the next frame), so every picture is made again.
-        Button(onClick = onEvictTextures, modifier = Modifier.padding(top = 4.dp)) { Text("Evict textures") }
-        Text(
-            text = describeMode(state.mode) + pointCount(state.mode, entities),
-            color = Color.White,
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .background(Color.Black.copy(alpha = 0.5f))
-                .padding(8.dp),
-        )
-    }
-}
-
-// How many points the shape being edited has, so it is clear when the handles are only some of them.
-private fun pointCount(mode: DrawMode, entities: List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>): String {
-    val id = (mode as? DrawMode.Edit)?.entityId ?: return ""
-    val count = when (val entity = entities.firstOrNull { it.id == id }) {
-        is DrawnPolygon -> entity.rings.sumOf { it.size }
-        is DrawnPolyline -> entity.vertices.size
-        else -> return ""
-    }
-    val rings = (entities.firstOrNull { it.id == id } as? DrawnPolygon)?.rings?.size?.takeIf { it > 1 }?.let { ", $it rings" } ?: ""
-    return " [$count points$rings]"
-}
-
-private fun describeMode(mode: DrawMode): String = when (mode) {
-    is DrawMode.Idle -> "Idle"
-    is DrawMode.Pan -> "Pan"
-    is DrawMode.Draw -> "Draw (${mode.targetEntityId?.let { "a ring for ${it.id}" } ?: mode.entityType.toString()}, ${mode.pendingVertices.size} points)" + when (val drag = mode.activeDrag) {
-        is DrawMode.Draw.ActiveDrag.MovingPoint -> " - moving point ${drag.index}"
-        is DrawMode.Draw.ActiveDrag.InsertingPoint -> " - adding a point on edge ${drag.edgeIndex}"
-        null -> ""
-    }
-    is DrawMode.Edit -> when (val drag = mode.activeDrag) {
-        is DrawMode.Edit.ActiveDrag.ExistingVertex -> "Edit (${mode.entityId.id}) - dragging ${drag.vertexId.id}"
-        is DrawMode.Edit.ActiveDrag.NewVertex -> "Edit (${mode.entityId.id}) - adding a vertex on edge ${drag.edgeIndex}"
-        is DrawMode.Edit.ActiveDrag.MovingMarker -> "Edit (${mode.entityId.id}) - moving the marker"
-        null -> "Edit (${mode.entityId.id}) - drag a vertex, a midpoint handle or a marker"
-    }
-    is DrawMode.Select -> "Select (${mode.entityId.id}) - tap again to edit"
-}
-
-// Mirrors DrawEngineReducer.reduceFinishDrawing's per-type minimum-vertex guard, just so
-// the "Finish" button's enabled state doesn't invite a tap it's going to silently ignore.
-private fun minimumPointsFor(entityType: DrawableEntityType): Int = when (entityType) {
-    DrawableEntityType.Polygon -> 3
-    DrawableEntityType.Polyline -> 2
-    DrawableEntityType.Marker -> 1
 }
 
 // A rectangle over Turkey, semi-transparent so the base imagery stays visible underneath —

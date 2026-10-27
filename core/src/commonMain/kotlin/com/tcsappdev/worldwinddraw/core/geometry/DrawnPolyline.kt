@@ -16,6 +16,8 @@ data class DrawnPolyline(
     override val style: ShapeStyle,
     val vertices: List<Vertex>,
     val lineWidth: Float = 1f,
+    override val description: String? = null,
+    override val zIndex: Int = 0,
 ) : DrawableEntity {
     init {
         require(vertices.size >= 2) { "A polyline must have at least 2 vertices" }

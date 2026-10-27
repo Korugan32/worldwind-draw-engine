@@ -12,12 +12,18 @@ import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
  * without a real icon (a plain [com.tcsappdev.worldwinddraw.core.style.ShapeStyle.SolidColor])
  * draws a [size]x[size] square in that color, so this can't default to something
  * imperceptibly small.
+ *
+ * @property label text written next to the icon, or `null` for none (see [MarkerLabel]). For a marker that is only text, give it a
+ * [style] that is fully transparent and a label whose position is [LabelPosition.Center].
  */
 data class DrawnMarker(
     override val id: EntityId,
     override val style: ShapeStyle,
     val position: GeoPosition,
     val size: Float = 16f,
+    val label: MarkerLabel? = null,
+    override val description: String? = null,
+    override val zIndex: Int = 0,
 ) : DrawableEntity {
     init {
         require(size > 0f) { "size must be greater than 0" }

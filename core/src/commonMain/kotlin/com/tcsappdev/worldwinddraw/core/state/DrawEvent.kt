@@ -2,6 +2,7 @@ package com.tcsappdev.worldwinddraw.core.state
 
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
+import com.tcsappdev.worldwinddraw.core.geometry.MarkerLabel
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 
 /**
@@ -93,6 +94,33 @@ sealed interface DrawEvent {
             require(size > 0f) { "size must be positive, was $size" }
         }
     }
+
+    /**
+     * An explicit request to give the marker that is currently selected or being edited the text [label], or to take its text away
+     * with `null`. A no-op in any other mode, and if the selected shape isn't a marker. Undoable.
+     */
+    data class SetMarkerLabel(val label: MarkerLabel?) : DrawEvent
+
+    /**
+     * An explicit request to give the shape that is currently selected or being edited the description [description] (`null` for
+     * none; see [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity.description]). A no-op in any other mode. Undoable.
+     */
+    data class SetDescription(val description: String?) : DrawEvent
+
+    /**
+     * An explicit request to put the shape that is currently selected or being edited at [zIndex] in the drawing order (see
+     * [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity.zIndex]). A no-op in any other mode. Undoable.
+     */
+    data class SetZIndex(val zIndex: Int) : DrawEvent
+
+    /**
+     * Draws the selected (or edited) shape over every other one, as one undo step: it is given a place one above the highest. Ignored
+     * in any other mode, when it is the only shape, or when it is already above all the others.
+     */
+    object BringToFront : DrawEvent
+
+    /** The opposite of [BringToFront]: draws the selected (or edited) shape below every other one. */
+    object SendToBack : DrawEvent
 
     /**
      * An explicit request (e.g. a host UI "Delete" button) to delete the shape that is currently
