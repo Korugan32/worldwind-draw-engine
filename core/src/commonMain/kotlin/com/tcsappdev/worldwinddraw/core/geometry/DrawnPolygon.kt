@@ -32,6 +32,8 @@ data class DrawnPolygon(
     val outlineStyle: ShapeStyle? = null,
     val outlineWidth: Float = 1f,
     val extraRings: List<List<Vertex>> = emptyList(),
+    override val description: String? = null,
+    override val zIndex: Int = 0,
 ) : DrawableEntity {
     init {
         require(vertices.size >= 3) { "A polygon must have at least 3 vertices" }

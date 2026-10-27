@@ -10,6 +10,9 @@ import com.tcsappdev.worldwinddraw.core.history.Command
 import com.tcsappdev.worldwinddraw.core.history.commands.AddEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddRingCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.RemoveRingCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.SetDescriptionCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.SetMarkerLabelCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.SetZIndexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.DeleteEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveMarkerCommand
@@ -74,6 +77,11 @@ object DrawEngineReducer {
         is DrawEvent.DeleteSelectedRing -> reduceDeleteSelectedRing(state, repository)
         is DrawEvent.SimplifyShape -> reduceSimplifyShape(state, event, repository)
         is DrawEvent.ResizeMarker -> reduceResizeMarker(state, event, repository)
+        is DrawEvent.SetMarkerLabel -> reduceOnSelected(state) { SetMarkerLabelCommand(repository, it, event.label) }
+        is DrawEvent.SetDescription -> reduceOnSelected(state) { SetDescriptionCommand(repository, it, event.description) }
+        is DrawEvent.SetZIndex -> reduceOnSelected(state) { SetZIndexCommand(repository, it, event.zIndex) }
+        is DrawEvent.BringToFront -> reduceMoveInOrder(state, repository, toFront = true)
+        is DrawEvent.SendToBack -> reduceMoveInOrder(state, repository, toFront = false)
     }
 
     private fun reduceClick(state: DrawEngineState, event: DrawEvent.Click): ReduceResult {
@@ -182,6 +190,35 @@ object DrawEngineReducer {
     private fun moveVertexCommand(repository: EntityRepository, entityId: EntityId, drag: DrawMode.Edit.ActiveDrag.ExistingVertex, position: GeoPosition): Command =
         if (drag.span != null) MoveVertexWithSpanCommand(repository, entityId, drag.vertexId, position, drag.span)
         else MoveVertexCommand(repository, entityId, drag.vertexId, drag.origin, position)
+
+    /** Runs the command [command] makes for the shape that is selected or being edited; nothing in any other mode. */
+    private fun reduceOnSelected(state: DrawEngineState, command: (EntityId) -> Command): ReduceResult {
+        val entityId = when (val mode = state.mode) {
+            is DrawMode.Select -> mode.entityId
+            is DrawMode.Edit -> mode.entityId
+            else -> return ReduceResult(state)
+        }
+        return ReduceResult(state, commands = listOf(command(entityId)))
+    }
+
+    /**
+     * Puts the selected shape one place above all the others ([toFront]) or below them. Looks at the shapes in [repository] (read only)
+     * to know where that is, and to leave no step in the history for a shape that is already there.
+     */
+    private fun reduceMoveInOrder(state: DrawEngineState, repository: EntityRepository, toFront: Boolean): ReduceResult {
+        val entityId = when (val mode = state.mode) {
+            is DrawMode.Select -> mode.entityId
+            is DrawMode.Edit -> mode.entityId
+            else -> return ReduceResult(state)
+        }
+        val entities = repository.entities.value
+        val entity = entities.firstOrNull { it.id == entityId } ?: return ReduceResult(state)
+        val others = entities.filter { it.id != entityId }.map { it.zIndex }
+        if (others.isEmpty()) return ReduceResult(state)
+        val target = if (toFront) others.max() + 1 else others.min() - 1
+        if (if (toFront) entity.zIndex >= target else entity.zIndex <= target) return ReduceResult(state)
+        return ReduceResult(state, commands = listOf(SetZIndexCommand(repository, entityId, target)))
+    }
 
     private fun reduceResizeMarker(state: DrawEngineState, event: DrawEvent.ResizeMarker, repository: EntityRepository): ReduceResult {
         val entityId = when (val mode = state.mode) {

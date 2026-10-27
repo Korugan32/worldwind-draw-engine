@@ -200,39 +200,41 @@ class DrawLayer(
             }.also { highlightAlphaSetters += it.setAlpha }
         }
 
-        entities.forEach { entity ->
-            if (entity !is DrawnPolygon) return@forEach
-            val shape = drawnPolygon(entity, editMode, newVertexDrag)
-            // While a vertex of this very polygon is being dragged the picture of an image fill is left out (see withImageFillBelow).
-            val dragging = editMode?.entityId == entity.id && editMode.activeDrag != null
-            drawn += bodies.get(entity.id, Pair(shape, dragging)) {
-                // An image fill is a picture laid under the polygon, which then keeps its outline and stays pickable. If the
-                // picture can't be produced the polygon gets a grey placeholder fill instead, so it isn't invisible.
-                val fill = entity.style as? ShapeStyle.ImageFill
-                val fillSurface = if (fill != null && !dragging) imageFillSurface(entity, fill) else null
-                val styled = if (fill != null && !dragging && fillSurface == null) shape.copy(style = IMAGE_FILL_PLACEHOLDER) else shape
-                listOfNotNull(fillSurface, styled.toWwkPolygon().tagged(entity.id))
-            }
-            highlightOf(entity.id, shape, { shape.toWwkHighlight(it) }) { r, a -> (r as Polygon).attributes.outlineColor.alpha = a }
-                ?.let { drawn += it.renderable }
-        }
-        entities.forEach { entity ->
-            if (entity !is DrawnPolyline) return@forEach
-            val renderVertices = livePreviewVertices(entity.id, 0, drawnVertices(entity.id, 0, entity.vertices, false, editMode), editMode, newVertexDrag)
-            val shape = if (renderVertices === entity.vertices) entity else entity.copy(vertices = renderVertices)
-            highlightOf(entity.id, shape, { shape.toWwkHighlight(it) }) { r, a -> (r as Path).attributes.outlineColor.alpha = a }
-                ?.let { drawn += it.renderable }
-            drawn += bodies.get(entity.id, shape) { listOf(shape.toWwkPolyline().tagged(entity.id)) }
-        }
-        entities.forEach { entity ->
-            if (entity !is DrawnMarker) return@forEach
-            highlightOf(entity.id, entity, { entity.toWwkHighlight(it) }) { r, a -> (r as Placemark).attributes.imageColor.alpha = a }
-                ?.let { drawn += it.renderable }
-            // While the marker is being edited its own icon is not pickable: the move target (below) is what is grabbed,
-            // and two pickable placemarks on one spot could let the wrong one win.
-            val beingEdited = editMode?.entityId == entity.id
-            drawn += bodies.get(entity.id, Pair(entity, beingEdited)) {
-                listOf(entity.toWwkPlacemark().tagged(entity.id).apply { if (beingEdited) isPickEnabled = false })
+        // Every shape in drawing order: by its z-index, then polygons below lines below markers, then as they were added.
+        for (entity in drawingOrder(entities)) {
+            when (entity) {
+                is DrawnPolygon -> {
+                    val shape = drawnPolygon(entity, editMode, newVertexDrag)
+                    // While a vertex of this very polygon is being dragged the picture of an image fill is left out (see withImageFillBelow).
+                    val dragging = editMode?.entityId == entity.id && editMode.activeDrag != null
+                    drawn += bodies.get(entity.id, Pair(shape, dragging)) {
+                        // An image fill is a picture laid under the polygon, which then keeps its outline and stays pickable. If the
+                        // picture can't be produced the polygon gets a grey placeholder fill instead, so it isn't invisible.
+                        val fill = entity.style as? ShapeStyle.ImageFill
+                        val fillSurface = if (fill != null && !dragging) imageFillSurface(entity, fill) else null
+                        val styled = if (fill != null && !dragging && fillSurface == null) shape.copy(style = IMAGE_FILL_PLACEHOLDER) else shape
+                        listOfNotNull(fillSurface, styled.toWwkPolygon().tagged(entity.id))
+                    }
+                    highlightOf(entity.id, shape, { shape.toWwkHighlight(it) }) { r, a -> (r as Polygon).attributes.outlineColor.alpha = a }
+                        ?.let { drawn += it.renderable }
+                }
+                is DrawnPolyline -> {
+                    val renderVertices = livePreviewVertices(entity.id, 0, drawnVertices(entity.id, 0, entity.vertices, false, editMode), editMode, newVertexDrag)
+                    val shape = if (renderVertices === entity.vertices) entity else entity.copy(vertices = renderVertices)
+                    highlightOf(entity.id, shape, { shape.toWwkHighlight(it) }) { r, a -> (r as Path).attributes.outlineColor.alpha = a }
+                        ?.let { drawn += it.renderable }
+                    drawn += bodies.get(entity.id, shape) { listOf(shape.toWwkPolyline().tagged(entity.id)) }
+                }
+                is DrawnMarker -> {
+                    highlightOf(entity.id, entity, { entity.toWwkHighlight(it) }) { r, a -> (r as Placemark).attributes.imageColor.alpha = a }
+                        ?.let { drawn += it.renderable }
+                    // While the marker is being edited its own icon is not pickable: the move target (below) is what is grabbed,
+                    // and two pickable placemarks on one spot could let the wrong one win.
+                    val beingEdited = editMode?.entityId == entity.id
+                    drawn += bodies.get(entity.id, Pair(entity, beingEdited)) {
+                        listOf(entity.toWwkPlacemark().tagged(entity.id).apply { if (beingEdited) isPickEnabled = false })
+                    }
+                }
             }
         }
 
@@ -324,6 +326,19 @@ class DrawLayer(
             addAllRenderables(drawn)
             applied = drawn
         }
+    }
+
+    /**
+     * [entities] in the order they are drawn, the first at the bottom: by [DrawableEntity.zIndex], then polygons below lines below
+     * markers, then in the order they came in (the sort is stable). What is drawn later is drawn over, and is what a tap reaches.
+     */
+    private fun drawingOrder(entities: List<DrawableEntity>): List<DrawableEntity> =
+        entities.sortedWith(compareBy<DrawableEntity>({ it.zIndex }, { kindRank(it) }))
+
+    private fun kindRank(entity: DrawableEntity) = when (entity) {
+        is DrawnPolygon -> 0
+        is DrawnPolyline -> 1
+        is DrawnMarker -> 2
     }
 
     /**
