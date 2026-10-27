@@ -1,9 +1,11 @@
 package com.tcsappdev.worldwinddraw.adapter.mapper
 
+import com.tcsappdev.worldwinddraw.core.raster.HatchTile
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
 import earth.worldwind.render.Color
+import earth.worldwind.render.image.ImageSource
 import earth.worldwind.shape.PlacemarkAttributes
 import earth.worldwind.shape.ShapeAttributes
 
@@ -26,6 +28,7 @@ fun ShapeStyle.toWwkShapeAttributes(): ShapeAttributes {
             interiorColor = color.toWwkColor()
         }
         is ShapeStyle.ImagePattern -> imageInterior(image, opacity)
+        is ShapeStyle.Hatch -> hatchInterior(this)
         // The picture is drawn by a separate surface image under the polygon (see DrawLayer), so
         // the polygon's own interior is left invisible — but still there, so it can be picked.
         is ShapeStyle.ImageFill -> ShapeAttributes().apply { interiorColor = Color(1f, 1f, 1f, 0f) }
@@ -47,6 +50,11 @@ fun ShapeStyle.toWwkLineAttributes(width: Float): ShapeAttributes {
             outlineWidth = width
         }
         is ShapeStyle.ImagePattern -> imageOutline(image, opacity, width)
+        // A line has no interior to hatch: it is drawn in the hatching's colour.
+        is ShapeStyle.Hatch -> ShapeAttributes().apply {
+            outlineColor = color.toWwkColor()
+            outlineWidth = width
+        }
         is ShapeStyle.ImageFill -> imageOutline(image, opacity, width)
         is ShapeStyle.AnimatedFill -> base.toWwkLineAttributes(width)
     }
@@ -66,6 +74,10 @@ fun ShapeStyle.toWwkPlacemarkAttributes(size: Float): PlacemarkAttributes {
             imageScale = size.toDouble()
         }
         is ShapeStyle.ImagePattern -> imageIcon(image, opacity, size)
+        is ShapeStyle.Hatch -> PlacemarkAttributes().apply {
+            imageColor = color.toWwkColor()
+            imageScale = size.toDouble()
+        }
         is ShapeStyle.ImageFill -> imageIcon(image, opacity, size)
         is ShapeStyle.AnimatedFill -> base.toWwkPlacemarkAttributes(size)
     }
@@ -83,6 +95,37 @@ private fun imageInterior(image: ImageRef, opacity: Float): ShapeAttributes = Sh
         // WWK multiplies each image pixel by the interior colour: white leaves the pixels
         // untinted and its alpha is the pattern's opacity.
         interiorColor = Color(1f, 1f, 1f, opacity)
+    }
+}
+
+/**
+ * A hatching is a small generated tile drawn as WWK draws an image pattern (tiled in screen pixels). The tile is made once per look
+ * and kept: WWK compares an in-memory image by reference, so the same look must hand it the same instance, or its texture cache
+ * would be defeated and every shape with that look would carry a texture of its own.
+ */
+private fun hatchInterior(hatch: ShapeStyle.Hatch): ShapeAttributes = ShapeAttributes().apply {
+    val source = HatchSources.get(hatch)
+    if (source == null) {
+        interiorColor = PLACEHOLDER_COLOR
+    } else {
+        interiorImageSource = source
+        // White leaves the tile's pixels untinted; the lines' own alpha is in the pixels.
+        interiorColor = Color(1f, 1f, 1f, 1f)
+    }
+}
+
+private object HatchSources {
+    // Bounded like the other image caches: a host that keeps trying new looks can't grow this without limit.
+    private const val MAX_ENTRIES = 16
+    private val cache = LinkedHashMap<ShapeStyle.Hatch, ImageSource>()
+
+    fun get(hatch: ShapeStyle.Hatch): ImageSource? {
+        cache[hatch]?.let { return it }
+        val tile = HatchTile.render(hatch.pattern, hatch.color, hatch.backgroundColor, hatch.spacing, hatch.thickness)
+        val source = imageSourceFromPixels(tile) ?: return null
+        if (cache.size >= MAX_ENTRIES) cache.remove(cache.keys.first())
+        cache[hatch] = source
+        return source
     }
 }
 

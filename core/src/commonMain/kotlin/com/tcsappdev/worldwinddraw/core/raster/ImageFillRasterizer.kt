@@ -55,6 +55,11 @@ object ImageFillRasterizer {
         opacity: Float,
         maxDimension: Int,
         background: ColorRgba? = null,
+        repeat: Boolean = false,
+        anchorX: Float? = null,
+        anchorY: Float? = null,
+        extendEdges: Boolean = false,
+        edgeSoftness: Float = 0f,
     ): RasterizedFill? {
         val points = rings.flatten()
         if (points.size < 3) return null
@@ -69,46 +74,90 @@ object ImageFillRasterizer {
         val centerLatRadians = (minLat + maxLat) / 2 * PI / 180.0
         val groundWidth = lonSpan * max(cos(centerLatRadians), 0.05)
         val longest = max(groundWidth, latSpan)
-        val width = max(2, (maxDimension * groundWidth / longest).roundToInt())
-        val height = max(2, (maxDimension * latSpan / longest).roundToInt())
+        // The shape's whole bounding box as a grid whose longer side is maxDimension: the frame placements are worked out in.
+        val boxWidth = max(2, (maxDimension * groundWidth / longest).roundToInt())
+        val boxHeight = max(2, (maxDimension * latSpan / longest).roundToInt())
 
-        val coverage = coverage(rings, minLat, maxLat, minLon, lonSpan, latSpan, width, height)
-        // For ImageFit.Inscribed: the visual centre of the first ring and the biggest circle around it, in pixels of this grid.
+        // For ImageFit.Inscribed: the visual centre of the first ring and the biggest circle around it, in pixels of the box grid.
         val circle = if (fit == ImageFit.Inscribed) {
             val center = PolygonCenter.visualCenter(rings.first())
             Circle(
-                x = ((center.position.longitude - minLon) / lonSpan * width).toFloat(),
-                y = ((maxLat - center.position.latitude) / latSpan * height).toFloat(),
+                x = ((center.position.longitude - minLon) / lonSpan * boxWidth).toFloat(),
+                y = ((maxLat - center.position.latitude) / latSpan * boxHeight).toFloat(),
                 // The grid is as tall as the shape is in degrees of latitude, and a degree of longitude is as many pixels as a
                 // degree of latitude after the shrinking above, so one scale turns metres into pixels.
-                radius = (center.radiusMeters / PolygonCenter.METERS_PER_DEGREE * height / latSpan).toFloat(),
+                radius = (center.radiusMeters / PolygonCenter.METERS_PER_DEGREE * boxHeight / latSpan).toFloat(),
             )
         } else null
-        val placement = placement(source, fit, scale, width, height, circle)
+        val fitted = placement(source, fit, scale, boxWidth, boxHeight, circle)
+        // An anchor moves the picture's centre to that fraction of the box (x from the west edge, y from the north edge).
+        val boxPlacement = if (anchorX == null && anchorY == null) fitted else Placement(
+            left = if (anchorX != null) anchorX * boxWidth - fitted.width / 2 else fitted.left,
+            top = if (anchorY != null) anchorY * boxHeight - fitted.height / 2 else fitted.top,
+            width = fitted.width,
+            height = fitted.height,
+        )
+
+        // Where nothing but the picture is drawn, only the picture's own rectangle needs pixels, so all maxDimension of them go to it
+        // (and the picture comes out sharper) instead of a part of them to the empty rest of the box. A background colour, extended
+        // edges or tiles fill the whole box, so those keep the whole of it.
+        var windowLeft = 0f
+        var windowTop = 0f
+        var windowRight = boxWidth.toFloat()
+        var windowBottom = boxHeight.toFloat()
+        if (!repeat && !extendEdges && background == null) {
+            val left = max(0f, boxPlacement.left)
+            val top = max(0f, boxPlacement.top)
+            val right = min(boxWidth.toFloat(), boxPlacement.left + boxPlacement.width)
+            val bottom = min(boxHeight.toFloat(), boxPlacement.top + boxPlacement.height)
+            if (right > left && bottom > top) {
+                windowLeft = left; windowTop = top; windowRight = right; windowBottom = bottom
+            }
+        }
+        val windowWidth = windowRight - windowLeft
+        val windowHeight = windowBottom - windowTop
+        val toPixels = maxDimension / max(windowWidth, windowHeight)
+        val width = max(2, (windowWidth * toPixels).roundToInt())
+        val height = max(2, (windowHeight * toPixels).roundToInt())
+        // The window as a geographic box, and the picture's place in the window's pixels.
+        val windowMaxLat = maxLat - windowTop / boxHeight * latSpan
+        val windowMinLat = maxLat - windowBottom / boxHeight * latSpan
+        val windowMinLon = minLon + windowLeft / boxWidth * lonSpan
+        val windowLonSpan = windowWidth / boxWidth * lonSpan
+        val placement = Placement(
+            left = (boxPlacement.left - windowLeft) * toPixels,
+            top = (boxPlacement.top - windowTop) * toPixels,
+            width = boxPlacement.width * toPixels,
+            height = boxPlacement.height * toPixels,
+        )
+        val coverage = coverage(rings, windowMinLat, windowMaxLat, windowMinLon, windowLonSpan, windowMaxLat - windowMinLat, width, height)
+
         val out = IntArray(width * height)
         val opacityScale = opacity.coerceIn(0f, 1f)
         for (y in 0 until height) {
             for (x in 0 until width) {
                 val cover = coverage[y * width + x]
                 if (cover <= 0f) continue
-                val sample = sample(source, placement, x + 0.5f, y + 0.5f)
+                val sample = sample(source, placement, x + 0.5f, y + 0.5f, repeat, extendEdges, edgeSoftness)
                 if (background == null) {
                     val alpha = (sample ushr 24) * cover * opacityScale
                     if (alpha <= 0f) continue
                     out[y * width + x] = (alpha.roundToInt().coerceIn(0, 255) shl 24) or (sample and 0x00FFFFFF)
                 } else {
-                    out[y * width + x] = over(sample, (sample ushr 24) / 255f * cover * opacityScale, background, cover)
+                    out[y * width + x] = over(sample, (sample ushr 24) / 255f * cover, background, cover, opacityScale)
                 }
             }
         }
-        return RasterizedFill(PixelImage(width, height, out), minLat, minLon, maxLat, maxLon)
+        return RasterizedFill(PixelImage(width, height, out), windowMinLat, windowMinLon, windowMaxLat, windowMinLon + windowLonSpan)
     }
 
     /**
      * The picture's colour [sample] at opacity [imageAlpha] laid over the [background] colour (itself covering [cover] of the pixel):
      * standard "over" blending, so wherever the picture is opaque it wins, where it is missing the background shows, and in between they mix.
+     * The blend is made first and [groupOpacity] fades it as one: the same picture colour over the same background colour looks the
+     * same inside the picture and around it, instead of the picture's part being more opaque.
      */
-    private fun over(sample: Int, imageAlpha: Float, background: ColorRgba, cover: Float): Int {
+    private fun over(sample: Int, imageAlpha: Float, background: ColorRgba, cover: Float, groupOpacity: Float): Int {
         val backgroundAlpha = background.alpha / 255f * cover
         val alpha = imageAlpha + backgroundAlpha * (1 - imageAlpha)
         if (alpha <= 0f) return 0
@@ -117,7 +166,7 @@ object ImageFillRasterizer {
         val red = channel((sample shr 16) and 0xFF, background.red)
         val green = channel((sample shr 8) and 0xFF, background.green)
         val blue = channel(sample and 0xFF, background.blue)
-        return ((alpha * 255).roundToInt().coerceIn(0, 255) shl 24) or (red shl 16) or (green shl 8) or blue
+        return ((alpha * groupOpacity * 255).roundToInt().coerceIn(0, 255) shl 24) or (red shl 16) or (green shl 8) or blue
     }
 
     // -- where the picture sits
@@ -150,11 +199,22 @@ object ImageFillRasterizer {
         return Placement((destWidth - scaledWidth) / 2f, (destHeight - scaledHeight) / 2f, scaledWidth, scaledHeight)
     }
 
-    /** The picture's colour at destination point ([x], [y]), bilinearly filtered, or `0` (transparent) outside the picture. */
-    private fun sample(source: PixelImage, p: Placement, x: Float, y: Float): Int {
-        val u = (x - p.left) / p.width * source.width - 0.5f
-        val v = (y - p.top) / p.height * source.height - 0.5f
-        if (x < p.left || x >= p.left + p.width || y < p.top || y >= p.top + p.height) return 0
+    /**
+     * The picture's colour at destination point ([x], [y]), bilinearly filtered, or `0` (transparent) outside the picture. With
+     * [edgeSoftness] above 0 its alpha fades towards the picture's edges (see [softEdge]).
+     */
+    private fun sample(source: PixelImage, p: Placement, x: Float, y: Float, repeat: Boolean, extendEdges: Boolean, edgeSoftness: Float): Int {
+        var dx0 = x - p.left
+        var dy0 = y - p.top
+        if (repeat) {
+            // Tiled: the position within whichever copy of the picture this point falls in.
+            dx0 -= floor(dx0 / p.width) * p.width
+            dy0 -= floor(dy0 / p.height) * p.height
+        } else if (!extendEdges && (dx0 < 0 || dx0 >= p.width || dy0 < 0 || dy0 >= p.height)) return 0
+        // With extendEdges a point past the picture is still sampled: the neighbours below are clamped to the picture, so what comes
+        // out is its outermost row or column of pixels carried on outwards.
+        val u = dx0 / p.width * source.width - 0.5f
+        val v = dy0 / p.height * source.height - 0.5f
         val x0 = floor(u).toInt()
         val y0 = floor(v).toInt()
         val fx = u - x0
@@ -163,7 +223,10 @@ object ImageFillRasterizer {
         for (dy in 0..1) for (dx in 0..1) {
             val weight = (if (dx == 0) 1 - fx else fx) * (if (dy == 0) 1 - fy else fy)
             if (weight <= 0f) continue
-            val px = source.argb[(y0 + dy).coerceIn(0, source.height - 1) * source.width + (x0 + dx).coerceIn(0, source.width - 1)]
+            // In a tiled picture the neighbour across an edge is the other side of the picture, not a repeat of the edge pixel.
+            val sx = if (repeat) (x0 + dx).mod(source.width) else (x0 + dx).coerceIn(0, source.width - 1)
+            val sy = if (repeat) (y0 + dy).mod(source.height) else (y0 + dy).coerceIn(0, source.height - 1)
+            val px = source.argb[sy * source.width + sx]
             val alpha = (px ushr 24).toFloat()
             // Weighted by alpha, so a transparent neighbour doesn't bleed its (meaningless) colour in.
             a += weight * alpha
@@ -172,10 +235,23 @@ object ImageFillRasterizer {
             b += weight * alpha * (px and 0xFF)
         }
         if (a <= 0f) return 0
-        return (a.roundToInt().coerceIn(0, 255) shl 24) or
+        // Extended edges have nothing under them to fade into, so they stay as they are.
+        val alpha = if (edgeSoftness > 0f && !extendEdges) a * softEdge(dx0, dy0, p, edgeSoftness) else a
+        return (alpha.roundToInt().coerceIn(0, 255) shl 24) or
             ((r / a).roundToInt().coerceIn(0, 255) shl 16) or
             ((g / a).roundToInt().coerceIn(0, 255) shl 8) or
             (b / a).roundToInt().coerceIn(0, 255)
+    }
+
+    /**
+     * How much of the picture is left at ([dx], [dy]) inside it, 1 in the middle and 0 at the edge: a smoothstep over a band as wide
+     * as [softness] times half the picture's shorter side, measured inwards from the nearest edge (so `1` fades all the way to the middle).
+     */
+    private fun softEdge(dx: Float, dy: Float, p: Placement, softness: Float): Float {
+        val fromEdge = min(min(dx, p.width - dx), min(dy, p.height - dy))
+        val band = softness * min(p.width, p.height) / 2
+        val t = (fromEdge / band).coerceIn(0f, 1f)
+        return t * t * (3 - 2 * t)
     }
 
     // -- the cut

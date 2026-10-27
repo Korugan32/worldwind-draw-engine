@@ -51,20 +51,48 @@ class ImageFillTest {
         ),
     )
 
-    private fun fill(key: String, fit: ImageFit = ImageFit.Contain, scale: Float = 1f, opacity: Float = 1f, background: ColorRgba? = null) =
-        ShapeStyle.ImageFill(ImageRef.Bytes(key, png()), fit, scale, opacity, background)
+    private fun fill(
+        key: String,
+        fit: ImageFit = ImageFit.Contain,
+        scale: Float = 1f,
+        opacity: Float = 1f,
+        background: ColorRgba? = null,
+        repeat: Boolean = false,
+        anchorX: Float? = null,
+        anchorY: Float? = null,
+        extendEdges: Boolean = false,
+        edgeSoftness: Float = 0f,
+    ) = ShapeStyle.ImageFill(ImageRef.Bytes(key, png()), fit, scale, opacity, background, repeat, anchorX, anchorY, extendEdges, edgeSoftness)
 
     // -- the renderable
 
     @Test
-    fun aPictureIsLaidOverExactlyTheShapesBoundingBoxAndIsNotPickable() {
-        val surface = assertNotNull(imageFillSurface(polygon(fill("box")), fill("box"))) as SurfaceImage
+    fun aPictureThatFillsTheShapeIsLaidOverExactlyItsBoundingBoxAndIsNotPickable() {
+        val stretched = fill("box", fit = ImageFit.Stretch)
+        val surface = assertNotNull(imageFillSurface(polygon(stretched), stretched)) as SurfaceImage
 
         assertEquals(10.0, surface.sector.minLatitude.inDegrees)
         assertEquals(14.0, surface.sector.maxLatitude.inDegrees)
         assertEquals(20.0, surface.sector.minLongitude.inDegrees)
         assertEquals(28.0, surface.sector.maxLongitude.inDegrees)
         assertFalse(surface.isPickEnabled, "the polygon on top is what gets picked")
+    }
+
+    @Test
+    fun aPictureThatLeavesPartOfTheShapeEmptyIsLaidOverOnlyItsOwnRectangleOfTheBoundingBox() {
+        val contained = fill("rect", fit = ImageFit.Contain, scale = 0.5f)
+        val surface = assertNotNull(imageFillSurface(polygon(contained), contained)) as SurfaceImage
+
+        val sector = surface.sector
+        assertTrue(sector.minLatitude.inDegrees >= 10.0 && sector.maxLatitude.inDegrees <= 14.0, "inside the box")
+        assertTrue(sector.minLongitude.inDegrees >= 20.0 && sector.maxLongitude.inDegrees <= 28.0)
+        assertTrue(sector.deltaLongitude.inDegrees < 8.0 - 0.5, "and smaller than it, as the picture is")
+        assertEquals(24.0, (sector.minLongitude.inDegrees + sector.maxLongitude.inDegrees) / 2, 0.01, "centred: the middle of 20..28")
+
+        val withBackground = fill("rect", fit = ImageFit.Contain, scale = 0.5f, background = ColorRgba(0, 255, 0))
+        val whole = assertNotNull(imageFillSurface(polygon(withBackground), withBackground)) as SurfaceImage
+        assertEquals(20.0, whole.sector.minLongitude.inDegrees, "with a background the whole box is needed")
+        assertEquals(28.0, whole.sector.maxLongitude.inDegrees)
     }
 
     @Test
@@ -87,6 +115,42 @@ class ImageFillTest {
 
         assertNotSame(plain.imageSource, withGreen.imageSource)
         assertSame(withGreen.imageSource, greenAgain.imageSource)
+    }
+
+    @Test
+    fun theSoftnessOfTheEdgeIsPartOfWhatMakesAPictureSoChangingItMakesANewOne() {
+        val sharp = fill("soft", fit = ImageFit.Stretch)
+        val soft = fill("soft", fit = ImageFit.Stretch, edgeSoftness = 0.5f)
+        val sharpSurface = imageFillSurface(polygon(sharp), sharp) as SurfaceImage
+        val softSurface = imageFillSurface(polygon(soft), soft) as SurfaceImage
+        val softAgain = imageFillSurface(polygon(soft), soft) as SurfaceImage
+
+        assertNotSame(sharpSurface.imageSource, softSurface.imageSource)
+        assertSame(softSurface.imageSource, softAgain.imageSource)
+    }
+
+    @Test
+    fun extendingTheEdgesIsPartOfWhatMakesAPictureSoChangingItMakesANewOne() {
+        val plain = fill("ext", scale = 0.5f)
+        val extended = fill("ext", scale = 0.5f, extendEdges = true)
+        val plainSurface = imageFillSurface(polygon(plain), plain) as SurfaceImage
+        val extendedSurface = imageFillSurface(polygon(extended), extended) as SurfaceImage
+        val extendedAgain = imageFillSurface(polygon(extended), extended) as SurfaceImage
+
+        assertNotSame(plainSurface.imageSource, extendedSurface.imageSource)
+        assertSame(extendedSurface.imageSource, extendedAgain.imageSource)
+    }
+
+    @Test
+    fun repeatAndTheAnchorArePartOfWhatMakesAPictureSoChangingThemMakesANewOne() {
+        val plain = imageFillSurface(polygon(fill("rep")), fill("rep")) as SurfaceImage
+        val tiled = fill("rep", scale = 0.5f, repeat = true)
+        val moved = fill("rep", scale = 0.5f, repeat = true, anchorX = 0.25f)
+        val tiledSurface = imageFillSurface(polygon(tiled), tiled) as SurfaceImage
+        val movedSurface = imageFillSurface(polygon(moved), moved) as SurfaceImage
+
+        assertNotSame(plain.imageSource, tiledSurface.imageSource)
+        assertNotSame(tiledSurface.imageSource, movedSurface.imageSource)
     }
 
     @Test
