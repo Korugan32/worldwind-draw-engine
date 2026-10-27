@@ -81,8 +81,25 @@ sealed interface ShapeStyle {
      *
      * [backgroundColor], when set, fills the rest of the shape under the picture: the part a picture
      * that doesn't cover the shape leaves empty (the sides a [ImageFit.Contain] picture doesn't reach,
-     * all of the shape around an [ImageFit.Inscribed] one). Its own alpha is its opacity; [opacity] is the picture's.
-     * `null` leaves the shape empty there, so the map shows through.
+     * all of the shape around an [ImageFit.Inscribed] one). Its own alpha is its opacity within the fill. The picture and the
+     * background are blended first and [opacity] then fades the two together, so a background of the picture's main colour
+     * (a flag's red) runs seamlessly into it. `null` leaves the shape empty there, so the map shows through.
+     *
+     * [extendEdges] fills that empty part from the picture itself instead: its outermost row or column of pixels carries on
+     * outwards, so a flag's own colours continue past it (a plain red flag turns the shape red, stripes keep running) and no
+     * colour has to be picked by hand. The background colour is then laid under it and only shows through a transparent picture.
+     * It does nothing with [repeat], which leaves no empty part.
+     *
+     * [edgeSoftness] fades the picture out towards its own edges instead of cutting it off sharply: `0f` is the sharp edge, `1f` fades
+     * from the edge all the way to the middle. What shows through is what is under the picture, the [backgroundColor] or the map, so
+     * the picture melts into it. The fade is a smooth curve over a band of that fraction of half the picture's shorter side. With
+     * [repeat] every copy fades at its own edges; with [extendEdges] there is nothing to fade into and it has no effect.
+     *
+     * [anchorX]/[anchorY] move the picture: where its centre goes in the shape's bounding box, as fractions of it (0 is the west
+     * and north edge, 1 the east and south edge, 0.5 the middle). `null` keeps where [fit] puts it (the middle of the box, or the
+     * visual centre for [ImageFit.Inscribed]); either can be set alone. With [repeat] the picture, sized by [fit] and [scale],
+     * is tiled across the shape instead of placed once, one copy centred where it would have been. The tiles are laid on the ground
+     * (they grow and shrink with the map and keep the same number across the shape), not on the screen like an [ImagePattern]'s.
      *
      * Only [ImageRef.Bytes] are supported: the picture has to be in memory to be clipped to the
      * shape, and a URL is only downloaded later. A URL, an undecodable image, a platform with no
@@ -96,10 +113,44 @@ sealed interface ShapeStyle {
         val scale: Float = 1f,
         val opacity: Float = 1f,
         val backgroundColor: ColorRgba? = null,
+        val repeat: Boolean = false,
+        val anchorX: Float? = null,
+        val anchorY: Float? = null,
+        val extendEdges: Boolean = false,
+        val edgeSoftness: Float = 0f,
     ) : ShapeStyle {
         init {
+            require(edgeSoftness in 0f..1f) { "edgeSoftness must be between 0 and 1, was $edgeSoftness" }
+            require(anchorX == null || anchorX.isFinite()) { "anchorX must be a finite number, was $anchorX" }
+            require(anchorY == null || anchorY.isFinite()) { "anchorY must be a finite number, was $anchorY" }
             require(scale > 0f) { "scale must be positive, was $scale" }
             require(opacity in 0f..1f) { "opacity must be between 0 and 1, was $opacity" }
+        }
+    }
+
+    /**
+     * The shape is filled with a hatching: lines, a cross or dots in [color], one tile of [spacing] pixels repeated across it, with
+     * [backgroundColor] (when set) behind them. The gaps stay empty otherwise, so the map shows through, which is what makes it
+     * fit for marking an area (disputed, occupied, restricted) without hiding what is under it.
+     *
+     * Like an [ImagePattern], which is what it is drawn as, the tile is laid out in *screen* pixels: zooming the map doesn't change the
+     * hatching's size or spacing, only the shape under it. So [spacing] and [thickness] are pixels of the display, not of a map
+     * scale; a host that wants the same look on every screen density scales them by its density.
+     *
+     * [spacing] is the tile's side: along a horizontal or vertical line it is the distance to the next line, along a diagonal one the
+     * distance measured along an axis (the lines themselves are `spacing / sqrt(2)` apart). [thickness] is a line's width, or the
+     * diameter of a dot. On a line or a marker the hatching has nothing to fill, so [color] is used as a plain colour there.
+     */
+    data class Hatch(
+        val pattern: HatchPattern,
+        val color: ColorRgba,
+        val backgroundColor: ColorRgba? = null,
+        val spacing: Int = 12,
+        val thickness: Float = 2f,
+    ) : ShapeStyle {
+        init {
+            require(spacing in 4..256) { "spacing must be between 4 and 256 pixels, was $spacing" }
+            require(thickness > 0f && thickness <= spacing) { "thickness must be positive and at most the spacing ($spacing), was $thickness" }
         }
     }
 
@@ -131,4 +182,25 @@ enum class ImageFit {
      * and lets the shape cut what sticks out. The first ring given is the outline it is centred in.
      */
     Inscribed,
+}
+
+/** What a [ShapeStyle.Hatch] is drawn with. */
+enum class HatchPattern {
+    /** Lines rising to the right, like `/`. */
+    DiagonalUp,
+
+    /** Lines falling to the right, like `\`. */
+    DiagonalDown,
+
+    /** Horizontal lines. */
+    Horizontal,
+
+    /** Vertical lines. */
+    Vertical,
+
+    /** Both diagonals, crossing (a lattice of diamonds). */
+    Cross,
+
+    /** A dot in the middle of every tile. */
+    Dots,
 }
