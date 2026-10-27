@@ -31,14 +31,14 @@ import earth.worldwind.shape.SurfaceImage
  */
 internal fun imageFillSurface(polygon: DrawnPolygon, fill: ShapeStyle.ImageFill): Renderable? {
     val bytes = fill.image as? ImageRef.Bytes ?: return null
-    val ring = polygon.vertices.map { it.position }
-    val key = FillKey(bytes.key, fill.fit, fill.scale, fill.opacity, fill.backgroundColor, fill.repeat, fill.anchorX, fill.anchorY, fill.extendEdges, fill.edgeSoftness, ring)
+    val rings = polygon.rings.map { ring -> ring.map { it.position } }
+    val key = FillKey(bytes.key, fill.fit, fill.scale, fill.opacity, fill.backgroundColor, fill.repeat, fill.anchorX, fill.anchorY, fill.extendEdges, fill.edgeSoftness, rings)
 
     val cached = FillCache.results[key]
     val product = cached ?: run {
         val source = FillCache.pixels(bytes) ?: return null
         val rasterized = ImageFillRasterizer.render(
-            source, listOf(ring), fill.fit, fill.scale, fill.opacity, MAX_IMAGE_DIMENSION, fill.backgroundColor, fill.repeat, fill.anchorX, fill.anchorY, fill.extendEdges, fill.edgeSoftness,
+            source, rings, fill.fit, fill.scale, fill.opacity, MAX_IMAGE_DIMENSION, fill.backgroundColor, fill.repeat, fill.anchorX, fill.anchorY, fill.extendEdges, fill.edgeSoftness,
         )
             ?: return null
         val imageSource = imageSourceFromPixels(rasterized.image) ?: return null
@@ -67,7 +67,7 @@ private data class FillKey(
     val anchorY: Float?,
     val extendEdges: Boolean,
     val edgeSoftness: Float,
-    val ring: List<GeoPosition>,
+    val rings: List<List<GeoPosition>>,
 )
 
 private class FillProduct(

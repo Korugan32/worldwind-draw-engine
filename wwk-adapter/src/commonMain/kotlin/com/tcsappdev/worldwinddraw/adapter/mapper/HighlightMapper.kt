@@ -28,6 +28,7 @@ internal fun DrawnPolygon.toWwkHighlight(color: ColorRgba): Polygon {
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND
         isFollowTerrain = true
         disableEdgeSubdivision(this)
+        for (ring in extraRings) addBoundary(densifiedWwkPositions(ring.map { it.position }, isClosed = true))
         isPickEnabled = false
     }
 }

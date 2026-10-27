@@ -127,8 +127,9 @@ class DrawLayer(
     private val bodies = Reuse<EntityId, Any, List<Renderable>>()
     private val highlights = Reuse<EntityId, Any, Highlight>()
     private val vertexHandles = Reuse<Pair<EntityId, VertexId>, Any, List<Renderable>>()
-    private val midpointHandles = Reuse<Pair<EntityId, Int>, Any, List<Renderable>>()
-    private val simplifiedVertices = Reuse<EntityId, Any, List<Vertex>>()
+    // Midpoint handles are per (entity, ring, edge); the drawn and the handled vertices per (entity, ring).
+    private val midpointHandles = Reuse<Triple<EntityId, Int, Int>, Any, List<Renderable>>()
+    private val simplifiedVertices = Reuse<Pair<EntityId, Int>, Any, List<Vertex>>()
     private var applied: List<Renderable> = emptyList()
 
     // How coarsely shapes are drawn for the current camera (see [LodLevel]); chosen each frame in doRender.
@@ -137,12 +138,12 @@ class DrawLayer(
     // The level each shape was last built at. A shape that is off screen keeps its old level until it comes
     // into view: building it again for a camera that can't see it would be wasted work and memory churn.
     private val shapeLevels = HashMap<EntityId, Int>()
-    private val shapeBounds = HashMap<EntityId, Pair<List<Vertex>, GeoBounds>>()
+    private val shapeBounds = HashMap<EntityId, ShapeBox>()
     private var lodPending = false
 
     // False until the first frame when [buildOnFirstFrame]: nothing is built before the camera, and with it the level of detail, is known.
     private var ready = !buildOnFirstFrame
-    private val handleAnchorIndices = Reuse<EntityId, Any, List<Int>>()
+    private val handleAnchorIndices = Reuse<Pair<EntityId, Int>, Any, List<Int>>()
 
     // How coarsely the edit handles are laid out for the current camera (a LodLevel, with a much bigger tolerance than drawing).
     private var handleLevel = LodLevel.NONE
@@ -201,8 +202,7 @@ class DrawLayer(
 
         entities.forEach { entity ->
             if (entity !is DrawnPolygon) return@forEach
-            val renderVertices = livePreviewVertices(entity.id, drawnVertices(entity.id, entity.vertices, true, editMode), editMode, newVertexDrag)
-            val shape = if (renderVertices === entity.vertices) entity else entity.copy(vertices = renderVertices)
+            val shape = drawnPolygon(entity, editMode, newVertexDrag)
             // While a vertex of this very polygon is being dragged the picture of an image fill is left out (see withImageFillBelow).
             val dragging = editMode?.entityId == entity.id && editMode.activeDrag != null
             drawn += bodies.get(entity.id, Pair(shape, dragging)) {
@@ -218,7 +218,7 @@ class DrawLayer(
         }
         entities.forEach { entity ->
             if (entity !is DrawnPolyline) return@forEach
-            val renderVertices = livePreviewVertices(entity.id, drawnVertices(entity.id, entity.vertices, false, editMode), editMode, newVertexDrag)
+            val renderVertices = livePreviewVertices(entity.id, 0, drawnVertices(entity.id, 0, entity.vertices, false, editMode), editMode, newVertexDrag)
             val shape = if (renderVertices === entity.vertices) entity else entity.copy(vertices = renderVertices)
             highlightOf(entity.id, shape, { shape.toWwkHighlight(it) }) { r, a -> (r as Path).attributes.outlineColor.alpha = a }
                 ?.let { drawn += it.renderable }
@@ -246,15 +246,17 @@ class DrawLayer(
                     putUserProperty(MARKER_MOVE_KEY, true)
                 }
             }
-            val (vertices, isClosed) = when (editedEntity) {
-                is DrawnPolygon -> editedEntity.vertices to true
-                is DrawnPolyline -> editedEntity.vertices to false
-                is DrawnMarker, null -> null to false
+            // A polygon has a ring of handles for each of its rings; a polyline, one line of them.
+            val editedRings = when (editedEntity) {
+                is DrawnPolygon -> editedEntity.rings
+                is DrawnPolyline -> listOf(editedEntity.vertices)
+                is DrawnMarker, null -> emptyList()
             }
-            if (vertices != null) {
+            val isClosed = editedEntity is DrawnPolygon
+            editedRings.forEachIndexed { ringIndex, vertices ->
                 // Which vertices have a handle: all of them, or — for a shape with many points seen from far away — only
                 // those that matter at the current handle level, so the user edits a coarse outline with a few handles.
-                val anchors = handleAnchors(editMode.entityId, vertices, isClosed, handleStyle.detail)
+                val anchors = handleAnchors(Pair(editMode.entityId, ringIndex), vertices, isClosed, handleStyle.detail)
                 val n = vertices.size
                 anchors.forEachIndexed { k, index ->
                     val vertex = vertices[index]
@@ -274,7 +276,7 @@ class DrawLayer(
                         }
                     }
                 }
-                val skipEdgeIndex = newVertexDrag?.edgeIndex
+                val skipEdgeIndex = newVertexDrag?.takeIf { it.ringIndex == ringIndex }?.edgeIndex
                 val coarseEdges = if (isClosed) anchors.size else anchors.size - 1
                 for (k in 0 until coarseEdges) {
                     val from = anchors[k]
@@ -289,7 +291,7 @@ class DrawLayer(
                         val vertex = vertices[middle]
                         val prevId = vertices[from].id
                         val nextId = vertices[to].id
-                        drawn += midpointHandles.get(editMode.entityId to k, Triple(vertex.position, handleStyle, Triple(vertex.id, prevId, nextId))) {
+                        drawn += midpointHandles.get(Triple(editMode.entityId, ringIndex, k), Triple(vertex.position, handleStyle, Triple(vertex.id, prevId, nextId))) {
                             midpointHandleRenderables(vertex.position, handleStyle) {
                                 putUserProperty(ENTITY_ID_KEY, editMode.entityId)
                                 putUserProperty(VERTEX_ID_KEY, vertex.id)
@@ -303,10 +305,11 @@ class DrawLayer(
                         if (from == skipEdgeIndex) continue
                         val start = vertices[from].position
                         val end = vertices[to].position
-                        drawn += midpointHandles.get(editMode.entityId to k, Triple(Pair(start, end), handleStyle, from)) {
+                        drawn += midpointHandles.get(Triple(editMode.entityId, ringIndex, k), Triple(Pair(start, end), handleStyle, from)) {
                             midpointHandleRenderables(edgeMidpoint(start, end), handleStyle) {
                                 putUserProperty(ENTITY_ID_KEY, editMode.entityId)
                                 putUserProperty(EDGE_INDEX_KEY, from)
+                                putUserProperty(RING_INDEX_KEY, ringIndex)
                             }
                         }
                     }
@@ -328,9 +331,9 @@ class DrawLayer(
      * that matter at the current [handleLevel] (see [PathSimplifier]). The same list is returned while the vertices and
      * the level are the same.
      */
-    private fun handleAnchors(id: EntityId, vertices: List<Vertex>, isClosed: Boolean, detail: HandleDetail): List<Int> {
+    private fun handleAnchors(key: Pair<EntityId, Int>, vertices: List<Vertex>, isClosed: Boolean, detail: HandleDetail): List<Int> {
         if (detail == HandleDetail.All || handleLevel == LodLevel.NONE || vertices.size <= HANDLE_MIN_VERTICES) return vertices.indices.toList()
-        return handleAnchorIndices.get(id, Pair(vertices, handleLevel)) {
+        return handleAnchorIndices.get(key, Pair(vertices, handleLevel)) {
             val tolerance = LodLevel.toleranceMeters(handleLevel)
             val positions = vertices.map { it.position }
             if (isClosed) PathSimplifier.simplifyRing(positions, tolerance) else PathSimplifier.simplifyPath(positions, tolerance)
@@ -365,19 +368,34 @@ class DrawLayer(
     private fun trackShapes(entities: List<DrawableEntity>) {
         val alive = HashSet<EntityId>()
         for (entity in entities) {
-            val vertices = when (entity) {
-                is DrawnPolygon -> entity.vertices
-                is DrawnPolyline -> entity.vertices
+            // What a shape is known by (the same instance while it doesn't change), how many vertices it has and the box around them all.
+            val (token, rings) = when (entity) {
+                is DrawnPolygon -> entity.rings to entity.rings
+                is DrawnPolyline -> entity.vertices to listOf(entity.vertices)
                 else -> continue
             }
-            if (vertices.size <= LOD_MIN_VERTICES) continue
+            val vertexCount = rings.sumOf { it.size }
+            if (rings.all { it.size <= LOD_MIN_VERTICES }) continue
             alive += entity.id
             val known = shapeBounds[entity.id]
-            if (known == null || known.first !== vertices) shapeBounds[entity.id] = vertices to GeoBounds.of(vertices)
+            if (known == null || known.token !== token) shapeBounds[entity.id] = ShapeBox(token, vertexCount, GeoBounds.ofRings(rings))
             shapeLevels.getOrPut(entity.id) { lodLevel } // a new shape is built at the level everything else is at, not whole
         }
         shapeBounds.keys.retainAll(alive)
         shapeLevels.keys.retainAll(alive)
+    }
+
+    /**
+     * [entity] as it is drawn now: each of its rings simplified for the current level (all of them whole while it is edited, see
+     * [drawnVertices]), with the live point of a "+" drag spliced into the ring it belongs to. The entity itself while nothing differs.
+     */
+    private fun drawnPolygon(entity: DrawnPolygon, editMode: DrawMode.Edit?, drag: DrawMode.Edit.ActiveDrag.NewVertex?): DrawnPolygon {
+        val rings = entity.rings
+        val drawn = rings.mapIndexed { index, ring ->
+            livePreviewVertices(entity.id, index, drawnVertices(entity.id, index, ring, true, editMode), editMode, drag)
+        }
+        if (drawn.indices.all { drawn[it] === rings[it] }) return entity
+        return entity.copy(vertices = drawn.first(), extraRings = drawn.drop(1))
     }
 
     /**
@@ -386,10 +404,10 @@ class DrawLayer(
      * from space doesn't need its thousands of points, and every point costs memory and drawing time. The same
      * list instance is returned while neither the shape's vertices nor its level change.
      */
-    private fun drawnVertices(id: EntityId, vertices: List<Vertex>, isClosed: Boolean, editMode: DrawMode.Edit?): List<Vertex> {
+    private fun drawnVertices(id: EntityId, ringIndex: Int, vertices: List<Vertex>, isClosed: Boolean, editMode: DrawMode.Edit?): List<Vertex> {
         val level = shapeLevels[id] ?: LodLevel.NONE
         if (level == LodLevel.NONE || editMode?.entityId == id || vertices.size <= LOD_MIN_VERTICES) return vertices
-        return simplifiedVertices.get(id, Pair(vertices, level)) {
+        return simplifiedVertices.get(Pair(id, ringIndex), Pair(vertices, level)) {
             val tolerance = LodLevel.toleranceMeters(level)
             val positions = vertices.map { it.position }
             val kept = if (isClosed) PathSimplifier.simplifyRing(positions, tolerance) else PathSimplifier.simplifyPath(positions, tolerance)
@@ -466,9 +484,9 @@ class DrawLayer(
         lodPending = false
         for ((id, entry) in shapeBounds) {
             if ((shapeLevels[id] ?: LodLevel.NONE) == level) continue
-            if (view != null && !entry.second.intersects(view)) continue
+            if (view != null && !entry.bounds.intersects(view)) continue
             if (budget <= 0) { lodPending = true; break }
-            budget -= entry.first.size
+            budget -= entry.vertexCount
             shapeLevels[id] = level
             changed = true
         }
@@ -489,17 +507,18 @@ class DrawLayer(
     }
 
     /**
-     * [vertices] with [drag]'s live position spliced in at its edge — but only when [drag]
-     * belongs to [entityId] (an in-progress midpoint drag on a *different* entity must not
+     * [vertices] (ring [ringIndex] of the shape) with [drag]'s live position spliced in at its edge — but only when [drag]
+     * belongs to [entityId] and to that ring (an in-progress midpoint drag on a *different* entity or ring must not
      * leak a phantom point into this one). Returns [vertices] unchanged otherwise.
      */
     private fun livePreviewVertices(
         entityId: EntityId,
+        ringIndex: Int,
         vertices: List<Vertex>,
         editMode: DrawMode.Edit?,
         drag: DrawMode.Edit.ActiveDrag.NewVertex?,
     ): List<Vertex> {
-        if (drag == null || editMode == null || editMode.entityId != entityId) return vertices
+        if (drag == null || editMode == null || editMode.entityId != entityId || drag.ringIndex != ringIndex) return vertices
         val phantom = Vertex(PHANTOM_VERTEX_ID, drag.position)
         return vertices.toMutableList().apply { add(drag.edgeIndex + 1, phantom) }
     }
@@ -515,6 +534,9 @@ class DrawLayer(
 
         /** [Renderable.putUserProperty] key a midpoint-handle [Placemark] is additionally tagged with. */
         const val EDGE_INDEX_KEY = "com.tcsappdev.worldwinddraw.edgeIndex"
+
+        /** [Renderable.putUserProperty] key a midpoint handle is tagged with, next to [EDGE_INDEX_KEY]: which ring of a polygon the edge is in. */
+        const val RING_INDEX_KEY = "com.tcsappdev.worldwinddraw.ringIndex"
 
         /** Tags on a vertex handle that has hidden vertices next to it: the handled vertex before and after it (see `DrawEvent.DragStart.hitSpanPrevId`). */
         const val SPAN_PREV_KEY = "com.tcsappdev.worldwinddraw.spanPrev"
@@ -567,6 +589,9 @@ class DrawLayer(
 
     }
 }
+
+/** What the level of detail needs to know about a shape: [token] changes when its vertices do, and the [bounds] of all its rings. */
+private class ShapeBox(val token: Any, val vertexCount: Int, val bounds: GeoBounds)
 
 /** A selection highlight, and how to set its alpha (see [DrawLayer.onTick]). */
 private class Highlight(val renderable: Renderable, val setAlpha: (Float) -> Unit)

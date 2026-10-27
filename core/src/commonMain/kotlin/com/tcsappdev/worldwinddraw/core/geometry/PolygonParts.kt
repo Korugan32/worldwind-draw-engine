@@ -1,0 +1,53 @@
+package com.tcsappdev.worldwinddraw.core.geometry
+
+/**
+ * Tells the separate parts of a shape of several rings (see [DrawnPolygon]) from each other: which rings are a part's outline and which
+ * are holes in it. There is nothing in the rings that says so, it follows from where they lie under the even-odd rule: a ring inside an
+ * odd number of other rings is a hole, inside an even number (none, or a hole) an outline, and a hole belongs to the innermost ring
+ * around it.
+ *
+ * A ring is judged by one of its vertices, so rings are expected not to cross each other or share points, as the model asks for.
+ */
+object PolygonParts {
+    /**
+     * The parts of the shape the [rings] enclose, in the order of their outlines: each part is a list with its outline first and its holes
+     * after it. An island in a lake in a country is a part of its own. Rings of fewer than 3 points are left out.
+     */
+    fun split(rings: List<List<GeoPosition>>): List<List<List<GeoPosition>>> {
+        val usable = rings.filter { it.size >= 3 }
+        // For every ring, the indices of the other rings that lie around it.
+        val around = usable.mapIndexed { i, ring ->
+            usable.indices.filter { j -> j != i && contains(usable[j], ring.first()) }
+        }
+        val parts = ArrayList<MutableList<List<GeoPosition>>>()
+        val partOf = HashMap<Int, Int>() // index of an outline -> its place in parts
+        for (i in usable.indices) {
+            if (around[i].size % 2 == 0) {
+                partOf[i] = parts.size
+                parts += mutableListOf(usable[i])
+            }
+        }
+        for (i in usable.indices) {
+            if (around[i].size % 2 == 0) continue
+            // The innermost ring around this hole is the one with the most rings around it, and it is an outline.
+            val parent = around[i].maxByOrNull { around[it].size } ?: continue
+            partOf[parent]?.let { parts[it] += usable[i] }
+        }
+        return parts
+    }
+
+    /** Whether [point] is inside [ring] (the ordinary crossing-number test on latitude and longitude). */
+    private fun contains(ring: List<GeoPosition>, point: GeoPosition): Boolean {
+        var inside = false
+        var j = ring.size - 1
+        for (i in ring.indices) {
+            val a = ring[i]
+            val b = ring[j]
+            if ((a.latitude > point.latitude) != (b.latitude > point.latitude) &&
+                point.longitude < (b.longitude - a.longitude) * (point.latitude - a.latitude) / (b.latitude - a.latitude) + a.longitude
+            ) inside = !inside
+            j = i
+        }
+        return inside
+    }
+}

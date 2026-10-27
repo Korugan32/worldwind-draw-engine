@@ -3,6 +3,7 @@ package com.tcsappdev.worldwinddraw.core.raster
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.GreatCircle
 import com.tcsappdev.worldwinddraw.core.geometry.PolygonCenter
+import com.tcsappdev.worldwinddraw.core.geometry.PolygonParts
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.ImageFit
 import kotlin.math.PI
@@ -78,40 +79,55 @@ object ImageFillRasterizer {
         val boxWidth = max(2, (maxDimension * groundWidth / longest).roundToInt())
         val boxHeight = max(2, (maxDimension * latSpan / longest).roundToInt())
 
-        // For ImageFit.Inscribed: the visual centre of the first ring and the biggest circle around it, in pixels of the box grid.
-        val circle = if (fit == ImageFit.Inscribed) {
-            val center = PolygonCenter.visualCenter(rings.first())
-            Circle(
-                x = ((center.position.longitude - minLon) / lonSpan * boxWidth).toFloat(),
-                y = ((maxLat - center.position.latitude) / latSpan * boxHeight).toFloat(),
-                // The grid is as tall as the shape is in degrees of latitude, and a degree of longitude is as many pixels as a
-                // degree of latitude after the shrinking above, so one scale turns metres into pixels.
-                radius = (center.radiusMeters / PolygonCenter.METERS_PER_DEGREE * boxHeight / latSpan).toFloat(),
-            )
-        } else null
-        val fitted = placement(source, fit, scale, boxWidth, boxHeight, circle)
-        // An anchor moves the picture's centre to that fraction of the box (x from the west edge, y from the north edge).
-        val boxPlacement = if (anchorX == null && anchorY == null) fitted else Placement(
-            left = if (anchorX != null) anchorX * boxWidth - fitted.width / 2 else fitted.left,
-            top = if (anchorY != null) anchorY * boxHeight - fitted.height / 2 else fitted.top,
-            width = fitted.width,
-            height = fitted.height,
-        )
+        // What is drawn is the picture placed in one or more pieces of the shape: the whole shape for every fit but Inscribed, which gives each
+        // separate part (see PolygonParts) its own picture in its own visual centre, so the islands of an archipelago each get one.
+        val pieceRings = if (fit == ImageFit.Inscribed) PolygonParts.split(rings).ifEmpty { listOf(rings) } else listOf(rings)
+        val pieces = pieceRings.map { part ->
+            // The piece's bounding box in pixels of the box grid.
+            val partPoints = part.flatten()
+            val pieceLeft = ((partPoints.minOf { it.longitude } - minLon) / lonSpan * boxWidth).toFloat()
+            val pieceRight = ((partPoints.maxOf { it.longitude } - minLon) / lonSpan * boxWidth).toFloat()
+            val pieceTop = ((maxLat - partPoints.maxOf { it.latitude }) / latSpan * boxHeight).toFloat()
+            val pieceBottom = ((maxLat - partPoints.minOf { it.latitude }) / latSpan * boxHeight).toFloat()
 
-        // Where nothing but the picture is drawn, only the picture's own rectangle needs pixels, so all maxDimension of them go to it
-        // (and the picture comes out sharper) instead of a part of them to the empty rest of the box. A background colour, extended
+            // For ImageFit.Inscribed: the visual centre of the piece (keeping away from its holes) and the biggest circle around it, in pixels of the box grid.
+            val circle = if (fit == ImageFit.Inscribed) {
+                val center = PolygonCenter.visualCenterOfRings(part)
+                Circle(
+                    x = ((center.position.longitude - minLon) / lonSpan * boxWidth).toFloat(),
+                    y = ((maxLat - center.position.latitude) / latSpan * boxHeight).toFloat(),
+                    // The grid is as tall as the shape is in degrees of latitude, and a degree of longitude is as many pixels as a
+                    // degree of latitude after the shrinking above, so one scale turns metres into pixels.
+                    radius = (center.radiusMeters / PolygonCenter.METERS_PER_DEGREE * boxHeight / latSpan).toFloat(),
+                )
+            } else null
+            val fitted = placement(source, fit, scale, boxWidth, boxHeight, circle)
+            // An anchor moves the picture's centre to that fraction of the piece's box (x from its west edge, y from its north edge).
+            val placed = if (anchorX == null && anchorY == null) fitted else Placement(
+                left = if (anchorX != null) pieceLeft + anchorX * (pieceRight - pieceLeft) - fitted.width / 2 else fitted.left,
+                top = if (anchorY != null) pieceTop + anchorY * (pieceBottom - pieceTop) - fitted.height / 2 else fitted.top,
+                width = fitted.width,
+                height = fitted.height,
+            )
+            Piece(part, placed)
+        }
+
+        // Where nothing but the picture is drawn, only the pictures' own rectangles need pixels, so all maxDimension of them go to them
+        // (and the pictures come out sharper) instead of a part of them to the empty rest of the box. A background colour, extended
         // edges or tiles fill the whole box, so those keep the whole of it.
         var windowLeft = 0f
         var windowTop = 0f
         var windowRight = boxWidth.toFloat()
         var windowBottom = boxHeight.toFloat()
         if (!repeat && !extendEdges && background == null) {
-            val left = max(0f, boxPlacement.left)
-            val top = max(0f, boxPlacement.top)
-            val right = min(boxWidth.toFloat(), boxPlacement.left + boxPlacement.width)
-            val bottom = min(boxHeight.toFloat(), boxPlacement.top + boxPlacement.height)
-            if (right > left && bottom > top) {
-                windowLeft = left; windowTop = top; windowRight = right; windowBottom = bottom
+            val inBox = pieces.map { it.placement }.filter {
+                it.left + it.width > 0f && it.top + it.height > 0f && it.left < boxWidth && it.top < boxHeight
+            }
+            if (inBox.isNotEmpty()) {
+                windowLeft = max(0f, inBox.minOf { it.left })
+                windowTop = max(0f, inBox.minOf { it.top })
+                windowRight = min(boxWidth.toFloat(), inBox.maxOf { it.left + it.width })
+                windowBottom = min(boxHeight.toFloat(), inBox.maxOf { it.top + it.height })
             }
         }
         val windowWidth = windowRight - windowLeft
@@ -119,32 +135,51 @@ object ImageFillRasterizer {
         val toPixels = maxDimension / max(windowWidth, windowHeight)
         val width = max(2, (windowWidth * toPixels).roundToInt())
         val height = max(2, (windowHeight * toPixels).roundToInt())
-        // The window as a geographic box, and the picture's place in the window's pixels.
+        // The window as a geographic box.
         val windowMaxLat = maxLat - windowTop / boxHeight * latSpan
         val windowMinLat = maxLat - windowBottom / boxHeight * latSpan
         val windowMinLon = minLon + windowLeft / boxWidth * lonSpan
         val windowLonSpan = windowWidth / boxWidth * lonSpan
-        val placement = Placement(
-            left = (boxPlacement.left - windowLeft) * toPixels,
-            top = (boxPlacement.top - windowTop) * toPixels,
-            width = boxPlacement.width * toPixels,
-            height = boxPlacement.height * toPixels,
-        )
-        val coverage = coverage(rings, windowMinLat, windowMaxLat, windowMinLon, windowLonSpan, windowMaxLat - windowMinLat, width, height)
+        val windowLatSpan = windowMaxLat - windowMinLat
 
         val out = IntArray(width * height)
         val opacityScale = opacity.coerceIn(0f, 1f)
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                val cover = coverage[y * width + x]
-                if (cover <= 0f) continue
-                val sample = sample(source, placement, x + 0.5f, y + 0.5f, repeat, extendEdges, edgeSoftness)
-                if (background == null) {
-                    val alpha = (sample ushr 24) * cover * opacityScale
-                    if (alpha <= 0f) continue
-                    out[y * width + x] = (alpha.roundToInt().coerceIn(0, 255) shl 24) or (sample and 0x00FFFFFF)
-                } else {
-                    out[y * width + x] = over(sample, (sample ushr 24) / 255f * cover, background, cover, opacityScale)
+        for (piece in pieces) {
+            // The picture's place in the window's pixels.
+            val placement = Placement(
+                left = (piece.placement.left - windowLeft) * toPixels,
+                top = (piece.placement.top - windowTop) * toPixels,
+                width = piece.placement.width * toPixels,
+                height = piece.placement.height * toPixels,
+            )
+            // Only the pixels of the window the piece can reach are looked at: the rows and columns of its bounding box.
+            val points = piece.rings.flatten()
+            val x0 = floor((points.minOf { it.longitude } - windowMinLon) / windowLonSpan * width).toInt().coerceIn(0, width)
+            val x1 = ceil((points.maxOf { it.longitude } - windowMinLon) / windowLonSpan * width).toInt().coerceIn(0, width)
+            val y0 = floor((windowMaxLat - points.maxOf { it.latitude }) / windowLatSpan * height).toInt().coerceIn(0, height)
+            val y1 = ceil((windowMaxLat - points.minOf { it.latitude }) / windowLatSpan * height).toInt().coerceIn(0, height)
+            if (x1 <= x0 || y1 <= y0) continue
+            val coverage = coverage(
+                piece.rings,
+                minLat = windowMaxLat - y1.toDouble() / height * windowLatSpan,
+                maxLat = windowMaxLat - y0.toDouble() / height * windowLatSpan,
+                minLon = windowMinLon + x0.toDouble() / width * windowLonSpan,
+                lonSpan = (x1 - x0).toDouble() / width * windowLonSpan,
+                latSpan = (y1 - y0).toDouble() / height * windowLatSpan,
+                width = x1 - x0, height = y1 - y0,
+            )
+            for (y in y0 until y1) {
+                for (x in x0 until x1) {
+                    val cover = coverage[(y - y0) * (x1 - x0) + (x - x0)]
+                    if (cover <= 0f) continue
+                    val sample = sample(source, placement, x + 0.5f, y + 0.5f, repeat, extendEdges, edgeSoftness)
+                    if (background == null) {
+                        val alpha = (sample ushr 24) * cover * opacityScale
+                        if (alpha <= 0f) continue
+                        out[y * width + x] = (alpha.roundToInt().coerceIn(0, 255) shl 24) or (sample and 0x00FFFFFF)
+                    } else {
+                        out[y * width + x] = over(sample, (sample ushr 24) / 255f * cover, background, cover, opacityScale)
+                    }
                 }
             }
         }
@@ -172,6 +207,9 @@ object ImageFillRasterizer {
     // -- where the picture sits
 
     private class Placement(val left: Float, val top: Float, val width: Float, val height: Float)
+
+    /** A part of the shape (its rings) and where its picture goes, in pixels of the box grid. */
+    private class Piece(val rings: List<List<GeoPosition>>, val placement: Placement)
 
     /** A circle in pixels of the output grid: its centre and radius. */
     private class Circle(val x: Float, val y: Float, val radius: Float)

@@ -49,4 +49,18 @@ class GeoBoundsTest {
         val atThePole = GeoBounds(80.0, 90.0, 0.0, 10.0).grownBy(1.0)
         assertEquals(90.0, atThePole.maxLat)
     }
+
+    @Test
+    fun theBoxOfSeveralRingsHoldsThemAll() {
+        fun ring(lat: Double, lon: Double) = listOf(
+            Vertex(VertexId("a$lat$lon"), GeoPosition(lat, lon)),
+            Vertex(VertexId("b$lat$lon"), GeoPosition(lat + 1, lon + 1)),
+            Vertex(VertexId("c$lat$lon"), GeoPosition(lat, lon + 2)),
+        )
+        val box = GeoBounds.ofRings(listOf(ring(10.0, 20.0), ring(-5.0, 40.0)))
+        assertEquals(-5.0, box.minLat)
+        assertEquals(11.0, box.maxLat)
+        assertEquals(20.0, box.minLon)
+        assertEquals(42.0, box.maxLon)
+    }
 }

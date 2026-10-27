@@ -36,6 +36,12 @@ internal class GeoBounds(minLat: Double, maxLat: Double, minLon: Double, maxLon:
     companion object {
         const val WIDE_DEGREES = 180.0
 
+        /** The box around the positions of all of [rings] (for a shape of several parts, the box of the lot). */
+        fun ofRings(rings: List<List<Vertex>>): GeoBounds =
+            if (rings.size == 1) of(rings.single()) else rings.map { of(it) }.reduce { a, b ->
+                GeoBounds(minOf(a.minLat, b.minLat), maxOf(a.maxLat, b.maxLat), minOf(a.minLon, b.minLon), maxOf(a.maxLon, b.maxLon))
+            }
+
         /** The box around [vertices]' positions. */
         fun of(vertices: List<Vertex>): GeoBounds {
             var minLat = 90.0

@@ -19,7 +19,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * not a value: two spans are never equal unless they are the same object.
  */
 class VertexSpan(val prevId: VertexId?, val nextId: VertexId?) {
-    /** The shape's vertices before the drag changed anything; `null` until the first command runs. */
+    /** The vertices of the ring the dragged vertex is in, before the drag changed anything; `null` until the first command runs. */
     var originalVertices: List<Vertex>? = null
         internal set
 }
@@ -51,14 +51,20 @@ class MoveVertexWithSpanCommand(
         repository.update(withVertices(entity, original))
     }
 
+    /** The vertices of the ring (or the line) holding the dragged vertex, and whether it is closed. */
     private fun verticesOf(entity: com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity): Pair<List<Vertex>, Boolean>? = when (entity) {
-        is DrawnPolygon -> entity.vertices to true
+        is DrawnPolygon -> entity.rings.firstOrNull { ring -> ring.any { it.id == vertexId } }?.let { it to true }
         is DrawnPolyline -> entity.vertices to false
         is DrawnMarker -> null
     }
 
+    /** [entity] with the ring that holds the dragged vertex (or the line) replaced by [vertices]. */
     private fun withVertices(entity: com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity, vertices: List<Vertex>) = when (entity) {
-        is DrawnPolygon -> entity.copy(vertices = vertices)
+        is DrawnPolygon -> {
+            // The dragged vertex stays in the same ring, moved or not, so it finds it.
+            val ring = entity.rings.indexOfFirst { ring -> ring.any { it.id == vertexId } }
+            if (ring < 0) entity else entity.withRing(ring, vertices)
+        }
         is DrawnPolyline -> entity.copy(vertices = vertices)
         is DrawnMarker -> entity
     }

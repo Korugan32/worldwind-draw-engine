@@ -23,7 +23,7 @@ class MoveVertexCommand(
     private fun moveVertexTo(position: GeoPosition) {
         val entity = repository.entities.value.first { it.id == entityId }
         val updatedEntity = when (entity) {
-            is DrawnPolygon -> entity.copy(vertices = replaceVertexPosition(entity.vertices, position))
+            is DrawnPolygon -> entity.mapRings { replaceVertexPosition(it, position) }
             is DrawnPolyline -> entity.copy(vertices = replaceVertexPosition(entity.vertices, position))
             is DrawnMarker -> entity
         }

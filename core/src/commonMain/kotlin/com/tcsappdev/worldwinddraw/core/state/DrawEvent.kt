@@ -36,6 +36,8 @@ sealed interface DrawEvent {
      * [hitSpanPrevId]/[hitSpanNextId] name the handled vertices on either side of [hitVertexId]; dragging it then
      * also moves the hidden vertices in between, in proportion (see
      * [com.tcsappdev.worldwinddraw.core.geometry.SpanMover]). Both `null` is an ordinary one-vertex drag.
+     *
+     * [hitRingIndex] is which ring of a polygon [hitEdgeIndex] is an edge of (`0`, the first, for a shape with only one).
      */
     data class DragStart(
         val position: GeoPosition,
@@ -47,6 +49,7 @@ sealed interface DrawEvent {
         val hitMarker: Boolean = false,
         val hitSpanPrevId: VertexId? = null,
         val hitSpanNextId: VertexId? = null,
+        val hitRingIndex: Int = 0,
     ) : DrawEvent
 
     /** The drag continues at [position]. What's being dragged is already known from the [DragStart] that began it. */
@@ -102,10 +105,16 @@ sealed interface DrawEvent {
 
     /**
      * Removes the vertex selected while editing (the one last tapped or grabbed, [DrawMode.Edit.selectedVertexId]) as one
-     * undo step. Ignored when nothing is selected, or when removing it would leave the shape with too few vertices (a
-     * polygon needs 3, a polyline 2): the shape stays as it is and the vertex stays selected.
+     * undo step. Ignored when nothing is selected, or when removing it would leave its ring with too few vertices (a
+     * polygon ring needs 3, a polyline 2): the shape stays as it is and the vertex stays selected.
      */
     object DeleteSelectedVertex : DrawEvent
+
+    /**
+     * Removes the whole ring of a polygon that holds the vertex selected while editing — a part, or a hole — as one undo step.
+     * Ignored when nothing is selected, or when that ring is the polygon's only one (delete the shape instead).
+     */
+    object DeleteSelectedRing : DrawEvent
 
     /**
      * Cuts the selected (or edited) polygon or polyline down to about [keepFraction] of its vertices, as one undo step: the least
