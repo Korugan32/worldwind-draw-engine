@@ -671,9 +671,9 @@ class DrawEngineReducerTest {
         val again = reduce(other, DrawEvent.Click(GeoPosition(2.0, 4.0), shapeId, hitVertexId = VertexId("s2")), repository).state
         assertEquals(null, (again.mode as DrawMode.Edit).selectedVertexId, "tapping the selected vertex again clears it")
 
-        val body = reduce(other, DrawEvent.Click(GeoPosition(0.0, 0.0), shapeId), repository).state
-        assertEquals(null, (body.mode as DrawMode.Edit).selectedVertexId, "tapping the body clears it")
-        assertEquals(shapeId, (body.mode as DrawMode.Edit).entityId, "and stays in edit mode")
+        val body = reduce(other, DrawEvent.Click(GeoPosition(0.0, 0.0), shapeId), repository).state.mode as DrawMode.Edit
+        assertEquals(null, body.selectedVertexId, "tapping the body clears it")
+        assertEquals(shapeId, body.entityId, "and stays in edit mode")
     }
 
     @Test

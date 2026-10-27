@@ -593,8 +593,13 @@ class DrawLayer(
         /** A shape with this few vertices (or fewer) gets a handle on every one. */
         private const val HANDLE_MIN_VERTICES = 12
 
-        /** How many vertices' worth of shapes are brought to a new level in one frame. */
-        private const val LOD_VERTEX_BUDGET = 20_000
+        /**
+         * How many vertices' worth of shapes are brought to a new level in one frame. Every shape built again is also tessellated by WWK
+         * in the same frame, so a camera step that changes the level for a whole world at once (about 25,000 vertices for the 1914 demo)
+         * made one frame several times too long on a phone (5 to 10 frames a second while zooming). Spread over frames it is not seen:
+         * a shape is at the old level for a few frames at most.
+         */
+        private const val LOD_VERTEX_BUDGET = 4_000
 
         /** The camera's view is grown by this fraction on each side when deciding what is visible. */
         private const val VIEW_MARGIN = 0.25

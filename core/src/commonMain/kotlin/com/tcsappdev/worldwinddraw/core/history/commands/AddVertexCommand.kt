@@ -5,8 +5,8 @@ import com.tcsappdev.worldwinddraw.core.history.Command
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 
 /**
- * Inserts [newVertex] into [entityId] right after [afterEdgeIndex] (the same "which edge"
- * convention as [com.tcsappdev.worldwinddraw.core.geometry.GeometryOps.insertVertex]).
+ * Inserts [newVertex] into [entityId] right after [afterEdgeIndex]: edge `i` runs from the
+ * vertex at index `i` to the next one, and the new vertex goes between the two.
  * For a polygon with several rings, [ringIndex] says which of them (`0`, the first, by default).
  * Undo removes it again by [newVertex]'s id. Only applies to [DrawnPolygon]/
  * [DrawnPolyline]; [DrawnMarker] has no vertices to insert into.

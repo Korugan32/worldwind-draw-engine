@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.graphics.createBitmap
 import androidx.compose.ui.unit.dp
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
@@ -79,10 +81,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             // DrawLayer.handleStyle can be changed live: this cycles it through three presets.
-            var handleSizeIndex by remember { mutableStateOf(1) }
-            var paletteIndex by remember { mutableStateOf(0) }
+            var handleSizeIndex by remember { mutableIntStateOf(1) }
+            var paletteIndex by remember { mutableIntStateOf(0) }
             // Handles on every point, or only the ones that matter at this zoom (see HandleDetail).
             var allPoints by remember { mutableStateOf(false) }
+            // The live frame readout (see PerformanceReadout), and the map's window once it exists, which the readout needs to hook into.
+            var performance by remember { mutableStateOf(false) }
+            var window by remember { mutableStateOf<WorldWindow?>(null) }
             val palette = PALETTES[paletteIndex]
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -97,8 +102,9 @@ class MainActivity : ComponentActivity() {
                                 detail = if (allPoints) HandleDetail.All else HandleDetail.Adaptive,
                             ),
                             highlightStyle = palette.highlight,
-                            onWorldWindow = { worldWindow = it },
+                            onWorldWindow = { worldWindow = it; window = it },
                         )
+                        if (performance) PerformanceReadout(window, Modifier.align(Alignment.TopStart).statusBarsPadding().padding(start = 72.dp, top = 8.dp))
                         // The controls: a toolbar that follows what is being done, and the settings behind the gear (see DemoControls).
                         DemoControls(
                             stateMachine,
@@ -113,6 +119,8 @@ class MainActivity : ComponentActivity() {
                                 onPalette = { paletteIndex = it },
                                 allPoints = allPoints,
                                 onAllPoints = { allPoints = it },
+                                performance = performance,
+                                onPerformance = { performance = it },
                                 onEvictTextures = { worldWindow?.let { android.util.Log.i("Demo", "evicted ${it.engine.renderResourceCache.trimToAge(Long.MAX_VALUE)} bytes of textures"); it.requestRedraw() } },
                             ),
                             // Clear of the status bar, the gesture bar and the map's own zoom controls at the bottom left.
@@ -170,7 +178,7 @@ private fun demoMarker(): DrawnMarker = DrawnMarker(
 // picker, a file or its own assets (see ImageRef.Bytes). No network is involved.
 private fun demoPatternBytes(): ByteArray {
     val size = 96
-    val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(size, size)
     val canvas = android.graphics.Canvas(bitmap)
     canvas.drawColor(android.graphics.Color.rgb(30, 110, 190))
     val wave = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
@@ -210,7 +218,7 @@ private fun demoPatternPolygon(): DrawnPolygon = DrawnPolygon(
 // recognisable, and asymmetric, so mirroring or rotating would show.
 private fun turkishFlagBytes(width: Int): ByteArray {
     val height = width * 2 / 3
-    val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(width, height)
     val canvas = android.graphics.Canvas(bitmap)
     val u = height / 2f // the flag is 3 units wide and 2 units tall
     val red = android.graphics.Color.rgb(227, 10, 23)

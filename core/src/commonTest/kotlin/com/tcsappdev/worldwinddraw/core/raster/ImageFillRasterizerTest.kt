@@ -504,6 +504,69 @@ class ImageFillRasterizerTest {
         assertTrue(result.minLongitude < 2.0 && result.maxLongitude > 32.0, "from the first picture to the second: ${result.minLongitude}..${result.maxLongitude}")
     }
 
+    // -- the cut of a detailed shape
+
+    /** The shoelace area of a ring in square degrees. */
+    private fun area(ring: List<GeoPosition>): Double {
+        var sum = 0.0
+        for (i in ring.indices) {
+            val a = ring[i]
+            val b = ring[(i + 1) % ring.size]
+            sum += a.longitude * b.latitude - b.longitude * a.latitude
+        }
+        return abs(sum) / 2
+    }
+
+    /** A star-like ring of [count] vertices around (1, 1) that wobbles at several scales, small enough that no edge needs great-circle detail. */
+    private fun wobblyRing(count: Int, seed: Int): List<GeoPosition> {
+        val random = kotlin.random.Random(seed)
+        return List(count) { i ->
+            val angle = 2 * kotlin.math.PI * i / count
+            val radius = 0.8 + 0.12 * kotlin.math.sin(angle * 5) + 0.05 * kotlin.math.sin(angle * 23) + 0.004 * (random.nextDouble() - 0.5)
+            GeoPosition(1.0 + radius * kotlin.math.sin(angle), 1.0 + radius * kotlin.math.cos(angle))
+        }
+    }
+
+    @Test
+    fun theCoveredPixelsOfADetailedShapeAddUpToItsArea() {
+        for ((count, seed) in listOf(40 to 1, 700 to 2, 3_000 to 3)) {
+            val ring = wobblyRing(count, seed)
+            val result = assertNotNull(render(solid(10, 10, red), listOf(ring), ImageFit.Stretch, maxDimension = 700, background = null), "$count vertices")
+            val covered = result.image.argb.sumOf { (it ushr 24) / 255.0 }
+            val box = (ring.maxOf { it.longitude } - ring.minOf { it.longitude }) * (ring.maxOf { it.latitude } - ring.minOf { it.latitude })
+            val expected = area(ring) / box * result.image.width * result.image.height
+            assertTrue(abs(covered - expected) / expected < 0.005, "$count vertices: covered $covered pixels, the shape's area is $expected")
+        }
+    }
+
+    @Test
+    fun aShapeWithEdgesOnTheSamePixelRowsAndColumnsIsCutExactly() {
+        // A rectangle whose edges run along the sample lines, a plus-shaped ring (many horizontal and vertical edges) and a staircase.
+        val plus = listOf(
+            GeoPosition(0.0, 1.0), GeoPosition(1.0, 1.0), GeoPosition(1.0, 0.0), GeoPosition(2.0, 0.0), GeoPosition(2.0, 1.0), GeoPosition(3.0, 1.0),
+            GeoPosition(3.0, 2.0), GeoPosition(2.0, 2.0), GeoPosition(2.0, 3.0), GeoPosition(1.0, 3.0), GeoPosition(1.0, 2.0), GeoPosition(0.0, 2.0),
+        )
+        val result = assertNotNull(render(solid(10, 10, red), listOf(plus), ImageFit.Stretch, maxDimension = 300, background = null))
+        val covered = result.image.argb.sumOf { (it ushr 24) / 255.0 }
+        val expected = area(plus) / 9.0 * result.image.width * result.image.height // the plus fills 5 of the 9 unit squares of its box
+        assertTrue(abs(covered - expected) / expected < 0.002, "covered $covered, expected $expected")
+        assertEquals(red, result.pixel(150, 150), "the middle")
+        assertEquals(0, result.pixel(10, 10).alpha(), "a corner of the box")
+    }
+
+    @Test
+    fun aVertexExactlyOnASampleLineIsCountedOnceSoWhatLiesBeyondItIsNotFlipped() {
+        // A pentagon whose right corner lies exactly on a sample line (row 100, a quarter pixel down: 100.125 of 400 rows for 2 degrees), and
+        // a separate square further right. A corner that is counted twice would turn the square inside out on that sample line.
+        val pentagon = listOf(GeoPosition(2.0, 0.0), GeoPosition(2.0, 1.0), GeoPosition(1.499375, 1.2), GeoPosition(0.0, 1.0), GeoPosition(0.0, 0.0))
+        val square = listOf(GeoPosition(0.5, 2.0), GeoPosition(0.5, 3.0), GeoPosition(1.5, 3.0), GeoPosition(1.5, 2.0))
+        val result = assertNotNull(render(solid(10, 10, red), listOf(pentagon, square), ImageFit.Stretch, maxDimension = 600, background = null))
+        assertEquals(400, result.image.height, "the grid the corner was placed for")
+        assertEquals(255, result.pixel(450, 100).alpha(), "the square's top row, which is the row of the corner")
+        assertEquals(255, result.pixel(450, 101).alpha(), "and the row below")
+        assertEquals(0, result.pixel(450, 99).alpha(), "while the row above it is above the square")
+    }
+
     // -- the picture's own rectangle
 
 

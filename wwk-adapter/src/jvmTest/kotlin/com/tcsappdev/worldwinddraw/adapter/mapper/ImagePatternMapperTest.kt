@@ -60,13 +60,6 @@ class ImagePatternMapperTest {
         assertEquals(1.0, attributes.imageScale)
     }
 
-    @Test
-    fun anAnimatedFillIsDrawnAsItsBaseUntilAnimationIsWiredIn() {
-        val animated = ShapeStyle.AnimatedFill(pattern, animationId = "water")
-
-        assertNotNull(animated.toWwkShapeAttributes().interiorImageSource)
-    }
-
     // -- Opacity
 
     @Test

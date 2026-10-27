@@ -15,9 +15,13 @@ object PolygonParts {
      */
     fun split(rings: List<List<GeoPosition>>): List<List<List<GeoPosition>>> {
         val usable = rings.filter { it.size >= 3 }
+        // A ring can only lie around a point inside its own bounding box, which is what is asked first: most pairs of rings (the islands
+        // of an archipelago) are told apart by that alone, so the ring-by-ring test runs for few of them.
+        val boxes = usable.map { Box.of(it) }
         // For every ring, the indices of the other rings that lie around it.
         val around = usable.mapIndexed { i, ring ->
-            usable.indices.filter { j -> j != i && contains(usable[j], ring.first()) }
+            val point = ring.first()
+            usable.indices.filter { j -> j != i && boxes[j].holds(point) && contains(usable[j], point) }
         }
         val parts = ArrayList<MutableList<List<GeoPosition>>>()
         val partOf = HashMap<Int, Int>() // index of an outline -> its place in parts
@@ -34,6 +38,14 @@ object PolygonParts {
             partOf[parent]?.let { parts[it] += usable[i] }
         }
         return parts
+    }
+
+    private class Box(val minLat: Double, val maxLat: Double, val minLon: Double, val maxLon: Double) {
+        fun holds(point: GeoPosition) = point.latitude in minLat..maxLat && point.longitude in minLon..maxLon
+
+        companion object {
+            fun of(ring: List<GeoPosition>) = Box(ring.minOf { it.latitude }, ring.maxOf { it.latitude }, ring.minOf { it.longitude }, ring.maxOf { it.longitude })
+        }
     }
 
     /** Whether [point] is inside [ring] (the ordinary crossing-number test on latitude and longitude). */

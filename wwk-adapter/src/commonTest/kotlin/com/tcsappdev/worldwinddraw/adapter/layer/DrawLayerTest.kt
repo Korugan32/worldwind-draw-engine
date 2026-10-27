@@ -294,9 +294,11 @@ class DrawLayerTest {
         val doneAfterFirst = ids.count { layer.vertexCountOf(it) < 10_000 }
         assertTrue(doneAfterFirst in 1..2, "some, not all: $doneAfterFirst")
 
-        layer.applyLod(6)
+        var calls = 1
+        while (layer.hasPendingLod && calls < 10) { layer.applyLod(6); calls++ }
         assertFalse(layer.hasPendingLod)
         assertTrue(ids.all { layer.vertexCountOf(it) < 10_000 })
+        assertTrue(calls <= 3, "one big shape per call needs three calls, took $calls")
     }
 
     @Test
