@@ -8,6 +8,8 @@ import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.history.Command
 import com.tcsappdev.worldwinddraw.core.history.commands.AddEntityCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.AddRingCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.RemoveRingCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.DeleteEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.MoveMarkerCommand
@@ -69,6 +71,7 @@ object DrawEngineReducer {
         is DrawEvent.FinishDrawing -> reduceFinishDrawing(state, event, repository)
         is DrawEvent.DeleteSelected -> reduceDeleteSelected(state, repository)
         is DrawEvent.DeleteSelectedVertex -> reduceDeleteSelectedVertex(state, repository)
+        is DrawEvent.DeleteSelectedRing -> reduceDeleteSelectedRing(state, repository)
         is DrawEvent.SimplifyShape -> reduceSimplifyShape(state, event, repository)
         is DrawEvent.ResizeMarker -> reduceResizeMarker(state, event, repository)
     }
@@ -122,7 +125,7 @@ object DrawEngineReducer {
                 event.position,
                 span = if (event.hitSpanPrevId != null || event.hitSpanNextId != null) VertexSpan(event.hitSpanPrevId, event.hitSpanNextId) else null,
             )
-            event.hitEdgeIndex != null -> DrawMode.Edit.ActiveDrag.NewVertex(event.hitEdgeIndex, event.position)
+            event.hitEdgeIndex != null -> DrawMode.Edit.ActiveDrag.NewVertex(event.hitEdgeIndex, event.position, event.hitRingIndex)
             else -> return ReduceResult(state)
         }
         // Grabbing a vertex also selects it.
@@ -169,7 +172,7 @@ object DrawEngineReducer {
 
             is DrawMode.Edit.ActiveDrag.NewVertex -> {
                 val newVertexId = event.newVertexId ?: return ReduceResult(disarmed)
-                AddVertexCommand(repository, mode.entityId, drag.edgeIndex, Vertex(newVertexId, event.position))
+                AddVertexCommand(repository, mode.entityId, drag.edgeIndex, Vertex(newVertexId, event.position), drag.ringIndex)
             }
         }
         return ReduceResult(disarmed, commands = listOf(command))
@@ -198,7 +201,8 @@ object DrawEngineReducer {
         val vertexId = mode.selectedVertexId ?: return ReduceResult(state)
         if (mode.activeDrag != null) return ReduceResult(state)
         val (vertices, minimum) = when (val entity = repository.entities.value.firstOrNull { it.id == mode.entityId }) {
-            is DrawnPolygon -> entity.vertices to 3
+            // The ring that holds the vertex is what must keep enough of them.
+            is DrawnPolygon -> (entity.rings.firstOrNull { ring -> ring.any { it.id == vertexId } } ?: return ReduceResult(state)) to 3
             is DrawnPolyline -> entity.vertices to 2
             else -> return ReduceResult(state)
         }
@@ -209,6 +213,22 @@ object DrawEngineReducer {
         )
     }
 
+    /**
+     * Removes the ring that holds the selected vertex as one undoable command; looks at the shape (read only) so a request that would
+     * leave the polygon with no ring leaves no step in the history.
+     */
+    private fun reduceDeleteSelectedRing(state: DrawEngineState, repository: EntityRepository): ReduceResult {
+        val mode = state.mode as? DrawMode.Edit ?: return ReduceResult(state)
+        val vertexId = mode.selectedVertexId ?: return ReduceResult(state)
+        if (mode.activeDrag != null) return ReduceResult(state)
+        val polygon = repository.entities.value.firstOrNull { it.id == mode.entityId } as? DrawnPolygon ?: return ReduceResult(state)
+        if (polygon.rings.size < 2 || polygon.ringIndexOf(vertexId) < 0) return ReduceResult(state)
+        return ReduceResult(
+            state.copy(mode = mode.copy(selectedVertexId = null)),
+            commands = listOf(RemoveRingCommand(repository, mode.entityId, vertexId)),
+        )
+    }
+
     /** Simplifies the selected or edited polygon/polyline; looks at the shape (read only) so a request that would remove nothing leaves no step in the history. */
     private fun reduceSimplifyShape(state: DrawEngineState, event: DrawEvent.SimplifyShape, repository: EntityRepository): ReduceResult {
         val entityId = when (val mode = state.mode) {
@@ -216,8 +236,9 @@ object DrawEngineReducer {
             is DrawMode.Edit -> if (mode.activeDrag == null) mode.entityId else return ReduceResult(state)
             else -> return ReduceResult(state)
         }
+        // Every ring of a polygon keeps at least 3 vertices, so what can be removed is what lies above that in each.
         val (count, minimum) = when (val entity = repository.entities.value.firstOrNull { it.id == entityId }) {
-            is DrawnPolygon -> entity.vertices.size to 3
+            is DrawnPolygon -> entity.rings.sumOf { it.size } to 3 * entity.rings.size
             is DrawnPolyline -> entity.vertices.size to 2
             else -> return ReduceResult(state)
         }
@@ -301,6 +322,17 @@ object DrawEngineReducer {
         val mode = state.mode as? DrawMode.Draw ?: return ReduceResult(state)
         if (event.vertexIds.size != mode.pendingVertices.size) return ReduceResult(state)
         val vertices = mode.pendingVertices.zip(event.vertexIds) { position, vertexId -> Vertex(vertexId, position) }
+
+        // A ring for a polygon that exists: it joins that polygon, which stays the one being edited. (Like finishing a new shape, this
+        // ends the drawing session, so it is not reported as a step of the draft's own history either.)
+        if (mode.targetEntityId != null) {
+            if (mode.entityType != DrawableEntityType.Polygon || vertices.size < 3) return ReduceResult(state)
+            if (repository.entities.value.firstOrNull { it.id == mode.targetEntityId } !is DrawnPolygon) return ReduceResult(state)
+            return ReduceResult(
+                state.copy(mode = DrawMode.Edit(mode.targetEntityId)),
+                commands = listOf(AddRingCommand(repository, mode.targetEntityId, vertices)),
+            )
+        }
 
         val entity = when (mode.entityType) {
             DrawableEntityType.Polygon ->

@@ -12,7 +12,8 @@ import kotlin.math.roundToInt
 
 /**
  * Cuts a polygon or polyline down to about [keepFraction] of its vertices (see [Visvalingam]); undo brings every vertex back, in
- * its place. The vertices that are kept are the original ones, ids and all, and a polygon never goes below 3 or a polyline below 2.
+ * its place. The vertices that are kept are the original ones, ids and all, and a polygon ring never goes below 3 or a polyline below 2.
+ * Every ring of a polygon is cut on its own, so a hole or a small part keeps its share of points instead of losing them to a big one.
  *
  * The shape's vertices are remembered when [execute] first runs, so the pure reducer can build the command without reading the
  * repository, and running it again (redo) gives the same result from the same starting vertices.
@@ -26,31 +27,34 @@ class SimplifyShapeCommand(
         require(keepFraction > 0f && keepFraction <= 1f) { "keepFraction must be in (0, 1], was $keepFraction" }
     }
 
-    private var original: List<Vertex>? = null
+    /** The shape's rings before it was cut: one list for a polyline. */
+    private var original: List<List<Vertex>>? = null
 
     override fun execute() {
         val entity = repository.entities.value.firstOrNull { it.id == entityId } ?: return
         val (current, isClosed) = when (entity) {
-            is DrawnPolygon -> entity.vertices to true
-            is DrawnPolyline -> entity.vertices to false
+            is DrawnPolygon -> entity.rings to true
+            is DrawnPolyline -> listOf(entity.vertices) to false
             is DrawnMarker -> return
         }
         val source = original ?: current.also { original = it }
-        val kept = Visvalingam.simplify(source.map { it.position }, isClosed, (source.size * keepFraction).roundToInt())
-        replaceVertices(entity, kept.map { source[it] })
+        replaceRings(entity, source.map { ring ->
+            val kept = Visvalingam.simplify(ring.map { it.position }, isClosed, (ring.size * keepFraction).roundToInt())
+            kept.map { ring[it] }
+        })
     }
 
     override fun undo() {
         val source = original ?: return
         val entity = repository.entities.value.firstOrNull { it.id == entityId } ?: return
-        replaceVertices(entity, source)
+        replaceRings(entity, source)
     }
 
-    private fun replaceVertices(entity: com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity, vertices: List<Vertex>) {
+    private fun replaceRings(entity: com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity, rings: List<List<Vertex>>) {
         repository.update(
             when (entity) {
-                is DrawnPolygon -> entity.copy(vertices = vertices)
-                is DrawnPolyline -> entity.copy(vertices = vertices)
+                is DrawnPolygon -> entity.copy(vertices = rings.first(), extraRings = rings.drop(1))
+                is DrawnPolyline -> entity.copy(vertices = rings.first())
                 is DrawnMarker -> entity
             }
         )

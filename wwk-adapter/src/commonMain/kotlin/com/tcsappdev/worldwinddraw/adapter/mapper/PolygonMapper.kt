@@ -13,6 +13,9 @@ import earth.worldwind.shape.Polygon
  * default, the polygon is placed at literal sea-level height and normal terrain (e.g.
  * mountains) depth-tests it away — invisible even though it "exists".
  *
+ * A polygon of several rings (see [DrawnPolygon]) is ONE WWK `Polygon` with a boundary for each ring: WWK fills it with the even-odd
+ * rule, so a ring inside another one is a hole, and separate rings are separate parts, as in the model (checked on an emulator).
+ *
  * Long edges get their great-circle points from [densifiedWwkPositions] rather than from WWK, which would set aside memory for
  * 63 of them on every edge (see there).
  *
@@ -27,6 +30,7 @@ fun DrawnPolygon.toWwkPolygon(): Polygon =
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND
         isFollowTerrain = true
         disableEdgeSubdivision(this)
+        for (ring in extraRings) addBoundary(densifiedWwkPositions(ring.map { it.position }, isClosed = true))
         val outline = outlineStyle
         if (outline != null) {
             val lineAttributes = outline.toWwkLineAttributes(outlineWidth)

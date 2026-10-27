@@ -421,6 +421,89 @@ class ImageFillRasterizerTest {
         assertFailsWith<IllegalArgumentException> { ShapeStyle.ImageFill(ImageRef.Bytes("k", byteArrayOf(1)), edgeSoftness = Float.NaN) }
     }
 
+    // -- shapes of several rings
+
+    /** The pixel of this result at a point of the map. */
+    private fun RasterizedFill.at(lat: Double, lon: Double): Int {
+        val x = ((lon - minLongitude) / (maxLongitude - minLongitude) * image.width).toInt()
+        val y = ((maxLatitude - lat) / (maxLatitude - minLatitude) * image.height).toInt()
+        return if (x in 0 until image.width && y in 0 until image.height) pixel(x, y) else 0
+    }
+
+    private fun ring(lat: Double, lon: Double, side: Double) = square(lat, lon, side)
+
+    @Test
+    fun anInscribedPictureKeepsAwayFromAHole() {
+        // 10 x 10 with a 6 x 6 hole in its south west: the picture goes to the roomy north east, not into the middle of the box.
+        val result = assertNotNull(
+            render(solid(20, 20, red), listOf(ring(0.0, 0.0, 10.0), ring(0.5, 0.5, 6.0)), ImageFit.Inscribed, background = null)
+        )
+        val centerLat = (result.minLatitude + result.maxLatitude) / 2
+        val centerLon = (result.minLongitude + result.maxLongitude) / 2
+        assertTrue(centerLat > 5.5 && centerLon > 5.5, "the picture is in the north east, at ($centerLat, $centerLon)")
+        assertEquals(0, result.at(3.0, 3.0).alpha(), "and the hole stays empty")
+    }
+
+    @Test
+    fun anInscribedPictureHasNoPictureInTheHoleEvenWhereItReachesIt() {
+        // A big picture (scale 3) over a shape with a hole is cut by the hole.
+        val result = assertNotNull(
+            render(solid(20, 20, red), listOf(ring(0.0, 0.0, 10.0), ring(3.0, 3.0, 4.0)), ImageFit.Inscribed, scale = 3f)
+        )
+        assertEquals(0, result.at(5.0, 5.0).alpha(), "in the hole")
+        assertEquals(red, result.at(1.5, 1.5), "beside it")
+    }
+
+    @Test
+    fun everySeparatePartOfAnInscribedFillGetsItsOwnWholePicture() {
+        val big = ring(0.0, 0.0, 10.0)
+        val small = ring(0.0, 30.0, 4.0)
+        val result = assertNotNull(render(quadrants(), listOf(big, small), ImageFit.Inscribed, maxDimension = 400, background = null))
+
+        // The whole picture, red, green, blue, yellow from north west to south east, in each of the two parts (the pixel grid is a little
+        // off the exact quarter points, so the colours are compared to within a few levels).
+        fun assertColour(expected: Int, actual: Int, what: String) {
+            for (shift in listOf(16, 8, 0)) {
+                assertTrue(abs(((expected shr shift) and 0xFF) - ((actual shr shift) and 0xFF)) <= 40, "$what: expected ${expected.toUInt().toString(16)}, was ${actual.toUInt().toString(16)}")
+            }
+        }
+        assertColour(red, result.at(6.8, 3.2), "big part, north west")
+        assertColour(green, result.at(6.8, 6.8), "big part, north east")
+        assertColour(blue, result.at(3.2, 3.2), "big part, south west")
+        assertColour(yellow, result.at(3.2, 6.8), "big part, south east")
+        assertColour(red, result.at(2.7, 31.3), "small part, north west")
+        assertColour(green, result.at(2.7, 32.7), "small part, north east")
+        assertColour(blue, result.at(1.3, 31.3), "small part, south west")
+        assertColour(yellow, result.at(1.3, 32.7), "small part, south east")
+        assertEquals(0, result.at(5.0, 20.0).alpha(), "nothing between them")
+    }
+
+    @Test
+    fun theAnchorOfAnInscribedFillIsAFractionOfEachPartsOwnBox() {
+        // At 0.25 of the whole box the picture would be centred between the parts, outside both; at 0.25 of each part's box it is inside it.
+        val result = assertNotNull(
+            render(quadrants(), listOf(ring(0.0, 0.0, 10.0), ring(0.0, 30.0, 10.0)), ImageFit.Inscribed, scale = 0.4f, anchorX = 0.25f, anchorY = 0.5f, maxDimension = 400, background = null)
+        )
+        assertTrue(result.at(5.0, 2.5).alpha() > 0, "the first part has its picture, centred a quarter of the way in")
+        assertTrue(result.at(5.0, 32.5).alpha() > 0, "so does the second, in the same place of its own box")
+    }
+
+    @Test
+    fun aFillOfAnotherFitStillLaysOnePictureOverTheWholeBoxAndCutsItToEveryRing() {
+        val result = assertNotNull(render(quadrants(), listOf(ring(0.0, 0.0, 10.0), ring(0.0, 30.0, 10.0)), ImageFit.Stretch, maxDimension = 400))
+        // One picture over the box 0..10 by 0..40: its colours change halfway, at longitude 20, so each part shows one colour pair.
+        assertEquals(red, result.at(8.0, 5.0), "first part, north")
+        assertEquals(blue, result.at(2.0, 5.0), "first part, south")
+        assertEquals(green, result.at(8.0, 35.0), "second part, north")
+        assertEquals(yellow, result.at(2.0, 35.0), "second part, south")
+    }
+
+    @Test
+    fun aShapeOfSeveralPartsBuildsOneResultWhoseBoxHoldsAllThePictures() {
+        val result = assertNotNull(render(solid(20, 20, red), listOf(ring(0.0, 0.0, 10.0), ring(0.0, 30.0, 4.0)), ImageFit.Inscribed, background = null))
+        assertTrue(result.minLongitude < 2.0 && result.maxLongitude > 32.0, "from the first picture to the second: ${result.minLongitude}..${result.maxLongitude}")
+    }
+
     // -- the picture's own rectangle
 
 

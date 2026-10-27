@@ -117,6 +117,41 @@ class ImageFillTest {
         assertSame(withGreen.imageSource, greenAgain.imageSource)
     }
 
+    private fun withRings(style: ShapeStyle, vararg extra: List<Vertex>) = polygon(style).copy(extraRings = extra.toList())
+
+    private fun squareRing(prefix: String, lat: Double, lon: Double, size: Double) = listOf(
+        Vertex(VertexId("${prefix}1"), GeoPosition(lat, lon)),
+        Vertex(VertexId("${prefix}2"), GeoPosition(lat + size, lon)),
+        Vertex(VertexId("${prefix}3"), GeoPosition(lat + size, lon + size)),
+        Vertex(VertexId("${prefix}4"), GeoPosition(lat, lon + size)),
+    )
+
+    @Test
+    fun aPictureForAPolygonOfSeveralRingsIsLaidOverTheBoxOfThemAll() {
+        val stretched = fill("rings", fit = ImageFit.Stretch)
+        val polygon = withRings(stretched, squareRing("p", 30.0, 40.0, 2.0)) // another part, far from the first
+        val surface = assertNotNull(imageFillSurface(polygon, stretched)) as SurfaceImage
+
+        assertEquals(10.0, surface.sector.minLatitude.inDegrees)
+        assertEquals(32.0, surface.sector.maxLatitude.inDegrees)
+        assertEquals(20.0, surface.sector.minLongitude.inDegrees)
+        assertEquals(42.0, surface.sector.maxLongitude.inDegrees)
+    }
+
+    @Test
+    fun theRingsArePartOfWhatMakesAPictureSoAddingOrChangingOneMakesANewOne() {
+        val stretched = fill("rings2", fit = ImageFit.Stretch)
+        val one = imageFillSurface(polygon(stretched), stretched) as SurfaceImage
+        val withHole = withRings(stretched, squareRing("h", 11.0, 22.0, 1.0))
+        val holed = imageFillSurface(withHole, stretched) as SurfaceImage
+        val holedAgain = imageFillSurface(withRings(stretched, squareRing("h", 11.0, 22.0, 1.0)), stretched) as SurfaceImage
+        val biggerHole = imageFillSurface(withRings(stretched, squareRing("h", 11.0, 22.0, 2.0)), stretched) as SurfaceImage
+
+        assertNotSame(one.imageSource, holed.imageSource)
+        assertSame(holed.imageSource, holedAgain.imageSource)
+        assertNotSame(holed.imageSource, biggerHole.imageSource)
+    }
+
     @Test
     fun theSoftnessOfTheEdgeIsPartOfWhatMakesAPictureSoChangingItMakesANewOne() {
         val sharp = fill("soft", fit = ImageFit.Stretch)

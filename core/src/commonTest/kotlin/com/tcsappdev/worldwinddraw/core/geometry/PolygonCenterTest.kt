@@ -91,4 +91,67 @@ class PolygonCenterTest {
         assertTrue(contains(star, center.position))
         assertTrue(center.radiusMeters > 5.0 * 111_194.9, "the inner radius is about 6: got ${center.radiusMeters}")
     }
+
+    // -- several rings
+
+    private fun box(lat: Double, lon: Double, size: Double) = ring(lat to lon, lat to lon + size, lat + size to lon + size, lat + size to lon)
+
+    private fun inBox(p: GeoPosition, lat: Double, lon: Double, size: Double) =
+        p.latitude in lat..lat + size && p.longitude in lon..lon + size
+
+    @Test
+    fun aHoleInTheMiddleMovesTheCentreIntoTheBandAroundIt() {
+        // 10 x 10 with a 6 x 6 hole in the middle: what is left is a band 2 wide. Its fattest circle is in a corner, where it can
+        // lean against the hole's corner: centred at (c, c) it touches the outer edges at c and the corner at sqrt(2) (2 - c), so c = 1.17.
+        val center = PolygonCenter.visualCenterOfRings(listOf(box(0.0, 0.0, 10.0), box(2.0, 2.0, 6.0)))
+
+        assertTrue(!inBox(center.position, 2.0, 2.0, 6.0), "not in the hole: ${center.position}")
+        assertTrue(abs(center.radiusMeters - 1.17 * 111_194.9) < 0.03 * 111_194.9, "radius ${center.radiusMeters}")
+        assertTrue(center.radiusMeters > 1.05 * 111_194.9, "more than the plain band's half width")
+    }
+
+    @Test
+    fun aHoleOffToOneSideLeavesTheCentreInTheFattestOtherPart() {
+        // 10 x 10 with a 6 x 6 hole in its south west: the roomy part is the north east, where a circle of radius 2 fits at (7, 7).
+        val center = PolygonCenter.visualCenterOfRings(listOf(box(0.0, 0.0, 10.0), box(0.5, 0.5, 6.0)))
+
+        assertTrue(!inBox(center.position, 0.5, 0.5, 6.0), "not in the hole")
+        assertTrue(center.position.latitude > 5.0 && center.position.longitude > 5.0, "in the north east: ${center.position}")
+        assertTrue(center.radiusMeters > 1.7 * 111_194.9, "a circle that big does not fit anywhere near the hole, radius ${center.radiusMeters}")
+    }
+
+    @Test
+    fun ofSeveralPartsTheCentreIsInTheFattestOne() {
+        val big = box(0.0, 0.0, 10.0)
+        val small = box(20.0, 30.0, 2.0)
+        val center = PolygonCenter.visualCenterOfRings(listOf(small, big)) // the small one is the first ring
+
+        assertTrue(inBox(center.position, 0.0, 0.0, 10.0), "in the big part: ${center.position}")
+        // (A degree of longitude is shrunk by the middle latitude of the whole shape, parts far apart included: about 4.9 here.)
+        assertTrue(abs(center.radiusMeters - 4.9 * 111_194.9) < 0.1 * 111_194.9, "radius ${center.radiusMeters}")
+    }
+
+    @Test
+    fun anIslandInALakeCountsAsPartOfTheShapeAgain() {
+        // Outer 20 x 20, a lake 16 x 16 leaving a band 2 wide, and an island 6 x 6 in the lake: the island is the fattest place.
+        val center = PolygonCenter.visualCenterOfRings(listOf(box(0.0, 0.0, 20.0), box(2.0, 2.0, 16.0), box(7.0, 7.0, 6.0)))
+
+        assertTrue(inBox(center.position, 7.0, 7.0, 6.0), "on the island: ${center.position}")
+        assertTrue(abs(center.radiusMeters - 3 * 111_194.9) < 0.06 * 111_194.9, "radius ${center.radiusMeters}")
+    }
+
+    @Test
+    fun withASingleRingTheRingFunctionGivesTheSameAsTheOldOne() {
+        val horseshoe = ring(0.0 to 0.0, 10.0 to 0.0, 10.0 to 10.0, 7.0 to 10.0, 7.0 to 3.0, 3.0 to 3.0, 3.0 to 10.0, 0.0 to 10.0)
+        assertEquals(PolygonCenter.visualCenter(horseshoe), PolygonCenter.visualCenterOfRings(listOf(horseshoe)))
+    }
+
+    @Test
+    fun ringsWithTooFewPointsAreIgnoredAndWithNothingElseTheFirstPointIsGiven() {
+        val square = box(0.0, 0.0, 10.0)
+        val line = ring(30.0 to 30.0, 31.0 to 31.0)
+        assertEquals(PolygonCenter.visualCenter(square), PolygonCenter.visualCenterOfRings(listOf(square, line)))
+        assertEquals(PolygonCenter.VisualCenter(line.first(), 0.0), PolygonCenter.visualCenterOfRings(listOf(line)))
+        assertFailsWith<IllegalArgumentException> { PolygonCenter.visualCenterOfRings(emptyList()) }
+    }
 }

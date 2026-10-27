@@ -201,6 +201,22 @@ private fun DrawModeOverlay(
                 Text("Delete point")
             }
         }
+        // More rings for the polygon being edited: draw one (tap points, then Finish); inside the shape it makes a hole, away from it another part.
+        // "Delete ring" removes the whole ring of the selected vertex (undoable).
+        val allEntities by entityRepository.entities.collectAsState()
+        val editMode = state.mode as? DrawMode.Edit
+        val editedPolygon = allEntities.firstOrNull { it.id == editMode?.entityId } as? DrawnPolygon
+        Row(modifier = Modifier.padding(top = 4.dp)) {
+            Button(
+                onClick = { editMode?.let { stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Draw(DrawableEntityType.Polygon, emptyList(), targetEntityId = it.entityId))) } },
+                enabled = editedPolygon != null && editMode?.activeDrag == null,
+            ) { Text("Add ring") }
+            Button(
+                onClick = { stateMachine.onEvent(DrawEvent.DeleteSelectedRing) },
+                enabled = editedPolygon != null && editedPolygon.rings.size > 1 && editMode?.selectedVertexId != null,
+                modifier = Modifier.padding(start = 4.dp),
+            ) { Text("Delete ring") }
+        }
         Row(modifier = Modifier.padding(top = 4.dp)) {
             Button(onClick = { historyManager.undo() }, enabled = canUndo) {
                 Text("Undo")
@@ -236,13 +252,13 @@ private fun DrawModeOverlay(
         // Cuts the selected/edited polygon or polyline down to a fraction of its points (one undo step); only offered when there is something to cut.
         val selectedShape = entities.firstOrNull { it.id == selectedId }
         val shapeVertexCount = when (selectedShape) {
-            is DrawnPolygon -> selectedShape.vertices.size
+            is DrawnPolygon -> selectedShape.rings.sumOf { it.size }
             is DrawnPolyline -> selectedShape.vertices.size
             else -> null
         }
         if (shapeVertexCount != null && shapeVertexCount > 6) {
             var keepFraction by remember { mutableStateOf(0.5f) }
-            val minimum = if (selectedShape is DrawnPolygon) 3 else 2
+            val minimum = if (selectedShape is DrawnPolygon) 3 * selectedShape.rings.size else 2
             val target = maxOf(minimum, (shapeVertexCount * keepFraction).roundToInt())
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
                 Slider(value = keepFraction, onValueChange = { keepFraction = it }, valueRange = 0.05f..1f, modifier = Modifier.width(140.dp))
@@ -270,17 +286,18 @@ private fun DrawModeOverlay(
 private fun pointCount(mode: DrawMode, entities: List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>): String {
     val id = (mode as? DrawMode.Edit)?.entityId ?: return ""
     val count = when (val entity = entities.firstOrNull { it.id == id }) {
-        is DrawnPolygon -> entity.vertices.size
+        is DrawnPolygon -> entity.rings.sumOf { it.size }
         is DrawnPolyline -> entity.vertices.size
         else -> return ""
     }
-    return " [$count points]"
+    val rings = (entities.firstOrNull { it.id == id } as? DrawnPolygon)?.rings?.size?.takeIf { it > 1 }?.let { ", $it rings" } ?: ""
+    return " [$count points$rings]"
 }
 
 private fun describeMode(mode: DrawMode): String = when (mode) {
     is DrawMode.Idle -> "Idle"
     is DrawMode.Pan -> "Pan"
-    is DrawMode.Draw -> "Draw (${mode.entityType}, ${mode.pendingVertices.size} points)" + when (val drag = mode.activeDrag) {
+    is DrawMode.Draw -> "Draw (${mode.targetEntityId?.let { "a ring for ${it.id}" } ?: mode.entityType.toString()}, ${mode.pendingVertices.size} points)" + when (val drag = mode.activeDrag) {
         is DrawMode.Draw.ActiveDrag.MovingPoint -> " - moving point ${drag.index}"
         is DrawMode.Draw.ActiveDrag.InsertingPoint -> " - adding a point on edge ${drag.edgeIndex}"
         null -> ""

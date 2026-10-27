@@ -48,12 +48,19 @@ sealed interface DrawMode {
      * and — unlike editing a real entity — it isn't undone by repository commands, because the
      * draft isn't an entity yet. Instead each step is recorded as a change of the whole mode (see
      * `UndoableModeChange`), so undo/redo walk through the sketching step by step.
+     *
+     * With [targetEntityId] set the draft is not a new shape but one more ring of that polygon — another part, or a hole in one, which
+     * of the two follows from where it is drawn (see [com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon]). Finishing then adds
+     * the ring to it instead of creating an entity, and leaves the engine editing that polygon (like finishing any drawing, that ends
+     * the drawing session and is not itself something undo can take back; the ring can be deleted again, see [DrawEvent.DeleteSelectedRing]).
+     * Only meaningful for [DrawableEntityType.Polygon].
      */
     data class Draw(
         val entityType: DrawableEntityType,
         val pendingVertices: List<GeoPosition>,
         val style: ShapeStyle = DEFAULT_STYLE,
         val activeDrag: ActiveDrag? = null,
+        val targetEntityId: EntityId? = null,
     ) : DrawMode {
         /** What an in-progress drag inside [Draw] is doing. */
         sealed interface ActiveDrag {
@@ -125,7 +132,7 @@ sealed interface DrawMode {
             ) : ActiveDrag
 
             /**
-             * A midpoint handle on edge [edgeIndex] is being dragged into a new vertex.
+             * A midpoint handle on edge [edgeIndex] (of ring [ringIndex], `0` for a shape with only one) is being dragged into a new vertex.
              * Deliberately does NOT touch [com.tcsappdev.worldwinddraw.core.repository.EntityRepository]
              * while dragging — [position] only drives a live rendering preview (see
              * `DrawLayer`). Only one [com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand],
@@ -134,7 +141,7 @@ sealed interface DrawMode {
              * for undo (remove) than for redo (re-insert at the right position), which is
              * exactly the kind of state a pure reducer can't safely fake.
              */
-            data class NewVertex(val edgeIndex: Int, val position: GeoPosition) : ActiveDrag
+            data class NewVertex(val edgeIndex: Int, val position: GeoPosition, val ringIndex: Int = 0) : ActiveDrag
 
             /**
              * The marker being edited is being moved. [origin] is where it was when the drag began: the

@@ -125,7 +125,10 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
                     pendingNewVertexId = VertexId(Random.nextLong().toString())
                     rememberGrabOffset(fromPosition, toPosition)
                     stateMachine.onEvent(
-                        DrawEvent.DragStart(fromPosition.toGeoPosition(), hitVertexId = null, hitEntityId = entityId, hitEdgeIndex = edgeIndex)
+                        DrawEvent.DragStart(
+                            fromPosition.toGeoPosition(), hitVertexId = null, hitEntityId = entityId, hitEdgeIndex = edgeIndex,
+                            hitRingIndex = ringIndexOf(userObject) ?: 0,
+                        )
                     )
                 }
                 else -> {
@@ -187,4 +190,7 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
 
     private fun edgeIndexOf(userObject: Any): Int? =
         (userObject as? Renderable)?.getUserProperty(DrawLayer.EDGE_INDEX_KEY)
+
+    private fun ringIndexOf(userObject: Any): Int? =
+        (userObject as? Renderable)?.getUserProperty(DrawLayer.RING_INDEX_KEY)
 }
