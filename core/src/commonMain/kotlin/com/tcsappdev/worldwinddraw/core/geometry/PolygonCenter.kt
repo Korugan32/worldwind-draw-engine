@@ -14,6 +14,9 @@ import kotlin.math.sqrt
  * or in a thin stretch, while this lands in the body. It also gives the radius of the biggest circle that fits inside the
  * shape around that point.
  *
+ * With several rings (see [DrawnPolygon]) the shape is what they enclose under the even-odd rule, so a hole is a place the centre keeps
+ * away from, and the centre of a shape of separate parts is in the fattest of them.
+ *
  * It is the polylabel algorithm (Mapbox): the bounding box is cut into cells, and only those that could still hold a point
  * better than the best found so far are cut again.
  *
@@ -37,25 +40,33 @@ object PolygonCenter {
      * [relativePrecision] of the polygon's size (the default, 0.1%, is far finer than a label or picture can show).
      * A ring of fewer than 3 points has no inside: the first point, radius 0.
      */
-    fun visualCenter(ring: List<GeoPosition>, relativePrecision: Double = 0.001): VisualCenter {
-        if (ring.isEmpty()) throw IllegalArgumentException("A ring needs at least one point")
-        if (ring.size < 3) return VisualCenter(ring.first(), 0.0)
+    fun visualCenter(ring: List<GeoPosition>, relativePrecision: Double = 0.001): VisualCenter =
+        visualCenterOfRings(listOf(ring), relativePrecision)
 
-        val minLat = ring.minOf { it.latitude }
-        val maxLat = ring.maxOf { it.latitude }
-        val minLon = ring.minOf { it.longitude }
-        val maxLon = ring.maxOf { it.longitude }
+    /**
+     * The visual centre of the shape the [rings] enclose together (even-odd: a ring inside another is a hole). The first ring
+     * is the one used when there is nothing to find (no ring has 3 points, or the shape has no area). Rings of fewer than 3
+     * points are ignored.
+     */
+    fun visualCenterOfRings(rings: List<List<GeoPosition>>, relativePrecision: Double = 0.001): VisualCenter {
+        val first = rings.firstOrNull()?.firstOrNull() ?: throw IllegalArgumentException("A ring needs at least one point")
+        val usable = rings.filter { it.size >= 3 }
+        if (usable.isEmpty()) return VisualCenter(first, 0.0)
+
+        val minLat = usable.minOf { ring -> ring.minOf { it.latitude } }
+        val maxLat = usable.maxOf { ring -> ring.maxOf { it.latitude } }
+        val minLon = usable.minOf { ring -> ring.minOf { it.longitude } }
+        val maxLon = usable.maxOf { ring -> ring.maxOf { it.longitude } }
         val lonScale = cos((minLat + maxLat) / 2 * PI / 180.0).coerceAtLeast(0.01)
 
         // The flat map: x is longitude shrunk, y is latitude.
-        val xs = DoubleArray(ring.size) { ring[it].longitude * lonScale }
-        val ys = DoubleArray(ring.size) { ring[it].latitude }
+        val flat = usable.map { ring -> FlatRing(DoubleArray(ring.size) { ring[it].longitude * lonScale }, DoubleArray(ring.size) { ring[it].latitude }) }
         val left = minLon * lonScale
         val right = maxLon * lonScale
         val width = right - left
         val height = maxLat - minLat
         val size = min(width, height)
-        if (size <= 0.0) return VisualCenter(ring.first(), 0.0)
+        if (size <= 0.0) return VisualCenter(first, 0.0)
         val precision = max(width, height) * relativePrecision
 
         val queue = CellQueue()
@@ -64,15 +75,15 @@ object PolygonCenter {
         while (x < right) {
             var y = minLat
             while (y < maxLat) {
-                queue.add(Cell(x + half, y + half, half, xs, ys))
+                queue.add(Cell(x + half, y + half, half, flat))
                 y += size
             }
             x += size
         }
 
-        // Start from the area centroid and the middle of the box, both common good guesses.
-        var best = centroidCell(xs, ys) ?: queue.peek()!!
-        val boxCell = Cell(left + width / 2, minLat + height / 2, 0.0, xs, ys)
+        // Start from the area centroid of the first ring and the middle of the box, both common good guesses.
+        var best = centroidCell(flat) ?: queue.peek()!!
+        val boxCell = Cell(left + width / 2, minLat + height / 2, 0.0, flat)
         if (boxCell.distance > best.distance) best = boxCell
 
         var cells = 0
@@ -82,10 +93,10 @@ object PolygonCenter {
             // Nothing in this cell can beat the best by more than the precision: leave it.
             if (cell.maxDistance - best.distance <= precision) continue
             half = cell.half / 2
-            queue.add(Cell(cell.x - half, cell.y - half, half, xs, ys))
-            queue.add(Cell(cell.x + half, cell.y - half, half, xs, ys))
-            queue.add(Cell(cell.x - half, cell.y + half, half, xs, ys))
-            queue.add(Cell(cell.x + half, cell.y + half, half, xs, ys))
+            queue.add(Cell(cell.x - half, cell.y - half, half, flat))
+            queue.add(Cell(cell.x + half, cell.y - half, half, flat))
+            queue.add(Cell(cell.x - half, cell.y + half, half, flat))
+            queue.add(Cell(cell.x + half, cell.y + half, half, flat))
         }
 
         return VisualCenter(
@@ -94,8 +105,13 @@ object PolygonCenter {
         )
     }
 
+    /** One ring on the flat map. */
+    private class FlatRing(val xs: DoubleArray, val ys: DoubleArray)
+
     /** The cell at the polygon's area centroid, or `null` if the polygon has no area. */
-    private fun centroidCell(xs: DoubleArray, ys: DoubleArray): Cell? {
+    private fun centroidCell(rings: List<FlatRing>): Cell? {
+        val xs = rings.first().xs
+        val ys = rings.first().ys
         var area = 0.0
         var cx = 0.0
         var cy = 0.0
@@ -108,12 +124,12 @@ object PolygonCenter {
             j = i
         }
         if (area == 0.0) return null
-        return Cell(cx / area, cy / area, 0.0, xs, ys)
+        return Cell(cx / area, cy / area, 0.0, rings)
     }
 
     /** A square cell of the search: its centre, half its side, and how far inside the polygon its centre is (negative: outside). */
-    private class Cell(val x: Double, val y: Double, val half: Double, xs: DoubleArray, ys: DoubleArray) {
-        val distance = signedDistance(x, y, xs, ys)
+    private class Cell(val x: Double, val y: Double, val half: Double, rings: List<FlatRing>) {
+        val distance = signedDistance(x, y, rings)
 
         /** The most any point of this cell could be inside by: its centre's distance plus the cell's half diagonal. */
         val maxDistance = distance + half * SQRT2
@@ -165,17 +181,21 @@ object PolygonCenter {
 
     private val SQRT2 = sqrt(2.0)
 
-    /** Distance from (px, py) to the nearest edge of the polygon: positive inside it, negative outside. */
-    private fun signedDistance(px: Double, py: Double, xs: DoubleArray, ys: DoubleArray): Double {
+    /** Distance from (px, py) to the nearest edge of any ring: positive inside the shape (an odd number of rings round it), negative outside. */
+    private fun signedDistance(px: Double, py: Double, rings: List<FlatRing>): Double {
         var inside = false
         var minDistanceSquared = Double.MAX_VALUE
-        var j = xs.size - 1
-        for (i in xs.indices) {
-            val ax = xs[i]; val ay = ys[i]
-            val bx = xs[j]; val by = ys[j]
-            if ((ay > py) != (by > py) && px < (bx - ax) * (py - ay) / (by - ay) + ax) inside = !inside
-            minDistanceSquared = min(minDistanceSquared, segmentDistanceSquared(px, py, ax, ay, bx, by))
-            j = i
+        for (ring in rings) {
+            val xs = ring.xs
+            val ys = ring.ys
+            var j = xs.size - 1
+            for (i in xs.indices) {
+                val ax = xs[i]; val ay = ys[i]
+                val bx = xs[j]; val by = ys[j]
+                if ((ay > py) != (by > py) && px < (bx - ax) * (py - ay) / (by - ay) + ax) inside = !inside
+                minDistanceSquared = min(minDistanceSquared, segmentDistanceSquared(px, py, ax, ay, bx, by))
+                j = i
+            }
         }
         val distance = sqrt(minDistanceSquared)
         return if (inside) distance else -distance
