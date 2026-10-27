@@ -40,18 +40,6 @@ class StyleAttributesMapperTest {
     // trivial one-line pass-through so the coverage loss is small.
 
     @Test
-    fun animatedFillDelegatesToItsBaseStyle() {
-        val base = ShapeStyle.SolidColor(ColorRgba(0, 255, 0))
-
-        val animatedAttributes = ShapeStyle.AnimatedFill(base, animationId = "water-mask").toWwkShapeAttributes()
-        val baseAttributes = base.toWwkShapeAttributes()
-
-        assertEquals(baseAttributes.interiorColor.red, animatedAttributes.interiorColor.red)
-        assertEquals(baseAttributes.interiorColor.green, animatedAttributes.interiorColor.green)
-        assertEquals(baseAttributes.interiorColor.blue, animatedAttributes.interiorColor.blue)
-    }
-
-    @Test
     fun solidColorMapsToOutlineColorAndWidthWithNoInteriorChange() {
         // toWwkLineAttributes must write outline* properties, not interior* — a polyline has
         // no interior, so writing interiorColor here would silently drop the entity's color.
@@ -60,16 +48,6 @@ class StyleAttributesMapperTest {
         assertEquals(1f, attributes.outlineColor.blue)
         assertEquals(4f, attributes.outlineWidth)
         assertNull(attributes.outlineImageSource)
-    }
-
-    @Test
-    fun animatedFillDelegatesLineAttributesToItsBaseStyle() {
-        val base = ShapeStyle.SolidColor(ColorRgba(0, 0, 255))
-
-        val animatedAttributes = ShapeStyle.AnimatedFill(base, animationId = "dashes").toWwkLineAttributes(width = 2f)
-
-        assertEquals(1f, animatedAttributes.outlineColor.blue)
-        assertEquals(2f, animatedAttributes.outlineWidth)
     }
 
     // No tests for toWwkPlacemarkAttributes() here: WWK's PlacemarkAttributes' default

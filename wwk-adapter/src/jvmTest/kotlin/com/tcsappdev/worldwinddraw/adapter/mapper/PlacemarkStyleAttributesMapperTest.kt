@@ -21,14 +21,4 @@ class PlacemarkStyleAttributesMapperTest {
         assertEquals(24.0, attributes.imageScale)
         assertNull(attributes.imageSource)
     }
-
-    @Test
-    fun animatedFillDelegatesPlacemarkAttributesToItsBaseStyle() {
-        val base = ShapeStyle.SolidColor(ColorRgba(0, 255, 0))
-
-        val animatedAttributes = ShapeStyle.AnimatedFill(base, animationId = "pulse").toWwkPlacemarkAttributes(size = 24f)
-
-        assertEquals(1f, animatedAttributes.imageColor.green)
-        assertEquals(24.0, animatedAttributes.imageScale)
-    }
 }

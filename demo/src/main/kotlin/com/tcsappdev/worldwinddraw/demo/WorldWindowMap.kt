@@ -157,6 +157,8 @@ private class ViewControlsTouch(private val controls: ViewControlsLayer, private
             val wasHolding = holding
             holding = false
             handler.removeCallbacks(repeat)
+            // A press that pressed a control is a click, which accessibility services have to be told about.
+            if (wasHolding && event.actionMasked == MotionEvent.ACTION_UP) view.performClick()
             wasHolding
         }
         else -> holding

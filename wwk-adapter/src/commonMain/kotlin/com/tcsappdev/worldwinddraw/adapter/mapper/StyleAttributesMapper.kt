@@ -32,7 +32,6 @@ fun ShapeStyle.toWwkShapeAttributes(): ShapeAttributes {
         // The picture is drawn by a separate surface image under the polygon (see DrawLayer), so
         // the polygon's own interior is left invisible — but still there, so it can be picked.
         is ShapeStyle.ImageFill -> ShapeAttributes().apply { interiorColor = Color(1f, 1f, 1f, 0f) }
-        is ShapeStyle.AnimatedFill -> base.toWwkShapeAttributes()
     }
 }
 
@@ -56,7 +55,6 @@ fun ShapeStyle.toWwkLineAttributes(width: Float): ShapeAttributes {
             outlineWidth = width
         }
         is ShapeStyle.ImageFill -> imageOutline(image, opacity, width)
-        is ShapeStyle.AnimatedFill -> base.toWwkLineAttributes(width)
     }
 }
 
@@ -79,7 +77,6 @@ fun ShapeStyle.toWwkPlacemarkAttributes(size: Float): PlacemarkAttributes {
             imageScale = size.toDouble()
         }
         is ShapeStyle.ImageFill -> imageIcon(image, opacity, size)
-        is ShapeStyle.AnimatedFill -> base.toWwkPlacemarkAttributes(size)
     }
 }
 

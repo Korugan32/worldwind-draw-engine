@@ -301,52 +301,86 @@ object ImageFillRasterizer {
         lonSpan: Double, latSpan: Double,
         width: Int, height: Int,
     ): FloatArray {
-        // Every edge as a segment in pixel space, with great-circle detail along it.
-        val xs = ArrayList<Float>()
-        val ys = ArrayList<Float>()
-        val edgeStarts = ArrayList<Int>()
+        // Every edge as a segment in pixel space, with great-circle detail along it, each ring's points in turn.
+        val xs = FloatBuffer()
+        val ys = FloatBuffer()
+        val ringStarts = ArrayList<Int>()
         for (ring in rings) {
             if (ring.size < 3) continue
-            val dense = ArrayList<GeoPosition>()
+            ringStarts.add(xs.size)
             for (i in ring.indices) {
                 val from = ring[i]
                 val to = ring[(i + 1) % ring.size]
-                dense.add(from)
-                dense.addAll(GreatCircle.intermediatePoints(from, to, EDGE_STEP_DEGREES))
-            }
-            edgeStarts.add(xs.size)
-            for (p in dense) {
-                xs.add(((p.longitude - minLon) / lonSpan * width).toFloat())
-                ys.add(((maxLat - p.latitude) / latSpan * height).toFloat())
+                xs.add(((from.longitude - minLon) / lonSpan * width).toFloat())
+                ys.add(((maxLat - from.latitude) / latSpan * height).toFloat())
+                for (p in GreatCircle.intermediatePoints(from, to, EDGE_STEP_DEGREES)) {
+                    xs.add(((p.longitude - minLon) / lonSpan * width).toFloat())
+                    ys.add(((maxLat - p.latitude) / latSpan * height).toFloat())
+                }
             }
         }
-        edgeStarts.add(xs.size)
+        ringStarts.add(xs.size)
+
+        // The edges: point k to the next point of its ring (the last one back to the first).
+        val edgeCount = xs.size
+        val ex0 = FloatArray(edgeCount)
+        val ey0 = FloatArray(edgeCount)
+        val ex1 = FloatArray(edgeCount)
+        val ey1 = FloatArray(edgeCount)
+        var edge = 0
+        for (r in 0 until ringStarts.size - 1) {
+            val start = ringStarts[r]
+            val count = ringStarts[r + 1] - start
+            for (k in 0 until count) {
+                val next = start + (k + 1) % count
+                ex0[edge] = xs.data[start + k]; ey0[edge] = ys.data[start + k]
+                ex1[edge] = xs.data[next]; ey1[edge] = ys.data[next]
+                edge++
+            }
+        }
+
+        // Which scanlines each edge crosses, so a scanline only looks at its own edges instead of all of them: the cost is that of the
+        // edges and the pixels, not their product (a coastline of 100,000 edges over 4,000 scanlines would be 400 million looks).
+        val scanlines = height * SUBSAMPLES
+        val firstLine = IntArray(edgeCount)
+        val lastLine = IntArray(edgeCount)
+        val perLine = IntArray(scanlines + 1)
+        for (e in 0 until edgeCount) {
+            val low = min(ey0[e], ey1[e])
+            val high = max(ey0[e], ey1[e])
+            // The range the edge can cover, a line wider each way, then cut to exactly the scanlines the test below accepts.
+            var first = max(0, ceil(low * SUBSAMPLES - 0.5f).toInt() - 1)
+            var last = min(scanlines - 1, ceil(high * SUBSAMPLES - 0.5f).toInt() + 1)
+            while (first <= last && !crosses(ey0[e], ey1[e], scanY(first))) first++
+            while (last >= first && !crosses(ey0[e], ey1[e], scanY(last))) last--
+            firstLine[e] = first
+            lastLine[e] = last
+            for (n in first..last) perLine[n + 1]++
+        }
+        for (n in 0 until scanlines) perLine[n + 1] += perLine[n]
+        val lineEdges = IntArray(perLine[scanlines])
+        val fill = perLine.copyOf(scanlines)
+        for (e in 0 until edgeCount) for (n in firstLine[e]..lastLine[e]) lineEdges[fill[n]++] = e
 
         val result = FloatArray(width * height)
         val row = FloatArray(width)
-        val crossings = ArrayList<Float>()
+        var crossings = FloatArray(64)
         val weight = 1f / SUBSAMPLES
         for (y in 0 until height) {
             row.fill(0f)
             for (s in 0 until SUBSAMPLES) {
-                val sy = y + (s + 0.5f) / SUBSAMPLES
-                crossings.clear()
-                for (ringIndex in 0 until edgeStarts.size - 1) {
-                    val start = edgeStarts[ringIndex]
-                    val end = edgeStarts[ringIndex + 1]
-                    val count = end - start
-                    for (k in 0 until count) {
-                        val x0 = xs[start + k]; val y0 = ys[start + k]
-                        val x1 = xs[start + (k + 1) % count]; val y1 = ys[start + (k + 1) % count]
-                        // Half-open on the upper end so a vertex shared by two edges is counted once.
-                        if ((y0 <= sy && y1 > sy) || (y1 <= sy && y0 > sy)) {
-                            crossings.add(x0 + (sy - y0) / (y1 - y0) * (x1 - x0))
-                        }
-                    }
+                val n = y * SUBSAMPLES + s
+                val sy = scanY(n)
+                val from = perLine[n]
+                val count = perLine[n + 1] - from
+                if (count > crossings.size) crossings = FloatArray(count * 2)
+                for (i in 0 until count) {
+                    val e = lineEdges[from + i]
+                    crossings[i] = ex0[e] + (sy - ey0[e]) / (ey1[e] - ey0[e]) * (ex1[e] - ex0[e])
                 }
-                crossings.sort()
+                crossings.sort(0, count)
                 var i = 0
-                while (i + 1 < crossings.size) {
+                while (i + 1 < count) {
                     addSpan(row, crossings[i], crossings[i + 1], weight)
                     i += 2
                 }
@@ -354,6 +388,23 @@ object ImageFillRasterizer {
             for (x in 0 until width) result[y * width + x] = min(1f, row[x])
         }
         return result
+    }
+
+    /** The y of sample line [n] (four to a pixel row), in pixels from the top. */
+    private fun scanY(n: Int): Float = (n / SUBSAMPLES) + ((n % SUBSAMPLES) + 0.5f) / SUBSAMPLES
+
+    /** Whether an edge from height [y0] to [y1] crosses the line at [sy]: half-open on the upper end so a vertex shared by two edges is counted once. */
+    private fun crosses(y0: Float, y1: Float, sy: Float) = (y0 <= sy && y1 > sy) || (y1 <= sy && y0 > sy)
+
+    /** A growable list of floats without boxing. */
+    private class FloatBuffer {
+        var data = FloatArray(1024)
+        var size = 0
+
+        fun add(value: Float) {
+            if (size == data.size) data = data.copyOf(size * 2)
+            data[size++] = value
+        }
     }
 
     private fun addSpan(row: FloatArray, from: Float, to: Float, weight: Float) {

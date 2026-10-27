@@ -24,6 +24,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -76,6 +78,8 @@ class DemoSettings(
     val allPoints: Boolean,
     val onAllPoints: (Boolean) -> Unit,
     val onEvictTextures: () -> Unit,
+    val performance: Boolean,
+    val onPerformance: (Boolean) -> Unit,
 )
 
 private enum class Kind { Normal, Primary, Danger }
@@ -102,8 +106,8 @@ fun DemoControls(
     val canRedo by historyManager.canRedo.collectAsState()
     val entities by entityRepository.entities.collectAsState()
     var panel by remember { mutableStateOf<Panel?>(null) }
-    var labelLook by remember { mutableStateOf(0) }
-    var keepFraction by remember { mutableStateOf(0.5f) }
+    var labelLook by remember { mutableIntStateOf(0) }
+    var keepFraction by remember { mutableFloatStateOf(0.5f) }
     // The note being written, while its window is open (see the Note button).
     var noteText by remember { mutableStateOf<String?>(null) }
 
@@ -321,6 +325,10 @@ private fun SettingsPanel(settings: DemoSettings, extra: @Composable ColumnScope
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Text("A handle on every point", color = TEXT, fontSize = 13.sp, modifier = Modifier.weight(1f))
             Switch(checked = settings.allPoints, onCheckedChange = settings.onAllPoints)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text("Performance readout", color = TEXT, fontSize = 13.sp, modifier = Modifier.weight(1f))
+            Switch(checked = settings.performance, onCheckedChange = settings.onPerformance)
         }
         Pill("Evict textures (debug)", selected = false) { settings.onEvictTextures() }
         extra()

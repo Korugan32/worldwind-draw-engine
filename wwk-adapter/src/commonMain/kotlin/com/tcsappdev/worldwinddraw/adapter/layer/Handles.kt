@@ -83,8 +83,8 @@ private const val MIDPOINT_FALLBACK_OPACITY = 0.75f
  * arc, which is *not* the same curve a naive planar midpoint sits on — over a long edge
  * the two visibly diverge, so a `core`-side pure-math midpoint would float off the
  * actual rendered line. This is why the computation lives here in `wwk-adapter` and not
- * in `core.geometry.GeometryOps`: it only stays correct by depending on the exact same
- * WWK math the shape itself is drawn with.
+ * in `core`: it only stays correct by depending on the exact same WWK math the shape
+ * itself is drawn with.
  */
 internal fun edgeMidpoints(vertices: List<GeoPosition>, isClosed: Boolean): List<Pair<Int, GeoPosition>> {
     val edgeCount = if (isClosed) vertices.size else vertices.size - 1

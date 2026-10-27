@@ -153,13 +153,6 @@ sealed interface ShapeStyle {
             require(thickness > 0f && thickness <= spacing) { "thickness must be positive and at most the spacing ($spacing), was $thickness" }
         }
     }
-
-    /**
-     * Reserved for a fill whose appearance changes over time: [base] is what is drawn today —
-     * the animation itself isn't wired to rendering yet (and the water-masking effect it was
-     * first meant for is out of scope, see docs/PLAN.md).
-     */
-    data class AnimatedFill(val base: ShapeStyle, val animationId: String) : ShapeStyle
 }
 
 /** How an [ShapeStyle.ImageFill]'s picture is sized against the shape's bounding box. Always centred, aspect ratio kept unless noted. */
