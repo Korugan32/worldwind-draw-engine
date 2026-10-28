@@ -1,9 +1,12 @@
 package com.tcsappdev.worldwinddraw.demo
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -19,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.graphics.createBitmap
 import androidx.compose.ui.unit.dp
+import com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
@@ -28,6 +32,8 @@ import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 import com.tcsappdev.worldwinddraw.core.history.HistoryManager
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
+import com.tcsappdev.worldwinddraw.core.state.DrawEvent
+import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.HandleDetail
@@ -36,7 +42,13 @@ import com.tcsappdev.worldwinddraw.core.style.ImageFit
 import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
+import com.tcsappdev.worldwinddraw.serialization.DrawFormatException
+import com.tcsappdev.worldwinddraw.serialization.DrawJson
+import com.tcsappdev.worldwinddraw.serialization.GeoJson
+import com.tcsappdev.worldwinddraw.serialization.ImportResult
+import com.tcsappdev.worldwinddraw.serialization.Kml
 import earth.worldwind.WorldWindow
+import java.io.File
 
 private class Palette(val label: String, val highlight: HighlightStyle, val ring: ColorRgba, val plus: ColorRgba)
 
@@ -68,6 +80,44 @@ class MainActivity : ComponentActivity() {
     private val historyManager = HistoryManager()
     private val stateMachine = DrawStateMachine(historyManager, entityRepository)
     private var worldWindow: WorldWindow? = null
+
+    // The file formats the demo saves to and loads from, each in a file of the app's own storage (see DrawJson, GeoJson, Kml).
+    private class FileFormat(val name: String, val file: String, val encode: (List<DrawableEntity>) -> String, val decode: (String) -> ImportResult)
+
+    private val formats = listOf(
+        FileFormat("drawing", "drawing.json", { DrawJson.encode(it, pretty = true) }, { ImportResult(DrawJson.decode(it), emptyList()) }),
+        FileFormat("GeoJSON", "drawing.geojson", { GeoJson.encode(it, pretty = true) }, GeoJson::decode),
+        FileFormat("KML", "drawing.kml", { Kml.encode(it, pretty = true) }, Kml::decode),
+    )
+
+    private fun save(format: FileFormat) {
+        val shapes = entityRepository.entities.value
+        val text = format.encode(shapes)
+        File(filesDir, format.file).writeText(text)
+        Toast.makeText(this, "Saved ${shapes.size} shapes as ${format.name} (${text.length / 1024} KB)", Toast.LENGTH_SHORT).show()
+    }
+
+    // Replaces what is on the map with the saved shapes. Dropping the history with it: its commands are about shapes that are gone.
+    private fun load(format: FileFormat) {
+        val file = File(filesDir, format.file)
+        if (!file.exists()) {
+            Toast.makeText(this, "No ${format.name} saved yet", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val result = try {
+            format.decode(file.readText())
+        } catch (e: DrawFormatException) {
+            Toast.makeText(this, "Cannot load: ${e.message}", Toast.LENGTH_LONG).show()
+            return
+        }
+        result.warnings.forEach { android.util.Log.w("Demo", "${format.name}: $it") }
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Idle))
+        historyManager.clear()
+        entityRepository.entities.value.forEach { entityRepository.remove(it.id) }
+        result.entities.forEach(entityRepository::add)
+        val warnings = if (result.warnings.isEmpty()) "" else ", ${result.warnings.size} warnings (see logcat)"
+        Toast.makeText(this, "Loaded ${result.entities.size} shapes$warnings", Toast.LENGTH_SHORT).show()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,6 +173,15 @@ class MainActivity : ComponentActivity() {
                                 onPerformance = { performance = it },
                                 onEvictTextures = { worldWindow?.let { android.util.Log.i("Demo", "evicted ${it.engine.renderResourceCache.trimToAge(Long.MAX_VALUE)} bytes of textures"); it.requestRedraw() } },
                             ),
+                            // Saving and loading, in each of the file formats.
+                            extraSettings = {
+                                formats.forEach { format ->
+                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Pill("Save ${format.name}", selected = false) { save(format) }
+                                        Pill("Load ${format.name}", selected = false) { load(format) }
+                                    }
+                                }
+                            },
                             // Clear of the status bar, the gesture bar and the map's own zoom controls at the bottom left.
                             modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 88.dp),
                         )

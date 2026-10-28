@@ -25,4 +25,5 @@ dependencyResolutionManagement {
 rootProject.name = "worldwind-draw-engine"
 include(":core")
 include(":wwk-adapter")
+include(":serialization")
 include(":demo")

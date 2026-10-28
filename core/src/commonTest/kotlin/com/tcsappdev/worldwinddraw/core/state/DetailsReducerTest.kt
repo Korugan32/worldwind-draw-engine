@@ -59,11 +59,23 @@ class DetailsReducerTest {
     }
 
     @Test
+    fun thePropertiesOfTheSelectedOrEditedShapeAreSetAsOneCommand() {
+        val repository = repository(polygon("P"))
+        for (mode in listOf(select("P"), edit("P"))) {
+            val result = reduce(mode, DrawEvent.SetProperties(mapOf("year" to "1914")), repository)
+            result.commands.single().execute()
+            assertEquals(mapOf("year" to "1914"), repository.entities.value.single().properties)
+            repository.update(repository.entities.value.single().let { (it as DrawnPolygon).copy(properties = emptyMap()) })
+        }
+    }
+
+    @Test
     fun detailsAreIgnoredWhenNothingIsSelected() {
         val repository = repository(polygon("P"))
         for (mode in listOf(DrawMode.Idle, DrawMode.Pan, DrawMode.Draw(DrawableEntityType.Polygon, emptyList()))) {
             assertTrue(reduce(mode, DrawEvent.SetMarkerLabel(MarkerLabel("x")), repository).commands.isEmpty(), "$mode")
             assertTrue(reduce(mode, DrawEvent.SetDescription("x"), repository).commands.isEmpty(), "$mode")
+            assertTrue(reduce(mode, DrawEvent.SetProperties(mapOf("x" to "1")), repository).commands.isEmpty(), "$mode")
             assertTrue(reduce(mode, DrawEvent.SetZIndex(3), repository).commands.isEmpty(), "$mode")
             assertTrue(reduce(mode, DrawEvent.BringToFront, repository).commands.isEmpty(), "$mode")
             assertTrue(reduce(mode, DrawEvent.SendToBack, repository).commands.isEmpty(), "$mode")
@@ -158,5 +170,20 @@ class DetailsReducerTest {
         assertEquals("a pin", marker().description)
         history.undo()
         assertEquals(null, marker().description)
+    }
+
+    @Test
+    fun propertiesAreAnUndoStepToo() {
+        val repository = repository(DrawnMarker(EntityId("M"), style, GeoPosition(0.0, 0.0)))
+        val history = HistoryManager()
+        val machine = DrawStateMachine(history, repository)
+        machine.onEvent(DrawEvent.Click(GeoPosition(0.0, 0.0), EntityId("M")))
+
+        machine.onEvent(DrawEvent.SetProperties(mapOf("kind" to "city")))
+        assertEquals(mapOf("kind" to "city"), repository.entities.value.single().properties)
+        history.undo()
+        assertEquals(emptyMap(), repository.entities.value.single().properties)
+        history.redo()
+        assertEquals(mapOf("kind" to "city"), repository.entities.value.single().properties)
     }
 }

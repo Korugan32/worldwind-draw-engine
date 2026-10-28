@@ -34,6 +34,20 @@ class EntityDetailsTest {
     }
 
     @Test
+    fun everyKindOfShapeStartsWithNoProperties() {
+        for (entity in listOf<DrawableEntity>(polygon, polyline, marker)) assertEquals(emptyMap(), entity.properties, "${entity.id}")
+    }
+
+    @Test
+    fun propertiesCanBeSetOnEveryKindAndTouchNothingElse() {
+        val data = mapOf("population" to "5000000", "code" to "TR")
+        assertEquals(polygon.copy(properties = data), polygon.withProperties(data))
+        assertEquals(polyline.copy(properties = data), polyline.withProperties(data))
+        assertEquals(marker.copy(properties = data), marker.withProperties(data))
+        assertEquals(emptyMap(), polygon.withProperties(data).withProperties(emptyMap()).properties)
+    }
+
+    @Test
     fun aZIndexCanBeSetOnEveryKindAndTouchesNothingElse() {
         assertEquals(polygon.copy(zIndex = 3), polygon.withZIndex(3))
         assertEquals(polyline.copy(zIndex = -2), polyline.withZIndex(-2))
