@@ -33,6 +33,15 @@ sealed interface DrawableEntity {
      * kind, the order they were added in. A tap on a place where shapes overlap reaches the one that is drawn on top.
      */
     val zIndex: Int
+
+    /**
+     * Data attached to the shape, as named values: what a GeoJSON feature's `properties` or a KML placemark's `ExtendedData` hold (a
+     * population, a country code, a year, a source). The library only keeps it, it is not drawn, and it is carried through the file
+     * formats: nothing in it means anything to the engine, so a host may put what it needs there. Values are text; a number or a flag
+     * read from a file comes in as its text (`5000000`, `true`) and goes back out as a text.
+     * Empty when there is none.
+     */
+    val properties: Map<String, String>
 }
 
 /** This shape with another [description] (see [DrawableEntity.description]). */
@@ -40,6 +49,13 @@ fun DrawableEntity.withDescription(description: String?): DrawableEntity = when 
     is DrawnPolygon -> copy(description = description)
     is DrawnPolyline -> copy(description = description)
     is DrawnMarker -> copy(description = description)
+}
+
+/** This shape with other [properties] (see [DrawableEntity.properties]). */
+fun DrawableEntity.withProperties(properties: Map<String, String>): DrawableEntity = when (this) {
+    is DrawnPolygon -> copy(properties = properties)
+    is DrawnPolyline -> copy(properties = properties)
+    is DrawnMarker -> copy(properties = properties)
 }
 
 /** This shape with another [zIndex] (see [DrawableEntity.zIndex]). */

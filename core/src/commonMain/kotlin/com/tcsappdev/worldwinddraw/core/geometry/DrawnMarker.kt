@@ -24,6 +24,7 @@ data class DrawnMarker(
     val label: MarkerLabel? = null,
     override val description: String? = null,
     override val zIndex: Int = 0,
+    override val properties: Map<String, String> = emptyMap(),
 ) : DrawableEntity {
     init {
         require(size > 0f) { "size must be greater than 0" }

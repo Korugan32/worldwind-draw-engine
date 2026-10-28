@@ -100,6 +100,51 @@ class DetailCommandsTest {
         assertEquals(before, repository.entities.value)
     }
 
+    // -- the properties
+
+    @Test
+    fun propertiesAreSetOnAnyKindAndUndoPutsTheOldOnesBack() {
+        val repository = repository()
+        for (id in listOf("P", "L", "M")) {
+            val command = SetPropertiesCommand(repository, EntityId(id), mapOf("name" to id))
+            command.execute()
+            assertEquals(mapOf("name" to id), repository.get(id).properties)
+            command.undo()
+            assertEquals(emptyMap(), repository.get(id).properties)
+        }
+    }
+
+    @Test
+    fun settingPropertiesReplacesAllOfThemAndUndoBringsAllBack() {
+        val repository = repository()
+        SetPropertiesCommand(repository, polygon.id, mapOf("a" to "1", "b" to "2")).execute()
+        val second = SetPropertiesCommand(repository, polygon.id, mapOf("c" to "3"))
+        second.execute()
+        assertEquals(mapOf("c" to "3"), repository.get("P").properties)
+        second.undo()
+        assertEquals(mapOf("a" to "1", "b" to "2"), repository.get("P").properties)
+        second.execute() // redo
+        assertEquals(mapOf("c" to "3"), repository.get("P").properties)
+        SetPropertiesCommand(repository, polygon.id, emptyMap()).execute()
+        assertEquals(emptyMap(), repository.get("P").properties)
+    }
+
+    @Test
+    fun propertiesForAMissingShapeAreIgnored() {
+        val repository = repository()
+        val before = repository.entities.value
+        SetPropertiesCommand(repository, EntityId("missing"), mapOf("x" to "1")).also { it.execute(); it.undo() }
+        assertEquals(before, repository.entities.value)
+    }
+
+    @Test
+    fun undoingBeforeAnythingWasDoneChangesNothing() {
+        val repository = repository()
+        val before = repository.entities.value
+        SetPropertiesCommand(repository, polygon.id, mapOf("x" to "1")).undo()
+        assertEquals(before, repository.entities.value)
+    }
+
     // -- the place in the drawing order
 
     @Test

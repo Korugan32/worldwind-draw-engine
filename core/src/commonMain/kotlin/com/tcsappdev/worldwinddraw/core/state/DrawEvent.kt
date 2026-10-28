@@ -108,6 +108,13 @@ sealed interface DrawEvent {
     data class SetDescription(val description: String?) : DrawEvent
 
     /**
+     * An explicit request to give the shape that is currently selected or being edited the properties [properties], replacing all it
+     * had (an empty map for none; see [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity.properties]). A no-op in any other
+     * mode. Undoable.
+     */
+    data class SetProperties(val properties: Map<String, String>) : DrawEvent
+
+    /**
      * An explicit request to put the shape that is currently selected or being edited at [zIndex] in the drawing order (see
      * [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity.zIndex]). A no-op in any other mode. Undoable.
      */

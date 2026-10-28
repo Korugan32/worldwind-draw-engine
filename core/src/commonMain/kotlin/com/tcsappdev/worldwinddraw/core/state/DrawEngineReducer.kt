@@ -11,6 +11,7 @@ import com.tcsappdev.worldwinddraw.core.history.commands.AddEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddRingCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.RemoveRingCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.SetDescriptionCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.SetPropertiesCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.SetMarkerLabelCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.SetZIndexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddVertexCommand
@@ -79,6 +80,7 @@ object DrawEngineReducer {
         is DrawEvent.ResizeMarker -> reduceResizeMarker(state, event, repository)
         is DrawEvent.SetMarkerLabel -> reduceOnSelected(state) { SetMarkerLabelCommand(repository, it, event.label) }
         is DrawEvent.SetDescription -> reduceOnSelected(state) { SetDescriptionCommand(repository, it, event.description) }
+        is DrawEvent.SetProperties -> reduceOnSelected(state) { SetPropertiesCommand(repository, it, event.properties) }
         is DrawEvent.SetZIndex -> reduceOnSelected(state) { SetZIndexCommand(repository, it, event.zIndex) }
         is DrawEvent.BringToFront -> reduceMoveInOrder(state, repository, toFront = true)
         is DrawEvent.SendToBack -> reduceMoveInOrder(state, repository, toFront = false)
