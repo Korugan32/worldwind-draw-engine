@@ -42,6 +42,7 @@ import com.tcsappdev.worldwinddraw.core.style.ImageFit
 import com.tcsappdev.worldwinddraw.core.style.ImageRef
 import com.tcsappdev.worldwinddraw.core.style.HighlightStyle
 import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
+import com.tcsappdev.worldwinddraw.booleanops.JtsOverlayEngine
 import com.tcsappdev.worldwinddraw.serialization.DrawFormatException
 import com.tcsappdev.worldwinddraw.serialization.DrawJson
 import com.tcsappdev.worldwinddraw.serialization.GeoJson
@@ -78,7 +79,9 @@ private val HANDLE_SIZES = listOf(
 class MainActivity : ComponentActivity() {
     private val entityRepository = EntityRepository()
     private val historyManager = HistoryManager()
-    private val stateMachine = DrawStateMachine(historyManager, entityRepository)
+    // Merging and cutting polygons is JTS's (see the boolean-ops module); the state machine only gets it to enable the events.
+    private val overlay = JtsOverlayEngine()
+    private val stateMachine = DrawStateMachine(historyManager, entityRepository, overlay)
     private var worldWindow: WorldWindow? = null
 
     // The file formats the demo saves to and loads from, each in a file of the app's own storage (see DrawJson, GeoJson, Kml).
@@ -113,8 +116,7 @@ class MainActivity : ComponentActivity() {
         result.warnings.forEach { android.util.Log.w("Demo", "${format.name}: $it") }
         stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Idle))
         historyManager.clear()
-        entityRepository.entities.value.forEach { entityRepository.remove(it.id) }
-        result.entities.forEach(entityRepository::add)
+        entityRepository.replaceAll(result.entities)
         val warnings = if (result.warnings.isEmpty()) "" else ", ${result.warnings.size} warnings (see logcat)"
         Toast.makeText(this, "Loaded ${result.entities.size} shapes$warnings", Toast.LENGTH_SHORT).show()
     }
@@ -128,6 +130,7 @@ class MainActivity : ComponentActivity() {
         entityRepository.add(demoFlagMarker())
         entityRepository.add(demoFlagPatternPolygon())
         entityRepository.add(demoFlagFillPolygon())
+        entityRepository.add(demoOverlapPolygon())
 
         setContent {
             // DrawLayer.handleStyle can be changed live: this cycles it through three presets.
@@ -173,6 +176,7 @@ class MainActivity : ComponentActivity() {
                                 onPerformance = { performance = it },
                                 onEvictTextures = { worldWindow?.let { android.util.Log.i("Demo", "evicted ${it.engine.renderResourceCache.trimToAge(Long.MAX_VALUE)} bytes of textures"); it.requestRedraw() } },
                             ),
+                            overlay = overlay,
                             // Saving and loading, in each of the file formats.
                             extraSettings = {
                                 formats.forEach { format ->
@@ -341,6 +345,20 @@ private fun demoFlagFillPolygon(): DrawnPolygon = DrawnPolygon(
         Vertex(VertexId("g3"), GeoPosition(latitude = 32.8, longitude = 38.0)),
         Vertex(VertexId("g4"), GeoPosition(latitude = 28.8, longitude = 38.0)),
         Vertex(VertexId("g5"), GeoPosition(latitude = 30.6, longitude = 32.0)),
+    ),
+    outlineStyle = ShapeStyle.SolidColor(ColorRgba(255, 255, 255, 255)),
+    outlineWidth = 2f,
+)
+
+// A translucent shape that crosses the red one (and the water one north of it): something to merge into it or cut out of it.
+private fun demoOverlapPolygon(): DrawnPolygon = DrawnPolygon(
+    id = EntityId("demo-overlap-polygon"),
+    style = ShapeStyle.SolidColor(ColorRgba(40, 90, 240, 150)),
+    vertices = listOf(
+        Vertex(VertexId("o1"), GeoPosition(latitude = 39.0, longitude = 30.0)),
+        Vertex(VertexId("o2"), GeoPosition(latitude = 44.5, longitude = 30.0)),
+        Vertex(VertexId("o3"), GeoPosition(latitude = 44.5, longitude = 37.0)),
+        Vertex(VertexId("o4"), GeoPosition(latitude = 39.0, longitude = 37.0)),
     ),
     outlineStyle = ShapeStyle.SolidColor(ColorRgba(255, 255, 255, 255)),
     outlineWidth = 2f,

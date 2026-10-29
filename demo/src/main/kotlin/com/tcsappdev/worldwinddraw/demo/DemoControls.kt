@@ -1,5 +1,6 @@
 package com.tcsappdev.worldwinddraw.demo
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,6 +50,8 @@ import com.tcsappdev.worldwinddraw.core.geometry.MarkerLabel
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 import com.tcsappdev.worldwinddraw.core.history.HistoryManager
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
+import com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine
+import com.tcsappdev.worldwinddraw.core.state.CombineKind
 import com.tcsappdev.worldwinddraw.core.state.DrawEvent
 import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
@@ -99,6 +103,8 @@ fun DemoControls(
     entityRepository: EntityRepository,
     settings: DemoSettings,
     modifier: Modifier = Modifier,
+    /** What merges and cuts polygons: without one there are no Merge and Cut buttons (see [OverlayEngine]). */
+    overlay: OverlayEngine? = null,
     extraSettings: @Composable ColumnScope.() -> Unit = {},
 ) {
     val state by stateMachine.state.collectAsState()
@@ -114,7 +120,9 @@ fun DemoControls(
     val mode = state.mode
     val draft = mode as? DrawMode.Draw
     val edit = mode as? DrawMode.Edit
-    val selectedId = (mode as? DrawMode.Select)?.entityId ?: edit?.entityId
+    val combine = mode as? DrawMode.Combine
+    val selectedId = (mode as? DrawMode.Select)?.entityId ?: edit?.entityId ?: combine?.entityId
+    val context = LocalContext.current
     val selected = entities.firstOrNull { it.id == selectedId }
     val polygon = selected as? DrawnPolygon
     val marker = selected as? DrawnMarker
@@ -125,7 +133,18 @@ fun DemoControls(
     }
 
     val tools = ArrayList<Tool>()
-    if (draft != null) {
+    // Merging or cutting asks for the second shape, which the next tap on the map picks (see DrawMode.Combine).
+    fun startCombine(kind: CombineKind) {
+        val shape = polygon ?: return
+        overlay?.validate(shape)?.let { reason ->
+            Toast.makeText(context, "This shape can't be merged or cut: $reason", Toast.LENGTH_LONG).show()
+            return
+        }
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Combine(shape.id, kind, "m" + Random.nextLong().toString(36))))
+    }
+    if (combine != null) {
+        tools += Tool("✕", "Cancel", Kind.Primary) { stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Select(combine.entityId))) }
+    } else if (draft != null) {
         tools += Tool("✓", "Finish", Kind.Primary, enabled = draft.pendingVertices.size >= minimumPointsFor(draft.entityType)) {
             val ids = draft.pendingVertices.map { VertexId(Random.nextLong().toString()) }
             stateMachine.onEvent(DrawEvent.FinishDrawing(EntityId(Random.nextLong().toString()), ids))
@@ -139,11 +158,11 @@ fun DemoControls(
         if (edit == null) tools += Tool("✎", "Edit", Kind.Primary) { stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Edit(selected.id))) }
         else tools += Tool("✓", "Done", Kind.Primary) { stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Select(selected.id))) }
     }
-    if (mode !is DrawMode.Idle && mode !is DrawMode.Pan) {
+    if (mode !is DrawMode.Idle && mode !is DrawMode.Pan && combine == null) {
         tools += Tool("↶", "Undo", enabled = canUndo) { historyManager.undo() }
         tools += Tool("↷", "Redo", enabled = canRedo) { historyManager.redo() }
     }
-    if (draft == null && selected != null) {
+    if (draft == null && combine == null && selected != null) {
         if (edit != null && polygon != null) {
             tools += Tool("◌", "Add ring", enabled = edit.activeDrag == null) {
                 stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Draw(DrawableEntityType.Polygon, emptyList(), targetEntityId = polygon.id)))
@@ -165,6 +184,10 @@ fun DemoControls(
             }
             tools += Tool("−", "Smaller") { stateMachine.onEvent(DrawEvent.ResizeMarker((marker.size * 0.8f).coerceAtLeast(8f))) }
             tools += Tool("+", "Bigger") { stateMachine.onEvent(DrawEvent.ResizeMarker((marker.size * 1.25f).coerceAtMost(240f))) }
+        }
+        if (polygon != null && overlay != null && entities.count { it is DrawnPolygon } >= 2) {
+            tools += Tool("∪", "Merge", enabled = edit?.activeDrag == null) { startCombine(CombineKind.Merge) }
+            tools += Tool("✂", "Cut", enabled = edit?.activeDrag == null) { startCombine(CombineKind.Cut) }
         }
         tools += Tool("⇧", "Front") { stateMachine.onEvent(DrawEvent.BringToFront) }
         tools += Tool("⇩", "Back") { stateMachine.onEvent(DrawEvent.SendToBack) }
@@ -299,6 +322,10 @@ private fun statusText(mode: DrawMode, selected: DrawableEntity?, vertexCount: I
             "Drawing a $what · ${mode.pendingVertices.size} points · tap the map to add"
         }
         is DrawMode.Select -> "${selected?.id?.id ?: mode.entityId.id} selected$note"
+        is DrawMode.Combine -> when (mode.kind) {
+            CombineKind.Merge -> "Merge into ${mode.entityId.id}: tap the shape to merge in"
+            CombineKind.Cut -> "Cut ${mode.entityId.id}: tap the shape to cut out of it"
+        }
         is DrawMode.Edit -> {
             val rings = (selected as? DrawnPolygon)?.rings?.size?.takeIf { it > 1 }?.let { " · $it rings" } ?: ""
             "Editing ${mode.entityId.id}" + (if (vertexCount > 0) " · $vertexCount points$rings" else "") + note

@@ -2,6 +2,7 @@ package com.tcsappdev.worldwinddraw.core.state
 
 import com.tcsappdev.worldwinddraw.core.history.CompositeCommand
 import com.tcsappdev.worldwinddraw.core.history.HistoryManager
+import com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,13 +37,15 @@ private val DRAWING_SESSION = Any()
 class DrawStateMachine(
     private val historyManager: HistoryManager,
     private val entityRepository: EntityRepository,
+    /** What merges and cuts polygons; without one [DrawEvent.MergeWith] and [DrawEvent.CutBy] do nothing (see [OverlayEngine]). */
+    private val overlay: OverlayEngine? = null,
 ) {
     private val _state = MutableStateFlow(DrawEngineState())
     val state: StateFlow<DrawEngineState> = _state.asStateFlow()
 
     fun onEvent(event: DrawEvent) {
         val modeBefore = _state.value.mode
-        val result = DrawEngineReducer.reduce(_state.value, event, entityRepository)
+        val result = DrawEngineReducer.reduce(_state.value, event, entityRepository, overlay)
         _state.value = result.state
         result.previewCommands.forEach { it.execute() }
 
@@ -51,10 +54,11 @@ class DrawStateMachine(
             // (finishing a drawing adds the entity), but they are not an undo step: they are the
             // boundary itself. Then the history of the finished session is forgotten.
             historyManager.clear()
-            if (event is DrawEvent.DeleteSelected) {
+            if (event is DrawEvent.DeleteSelected || event is DrawEvent.CutBy) {
                 // Deleting leaves the edit session, but unlike finishing a drawing it must stay
                 // undoable: undo just brings the shape back, so there is nothing to protect the
-                // user from, and an accidental delete needs a way out.
+                // user from, and an accidental delete needs a way out. A cut that takes all of the
+                // shape is a delete too (and the only cut that leaves the session).
                 result.commands.forEach { historyManager.execute(it) }
             } else {
                 result.commands.forEach { it.execute() }

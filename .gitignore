@@ -16,3 +16,4 @@ local.properties
 .kotlin
 .idea
 /serialization/build/
+/boolean-ops/build

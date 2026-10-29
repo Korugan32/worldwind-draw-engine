@@ -6,9 +6,11 @@ import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
+import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 import com.tcsappdev.worldwinddraw.core.history.Command
 import com.tcsappdev.worldwinddraw.core.history.commands.AddEntityCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.AddRingCommand
+import com.tcsappdev.worldwinddraw.core.history.commands.CombineShapesCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.RemoveRingCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.SetDescriptionCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.SetPropertiesCommand
@@ -23,6 +25,8 @@ import com.tcsappdev.worldwinddraw.core.history.commands.RemoveVertexCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.SimplifyShapeCommand
 import com.tcsappdev.worldwinddraw.core.history.commands.VertexSpan
 import com.tcsappdev.worldwinddraw.core.history.commands.ResizeMarkerCommand
+import com.tcsappdev.worldwinddraw.core.overlay.InvalidShapeException
+import com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 import kotlin.math.roundToInt
 
@@ -66,9 +70,13 @@ data class UndoableModeChange(val before: DrawMode, val after: DrawMode)
  * rendering engine running.
  */
 object DrawEngineReducer {
-    fun reduce(state: DrawEngineState, event: DrawEvent, repository: EntityRepository): ReduceResult = when (event) {
-        is DrawEvent.ModeChange -> ReduceResult(state.copy(mode = event.mode), modeChange = recordedIfDraft(state.mode, event.mode))
-        is DrawEvent.Click -> reduceClick(state, event)
+    /**
+     * [overlay] is what merges and cuts polygons; without one [DrawEvent.MergeWith] and [DrawEvent.CutBy] do nothing. It is only asked,
+     * never changes anything, so the reducer stays pure.
+     */
+    fun reduce(state: DrawEngineState, event: DrawEvent, repository: EntityRepository, overlay: OverlayEngine? = null): ReduceResult = when (event) {
+        is DrawEvent.ModeChange -> reduceModeChange(state, event, repository, overlay)
+        is DrawEvent.Click -> reduceClick(state, event, repository, overlay)
         is DrawEvent.DragStart -> reduceDragStart(state, event)
         is DrawEvent.DragMove -> reduceDragMove(state, event, repository)
         is DrawEvent.DragEnd -> reduceDragEnd(state, event, repository)
@@ -82,12 +90,24 @@ object DrawEngineReducer {
         is DrawEvent.SetDescription -> reduceOnSelected(state) { SetDescriptionCommand(repository, it, event.description) }
         is DrawEvent.SetProperties -> reduceOnSelected(state) { SetPropertiesCommand(repository, it, event.properties) }
         is DrawEvent.SetZIndex -> reduceOnSelected(state) { SetZIndexCommand(repository, it, event.zIndex) }
+        is DrawEvent.MergeWith -> reduceCombine(state, repository, overlay, event.otherId, event.idPrefix, merge = true)
+        is DrawEvent.CutBy -> reduceCombine(state, repository, overlay, event.cutterId, event.idPrefix, merge = false)
         is DrawEvent.BringToFront -> reduceMoveInOrder(state, repository, toFront = true)
         is DrawEvent.SendToBack -> reduceMoveInOrder(state, repository, toFront = false)
     }
 
-    private fun reduceClick(state: DrawEngineState, event: DrawEvent.Click): ReduceResult {
+    private fun reduceModeChange(state: DrawEngineState, event: DrawEvent.ModeChange, repository: EntityRepository, overlay: OverlayEngine?): ReduceResult {
+        val target = event.mode
+        // Waiting for a second shape only makes sense when there is something to merge or cut with, and a polygon to do it to.
+        if (target is DrawMode.Combine && (overlay == null || repository.entities.value.firstOrNull { it.id == target.entityId } !is DrawnPolygon)) {
+            return ReduceResult(state)
+        }
+        return ReduceResult(state.copy(mode = target), modeChange = recordedIfDraft(state.mode, target))
+    }
+
+    private fun reduceClick(state: DrawEngineState, event: DrawEvent.Click, repository: EntityRepository, overlay: OverlayEngine?): ReduceResult {
         val currentMode = state.mode
+        if (currentMode is DrawMode.Combine) return reduceClickWhileCombining(state, currentMode, event, repository, overlay)
         if (currentMode is DrawMode.Draw) {
             val added = currentMode.copy(pendingVertices = currentMode.pendingVertices + event.position)
             return ReduceResult(state.copy(mode = added), modeChange = recordedIfDraft(currentMode, added))
@@ -114,6 +134,22 @@ object DrawEngineReducer {
             else -> currentMode
         }
         return ReduceResult(state.copy(mode = newMode))
+    }
+
+    /** The second shape of a merge or a cut: see [DrawMode.Combine]. */
+    private fun reduceClickWhileCombining(
+        state: DrawEngineState,
+        mode: DrawMode.Combine,
+        event: DrawEvent.Click,
+        repository: EntityRepository,
+        overlay: OverlayEngine?,
+    ): ReduceResult {
+        val selected = state.copy(mode = DrawMode.Select(mode.entityId))
+        val hit = event.hitEntityId
+        if (hit == null || hit == mode.entityId) return ReduceResult(selected) // a tap on nothing, or on the first shape again: cancelled
+        if (repository.entities.value.firstOrNull { it.id == hit } !is DrawnPolygon) return ReduceResult(state) // not a shape to merge with: keep waiting
+        // The same as the event, from the selection: whether it works or not (a shape that is not valid) the waiting is over.
+        return reduceCombine(selected, repository, overlay, hit, mode.idPrefix, merge = mode.kind == CombineKind.Merge)
     }
 
     /**
@@ -220,6 +256,44 @@ object DrawEngineReducer {
         val target = if (toFront) others.max() + 1 else others.min() - 1
         if (if (toFront) entity.zIndex >= target else entity.zIndex <= target) return ReduceResult(state)
         return ReduceResult(state, commands = listOf(SetZIndexCommand(repository, entityId, target)))
+    }
+
+    /**
+     * Merges [otherId] into the selected polygon, or cuts it out of it ([merge] false). The overlay is worked out here, from the shapes in
+     * [repository] (read only), so that the command that follows only has to apply it and the reducer can tell whether anything is left.
+     */
+    private fun reduceCombine(
+        state: DrawEngineState,
+        repository: EntityRepository,
+        overlay: OverlayEngine?,
+        otherId: EntityId,
+        idPrefix: String,
+        merge: Boolean,
+    ): ReduceResult {
+        if (overlay == null) return ReduceResult(state)
+        val selectedId = when (val mode = state.mode) {
+            is DrawMode.Select -> mode.entityId
+            is DrawMode.Edit -> mode.entityId
+            else -> return ReduceResult(state)
+        }
+        if (selectedId == otherId) return ReduceResult(state)
+        val entities = repository.entities.value
+        val selected = entities.firstOrNull { it.id == selectedId } as? DrawnPolygon ?: return ReduceResult(state)
+        val other = entities.firstOrNull { it.id == otherId } as? DrawnPolygon ?: return ReduceResult(state)
+        var counter = 0
+        val newVertexId = { VertexId("$idPrefix-${++counter}") }
+        val rings = try {
+            if (merge) overlay.union(selected, other, newVertexId) else overlay.difference(selected, other, newVertexId)
+        } catch (_: InvalidShapeException) {
+            return ReduceResult(state)
+        }
+        val command = CombineShapesCommand(repository, selectedId, rings, absorbedId = if (merge) otherId else null)
+        val newState = when {
+            rings.isEmpty() -> state.copy(mode = DrawMode.Idle) // nothing is left of the selected shape
+            state.mode is DrawMode.Edit -> state.copy(mode = state.mode.copy(selectedVertexId = null, activeDrag = null)) // its vertices have changed
+            else -> state
+        }
+        return ReduceResult(newState, commands = listOf(command))
     }
 
     private fun reduceResizeMarker(state: DrawEngineState, event: DrawEvent.ResizeMarker, repository: EntityRepository): ReduceResult {

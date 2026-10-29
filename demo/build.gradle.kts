@@ -30,6 +30,7 @@ dependencies {
 
     implementation(project(":wwk-adapter"))
     implementation(project(":serialization"))
+    implementation(project(":boolean-ops"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
