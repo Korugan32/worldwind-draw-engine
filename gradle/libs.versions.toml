@@ -16,6 +16,7 @@ worldwind = "2.0.5"
 dokka = "2.2.0"
 kotlinxCoroutines = "1.11.0"
 kotlinxSerialization = "1.11.0"
+kts = "1.20.0.0"
 desugarJdkLibs = "2.1.5"
 
 [libraries]
@@ -23,6 +24,7 @@ desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", ver
 worldwind = { group = "earth.worldwind", name = "worldwind", version.ref = "worldwind" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+kts-core = { group = "de.mpmediasoft.kts", name = "kts-core", version.ref = "kts" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

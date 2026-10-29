@@ -115,6 +115,22 @@ sealed interface DrawEvent {
     data class SetProperties(val properties: Map<String, String>) : DrawEvent
 
     /**
+     * An explicit request to merge the polygon [otherId] into the polygon that is currently selected or being edited: the selected one
+     * becomes the union of the two (keeping its id and look) and [otherId] is gone. New vertices (where the outlines cross) get ids made from
+     * [idPrefix] (`<idPrefix>-1`, `<idPrefix>-2`, ...), which the host picks so that they are free. Does nothing in any other mode, if either
+     * shape is missing or isn't a polygon, if they are the same shape, if either isn't a valid polygon, or if the state machine was given
+     * no [com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine]. Undoable.
+     */
+    data class MergeWith(val otherId: EntityId, val idPrefix: String) : DrawEvent
+
+    /**
+     * An explicit request to cut the polygon [cutterId] out of the polygon that is currently selected or being edited: the selected one
+     * loses the part the other covers (and is removed if nothing is left, which leaves the selection), and [cutterId] stays as it is. Ids of
+     * new vertices and the cases where nothing happens are as for [MergeWith]. Undoable.
+     */
+    data class CutBy(val cutterId: EntityId, val idPrefix: String) : DrawEvent
+
+    /**
      * An explicit request to put the shape that is currently selected or being edited at [zIndex] in the drawing order (see
      * [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity.zIndex]). A no-op in any other mode. Undoable.
      */

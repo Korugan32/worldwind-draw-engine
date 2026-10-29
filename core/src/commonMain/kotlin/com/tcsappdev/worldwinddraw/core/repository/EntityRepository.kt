@@ -27,4 +27,18 @@ class EntityRepository {
     fun update(entity: DrawableEntity) {
         _entities.value = _entities.value.map { if (it.id == entity.id) entity else it }
     }
+
+    /**
+     * Makes [newEntities], in that order, the shapes that exist, whatever there was before, as ONE change: whoever watches [entities]
+     * sees the old list and then the new one, never the many in-between lists that removing and adding one by one would show (and
+     * that would each make the map redraw). What a loaded file or a restored snapshot needs. An empty list clears the repository.
+     * Not a history step: it is a command's job to make a change that can be undone, and replacing everything is meant for the host
+     * to set the scene (clear the history with it, see `HistoryManager.clear`).
+     *
+     * @throws IllegalArgumentException if two of [newEntities] have the same id; nothing changes then.
+     */
+    fun replaceAll(newEntities: List<DrawableEntity>) {
+        require(newEntities.map { it.id }.toSet().size == newEntities.size) { "two shapes have the same id" }
+        _entities.value = newEntities.toList()
+    }
 }

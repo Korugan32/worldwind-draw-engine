@@ -26,4 +26,5 @@ rootProject.name = "worldwind-draw-engine"
 include(":core")
 include(":wwk-adapter")
 include(":serialization")
+include(":boolean-ops")
 include(":demo")

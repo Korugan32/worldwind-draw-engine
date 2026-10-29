@@ -24,6 +24,7 @@ sealed interface DrawMode {
     fun styleStateFor(entityId: EntityId): StyleState = when {
         this is Edit && this.entityId == entityId -> StyleState.EDITING
         this is Select && this.entityId == entityId -> StyleState.SELECTED
+        this is Combine && this.entityId == entityId -> StyleState.SELECTED
         else -> StyleState.DEFAULT
     }
 
@@ -155,5 +156,27 @@ sealed interface DrawMode {
 
     /** [entityId] is highlighted as selected, but not yet in edit mode. */
     data class Select(val entityId: EntityId) : DrawMode
+
+    /**
+     * Waiting for the second shape of a merge or a cut: the polygon [entityId] is the one that was selected, and the next tap on another
+     * polygon ([DrawEvent.Click] with a `hitEntityId`) does [kind] with it, as [DrawEvent.MergeWith] or [DrawEvent.CutBy] would, and goes back to
+     * [Select] of [entityId] (or to [Idle] when a cut took all of it). A tap on nothing or on [entityId] itself cancels, as does a
+     * [DrawEvent.ModeChange] to anything else; a tap on a shape that isn't a polygon is ignored. New vertices get ids made from [idPrefix] (see
+     * [DrawEvent.MergeWith]). The shape [entityId] is highlighted as selected meanwhile.
+     *
+     * A [DrawEvent.ModeChange] into this mode does nothing unless the state machine has an
+     * [OverlayEngine][com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine] and [entityId] is a polygon, so a host can offer merging and cutting
+     * by whether this mode can be entered.
+     */
+    data class Combine(val entityId: EntityId, val kind: CombineKind, val idPrefix: String) : DrawMode
+}
+
+/** What a [DrawMode.Combine] does with the polygon that is tapped second. */
+enum class CombineKind {
+    /** The tapped polygon is merged into the selected one: [DrawEvent.MergeWith]. */
+    Merge,
+
+    /** The tapped polygon is cut out of the selected one: [DrawEvent.CutBy]. */
+    Cut,
 }
 
