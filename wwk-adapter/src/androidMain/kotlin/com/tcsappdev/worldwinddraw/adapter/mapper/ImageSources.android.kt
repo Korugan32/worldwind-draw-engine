@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.tcsappdev.worldwinddraw.core.raster.PixelImage
 import earth.worldwind.render.image.ImageSource
+import java.lang.ref.WeakReference
 
 // An image source made with ImageSource.fromBitmap can't be kept and reused: when WWK's texture cache drops the
 // picture's texture (it is stale, or memory is short) the texture's release() recycles that very Bitmap, and the
@@ -21,8 +22,15 @@ private class EncodedImageFactory(private val bytes: ByteArray, private val samp
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sampleSize })
 }
 
-private class PixelsImageFactory(private val image: PixelImage) : InMemoryImageFactory() {
-    override suspend fun createBitmap(): Bitmap? = Bitmap.createBitmap(image.argb, image.width, image.height, Bitmap.Config.ARGB_8888)
+private class PixelsImageFactory(image: PixelImage, retain: Boolean) : InMemoryImageFactory() {
+    private val retained: PixelImage? = if (retain) image else null
+    private val weak = WeakReference(image)
+
+    // Null when the pixels were let go (nothing draws this picture any more) and WWK still asks for it.
+    override suspend fun createBitmap(): Bitmap? {
+        val image = retained ?: weak.get() ?: return null
+        return Bitmap.createBitmap(image.argb, image.width, image.height, Bitmap.Config.ARGB_8888)
+    }
 }
 
 /** The smallest power of two (what inSampleSize needs) that brings the longest side down to [maxDimension], or 0 when [bytes] isn't an image. */
@@ -56,5 +64,5 @@ internal actual fun decodePixels(bytes: ByteArray, maxDimension: Int): PixelImag
     return PixelImage(bitmap.width, bitmap.height, pixels).also { bitmap.recycle() }
 }
 
-internal actual fun imageSourceFromPixels(image: PixelImage): ImageSource? =
-    ImageSource.fromImageFactory(PixelsImageFactory(image))
+internal actual fun imageSourceFromPixels(image: PixelImage, retainPixels: Boolean): ImageSource? =
+    ImageSource.fromImageFactory(PixelsImageFactory(image, retainPixels))

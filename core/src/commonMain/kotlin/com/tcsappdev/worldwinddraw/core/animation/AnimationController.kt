@@ -16,6 +16,7 @@ class AnimationController {
     }
 
     fun tick(deltaMs: Long) {
-        animations.forEach { it.onTick(deltaMs) }
+        // a copy: an animation may unregister itself, or register another one, when it ends
+        animations.toList().forEach { it.onTick(deltaMs) }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +32,15 @@ import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 import com.tcsappdev.worldwinddraw.core.history.HistoryManager
+import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPosition
+import com.tcsappdev.worldwinddraw.core.animation.AnimationController
+import com.tcsappdev.worldwinddraw.core.animation.AnimationSpec
+import com.tcsappdev.worldwinddraw.core.animation.Easing
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
+import com.tcsappdev.worldwinddraw.morph.Snapshot
+import com.tcsappdev.worldwinddraw.morph.SnapshotTransition
+import com.tcsappdev.worldwinddraw.morph.restore
+import com.tcsappdev.worldwinddraw.morph.snapshot
 import com.tcsappdev.worldwinddraw.core.state.DrawEvent
 import com.tcsappdev.worldwinddraw.core.state.DrawMode
 import com.tcsappdev.worldwinddraw.core.state.DrawStateMachine
@@ -121,6 +130,69 @@ class MainActivity : ComponentActivity() {
         Toast.makeText(this, "Loaded ${result.entities.size} shapes$warnings", Toast.LENGTH_SHORT).show()
     }
 
+    // Two moments of the drawing to play between (see SnapshotTransition), and the one that is playing.
+    private val animationController = AnimationController()
+    private var snapshotA: Snapshot? = null
+    private var snapshotB: Snapshot? = null
+    private var transition: SnapshotTransition? = null
+
+    private fun keep(name: String) {
+        val snapshot = entityRepository.snapshot()
+        if (name == "A") snapshotA = snapshot else snapshotB = snapshot
+        Toast.makeText(this, "Kept $name: ${snapshot.entities.size} shapes", Toast.LENGTH_SHORT).show()
+    }
+
+    // Plays the drawing from one kept moment to the other. A show, not an edit: the history is dropped (its commands are about shapes
+    // that come and go) and editing is left first.
+    private fun play(from: Snapshot?, to: Snapshot?, durationMs: Long = 2000) {
+        if (from == null || to == null) {
+            Toast.makeText(this, "Keep A and B first", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (transition?.isFinished == false) return
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Idle))
+        historyManager.clear()
+        lateinit var playing: SnapshotTransition
+        playing = SnapshotTransition(entityRepository, from, to, AnimationSpec(durationMs, Easing { f -> f * f * (3 - 2 * f) })) {
+            animationController.unregister(playing)
+        }
+        transition = playing
+        animationController.register(playing)
+    }
+
+    // The ready-made morph scenarios (see MorphScenarios.kt). A scenario replaces the drawing on the map; what was there is kept
+    // until "Back to my drawing".
+    private val scenarios by lazy { morphScenarios(overlay) + extraMorphScenarios }
+    private var drawingBeforeScenarios: Snapshot? = null
+    private var slowMotion by mutableStateOf(false) // 12 seconds instead of 3, to look at what happens in between
+
+    private fun runScenario(name: String) {
+        if (transition?.isFinished == false) return
+        val scenario = scenarios.first { it.name == name }
+        if (drawingBeforeScenarios == null) drawingBeforeScenarios = entityRepository.snapshot()
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Idle))
+        historyManager.clear()
+        entityRepository.restore(scenario.from)
+        scenario.camera?.let { camera ->
+            worldWindow?.let { window ->
+                val target = camera.toWwkPosition()
+                window.engine.camera.position.set(target.latitude, target.longitude, target.altitude)
+                window.requestRedraw()
+            }
+        }
+        play(scenario.from, scenario.to, durationMs = if (slowMotion) 12_000 else 3_000)
+        Toast.makeText(this, "${scenario.name}: ${scenario.look}", Toast.LENGTH_LONG).show()
+    }
+
+    private fun backToMyDrawing() {
+        if (transition?.isFinished == false) return
+        val saved = drawingBeforeScenarios ?: return
+        stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Idle))
+        historyManager.clear()
+        entityRepository.restore(saved)
+        drawingBeforeScenarios = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         entityRepository.add(demoPolygon())
@@ -156,6 +228,7 @@ class MainActivity : ComponentActivity() {
                             ),
                             highlightStyle = palette.highlight,
                             onWorldWindow = { worldWindow = it; window = it },
+                            animationController = animationController,
                         )
                         if (performance) PerformanceReadout(window, Modifier.align(Alignment.TopStart).statusBarsPadding().padding(start = 72.dp, top = 8.dp))
                         // The controls: a toolbar that follows what is being done, and the settings behind the gear (see DemoControls).
@@ -184,6 +257,28 @@ class MainActivity : ComponentActivity() {
                                         Pill("Save ${format.name}", selected = false) { save(format) }
                                         Pill("Load ${format.name}", selected = false) { load(format) }
                                     }
+                                }
+                                // Two moments of the drawing and a smooth play between them (shapes with the same points move, the rest fade).
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Pill("Keep A", selected = false) { keep("A") }
+                                    Pill("Keep B", selected = false) { keep("B") }
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Pill("Play A→B", selected = false) { play(snapshotA, snapshotB) }
+                                    Pill("Play B→A", selected = false) { play(snapshotB, snapshotA) }
+                                }
+                                // Ready-made scenarios: one tap puts the first drawing on the map and plays to the second (3 seconds, 12 in slow motion).
+                                @Composable fun scenarioRow(title: String, vararg names: String) = SettingRow(title) { names.forEach { name -> Pill(name, selected = false) { runScenario(name) } } }
+                                scenarioRow("Morph scenarios: one tap, plays at once", "Colour", "No fill", "Flag fill")
+                                scenarioRow("Morph: pictures and looks", "Flag tiles", "Colour to flag")
+                                scenarioRow("Morph: shapes that change", "New corners", "Other corners", "Appear and vanish")
+                                scenarioRow("Morph: other", "Marker and line", "Merge", "Cut")
+                                extraMorphScenarios.map { it.name }.chunked(2).forEachIndexed { index, names ->
+                                    scenarioRow(if (index == 0) "Morph: more scenarios" else "", *names.toTypedArray())
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Pill("Slow motion", selected = slowMotion) { slowMotion = !slowMotion }
+                                    Pill("Back to my drawing", selected = false) { backToMyDrawing() }
                                 }
                             },
                             // Clear of the status bar, the gesture bar and the map's own zoom controls at the bottom left.
@@ -279,7 +374,7 @@ private fun demoPatternPolygon(): DrawnPolygon = DrawnPolygon(
 // The Turkish flag (3:2) drawn at [width] pixels, as the bytes of a PNG — a stylised version: the
 // crescent and star are close to the official construction, not exact. Flags are a good test image:
 // recognisable, and asymmetric, so mirroring or rotating would show.
-private fun turkishFlagBytes(width: Int): ByteArray {
+internal fun turkishFlagBytes(width: Int): ByteArray {
     val height = width * 2 / 3
     val bitmap = createBitmap(width, height)
     val canvas = android.graphics.Canvas(bitmap)

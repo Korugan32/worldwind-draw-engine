@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -336,10 +337,13 @@ private fun statusText(mode: DrawMode, selected: DrawableEntity?, vertexCount: I
 @Composable
 private fun SettingsPanel(settings: DemoSettings, extra: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier) {
     Column(
+        // Taller than a small screen once the host adds its own controls: it scrolls, and stays clear of the toolbar below.
         modifier = modifier
             .widthIn(max = 320.dp)
+            .heightIn(max = 460.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(PANEL)
+            .verticalScroll(rememberScrollState())
             .padding(14.dp),
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp),
     ) {
@@ -363,7 +367,7 @@ private fun SettingsPanel(settings: DemoSettings, extra: @Composable ColumnScope
 }
 
 @Composable
-private fun SettingRow(title: String, content: @Composable () -> Unit) {
+internal fun SettingRow(title: String, content: @Composable () -> Unit) {
     Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
         Text(title, color = MUTED, fontSize = 11.sp, fontWeight = FontWeight.Medium)
         Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) { content() }
