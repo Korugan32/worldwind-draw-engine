@@ -56,5 +56,12 @@ internal expect fun decodeImageBytes(bytes: ByteArray, maxDimension: Int): Loade
  */
 internal expect fun decodePixels(bytes: ByteArray, maxDimension: Int): PixelImage?
 
-/** The WWK image for freshly computed [image] pixels, or `null` on a platform that can't make one yet. */
-internal expect fun imageSourceFromPixels(image: PixelImage): ImageSource?
+/**
+ * The WWK image for freshly computed [image] pixels, or `null` on a platform that can't make one yet.
+ *
+ * WWK keeps a texture under its image source for as long as its cache has room (a large share of the device's memory), and
+ * the source has to be able to make the picture again, so by default it holds on to [image]. A caller that has its own,
+ * smaller cache of the pixels and makes new ones all the time (a fill that changes every frame) passes `retainPixels = false`:
+ * the source then holds them only weakly, and the pixels of pictures that are no longer drawn can be freed.
+ */
+internal expect fun imageSourceFromPixels(image: PixelImage, retainPixels: Boolean = true): ImageSource?

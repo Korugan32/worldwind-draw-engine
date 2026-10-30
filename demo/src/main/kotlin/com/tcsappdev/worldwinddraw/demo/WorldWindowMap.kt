@@ -56,11 +56,11 @@ fun WorldWindowMap(
     handleStyle: HandleStyle = HandleStyle(),
     highlightStyle: HighlightStyle = HighlightStyle(),
     onWorldWindow: (WorldWindow) -> Unit = {},
+    animationController: AnimationController = remember { AnimationController() },
 ) {
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     var worldWindow by remember { mutableStateOf<WorldWindow?>(null) }
-    val animationController = remember { AnimationController() }
     var drawLayer by remember { mutableStateOf<DrawLayer?>(null) }
 
     // DrawLayer.handleStyle/highlightStyle can change at any time; this just forwards the host's current values.

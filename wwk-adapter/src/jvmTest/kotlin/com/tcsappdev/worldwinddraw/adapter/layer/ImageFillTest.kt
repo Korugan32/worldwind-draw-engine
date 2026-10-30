@@ -99,11 +99,22 @@ class ImageFillTest {
     fun theSameInputsReuseTheSamePictureAndAChangeMakesANewOne() {
         val first = imageFillSurface(polygon(fill("reuse")), fill("reuse")) as SurfaceImage
         val again = imageFillSurface(polygon(fill("reuse")), fill("reuse")) as SurfaceImage
-        val fainter = imageFillSurface(polygon(fill("reuse", opacity = 0.5f)), fill("reuse", opacity = 0.5f)) as SurfaceImage
+        val larger = imageFillSurface(polygon(fill("reuse", scale = 0.5f)), fill("reuse", scale = 0.5f)) as SurfaceImage
 
         // WWK compares an in-memory image by reference: reusing the instance is what keeps its texture cache working.
         assertSame(first.imageSource, again.imageSource)
-        assertNotSame(first.imageSource, fainter.imageSource)
+        assertNotSame(first.imageSource, larger.imageSource)
+    }
+
+    @Test
+    fun theOpacityIsAppliedWhenDrawnSoFadingAFillMakesNoNewPicture() {
+        val opaque = imageFillSurface(polygon(fill("fade")), fill("fade")) as FadingSurfaceImage
+        val half = imageFillSurface(polygon(fill("fade", opacity = 0.5f)), fill("fade", opacity = 0.5f)) as FadingSurfaceImage
+        val clear = imageFillSurface(polygon(fill("fade", opacity = 0f)), fill("fade", opacity = 0f)) as FadingSurfaceImage
+
+        assertSame(opaque.imageSource, half.imageSource, "one picture for every opacity")
+        assertSame(opaque.imageSource, clear.imageSource)
+        assertEquals(listOf(1f, 0.5f, 0f), listOf(opaque.opacity, half.opacity, clear.opacity))
     }
 
     @Test

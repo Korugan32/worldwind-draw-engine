@@ -43,7 +43,7 @@ internal actual fun decodePixels(bytes: ByteArray, maxDimension: Int): PixelImag
     return PixelImage(image.width, image.height, image.getRGB(0, 0, image.width, image.height, null, 0, image.width))
 }
 
-internal actual fun imageSourceFromPixels(image: PixelImage): ImageSource? {
+internal actual fun imageSourceFromPixels(image: PixelImage, retainPixels: Boolean): ImageSource? {
     val buffered = BufferedImage(image.width, image.height, BufferedImage.TYPE_INT_ARGB)
     buffered.setRGB(0, 0, image.width, image.height, image.argb, 0, image.width)
     return ImageSource.fromImage(buffered)
