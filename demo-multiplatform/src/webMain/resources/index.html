@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw engine check</title>
+    <style>
+        html, body { margin: 0; height: 100%; overflow: hidden; background: #000; }
+        /* The globe is a WebGL canvas the library puts behind everything (see earth.worldwind.compose.WorldWindow for wasmJs). The Compose
+           surface is one canvas that swallows every touch, so it is only as big as the toolbar: the rest of the page reaches the globe. */
+        #ui { position: fixed; left: 0; right: 0; bottom: 0; height: 80px; z-index: 10; }
+    </style>
+</head>
+<body>
+<div id="ui"></div>
+<script>
+    // WorldWind 2.1.0 sizes its texture cache from navigator.deviceMemory and, where the browser has none (Safari, Firefox), ends up with
+    // a capacity of 0 and stops with "The capacity is less than 1". Saying how much memory there is keeps it going.
+    if (navigator.deviceMemory === undefined) {
+        Object.defineProperty(navigator, 'deviceMemory', { value: 4, configurable: true });
+    }
+</script>
+<script src="demo-multiplatform.js"></script>
+</body>
+</html>
