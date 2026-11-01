@@ -10,3 +10,5 @@ internal actual fun decodeImageBytes(bytes: ByteArray, maxDimension: Int): Loade
 internal actual fun decodePixels(bytes: ByteArray, maxDimension: Int): PixelImage? = null
 
 internal actual fun imageSourceFromPixels(image: PixelImage, retainPixels: Boolean): ImageSource? = null
+
+internal actual suspend fun preloadImageBytes(bytes: ByteArray) {}

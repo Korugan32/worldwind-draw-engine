@@ -65,3 +65,12 @@ internal expect fun decodePixels(bytes: ByteArray, maxDimension: Int): PixelImag
  * the source then holds them only weakly, and the pixels of pictures that are no longer drawn can be freed.
  */
 internal expect fun imageSourceFromPixels(image: PixelImage, retainPixels: Boolean = true): ImageSource?
+
+/**
+ * Gets a picture ready to be drawn from its bytes. Needed in the browser only: there a picture can only be decoded asynchronously, so a shape
+ * whose look is a picture given as [ImageRef.Bytes] shows its placeholder until this has finished for those bytes; call it (and wait for it)
+ * before adding such a shape. On every other platform it does nothing, because the decoding is done when the shape is drawn.
+ */
+suspend fun preloadImage(bytes: ByteArray) = preloadImageBytes(bytes)
+
+internal expect suspend fun preloadImageBytes(bytes: ByteArray)

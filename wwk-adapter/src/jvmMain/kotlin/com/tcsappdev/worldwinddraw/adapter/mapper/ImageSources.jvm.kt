@@ -48,3 +48,5 @@ internal actual fun imageSourceFromPixels(image: PixelImage, retainPixels: Boole
     buffered.setRGB(0, 0, image.width, image.height, image.argb, 0, image.width)
     return ImageSource.fromImage(buffered)
 }
+
+internal actual suspend fun preloadImageBytes(bytes: ByteArray) {}

@@ -66,3 +66,5 @@ internal actual fun decodePixels(bytes: ByteArray, maxDimension: Int): PixelImag
 
 internal actual fun imageSourceFromPixels(image: PixelImage, retainPixels: Boolean): ImageSource? =
     ImageSource.fromImageFactory(PixelsImageFactory(image, retainPixels))
+
+internal actual suspend fun preloadImageBytes(bytes: ByteArray) {}
