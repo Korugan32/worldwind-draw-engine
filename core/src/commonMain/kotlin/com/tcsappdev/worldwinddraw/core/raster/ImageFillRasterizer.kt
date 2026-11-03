@@ -17,7 +17,15 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
-/** An [ImageFillRasterizer] result: the picture, and the geographic box ([minLat]..[maxLat], [minLon]..[maxLon]) its edges correspond to. */
+/**
+ * An [ImageFillRasterizer] result: the picture, and the geographic box its edges correspond to.
+ *
+ * @property image the picture.
+ * @property minLatitude the latitude of the bottom edge of [image], in degrees.
+ * @property minLongitude the longitude of the left edge of [image], in degrees.
+ * @property maxLatitude the latitude of the top edge of [image], in degrees.
+ * @property maxLongitude the longitude of the right edge of [image], in degrees.
+ */
 @InternalWorldWindDrawApi
 public class RasterizedFill(
     public val image: PixelImage,

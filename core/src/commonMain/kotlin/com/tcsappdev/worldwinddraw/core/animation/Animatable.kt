@@ -6,6 +6,7 @@ package com.tcsappdev.worldwinddraw.core.animation
  * call [onTick] on every frame, passing how many milliseconds elapsed since the last call.
  */
 public interface Animatable {
+    /** Advances by [deltaMs] milliseconds, the time since the previous call. */
     public fun onTick(deltaMs: Long)
 }
 

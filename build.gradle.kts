@@ -12,4 +12,7 @@ plugins {
 dependencies {
     dokka(project(":core"))
     dokka(project(":wwk-adapter"))
+    dokka(project(":serialization"))
+    dokka(project(":boolean-ops"))
+    dokka(project(":morph"))
 }

@@ -16,6 +16,10 @@ import kotlin.math.sqrt
  */
 @InternalWorldWindDrawApi
 public object HatchTile {
+    /**
+     * A square tile of [spacing] pixels with lines of [pattern] in [color] ([thickness] pixels wide) on [background] (transparent if null),
+     * that repeats without a seam.
+     */
     public fun render(pattern: HatchPattern, color: ColorRgba, background: ColorRgba?, spacing: Int, thickness: Float): PixelImage {
         val half = thickness / 2
         val out = IntArray(spacing * spacing)

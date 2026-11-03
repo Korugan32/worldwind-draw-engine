@@ -70,6 +70,11 @@ public data class DrawOutlineOptions(
  * line are `<its id>-<n>`.
  */
 public object DrawOutline {
+    /**
+     * What the screen shows at [t] of the effect on [polygon]: 0 the pen is at the start and nothing is drawn yet, 1 exactly [polygon]
+     * itself. Anything outside 0..1 is the nearest end. The list is the fill (once it comes in) and the shapes of the drawn outline; the
+     * polygon is not changed.
+     */
     public fun at(polygon: DrawnPolygon, t: Float, options: DrawOutlineOptions = DrawOutlineOptions()): List<DrawableEntity> {
         require(!t.isNaN()) { "t is not a number" }
         if (t >= 1f) return listOf(polygon)

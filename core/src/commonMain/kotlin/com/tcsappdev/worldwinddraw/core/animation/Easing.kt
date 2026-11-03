@@ -8,5 +8,6 @@ package com.tcsappdev.worldwinddraw.core.animation
  * so the animation starts slow and speeds up.
  */
 public fun interface Easing {
+    /** The eased fraction for a linear [fraction] between 0 and 1; it should give 0 for 0 and 1 for 1. */
     public fun transform(fraction: Float): Float
 }

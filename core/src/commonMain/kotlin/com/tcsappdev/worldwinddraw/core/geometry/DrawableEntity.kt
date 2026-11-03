@@ -18,7 +18,9 @@ public value class EntityId(public val id: String)
  * shape type later will surface every place that needs updating as a compile error.
  */
 public sealed interface DrawableEntity {
+    /** The id that names this shape, stable for as long as it exists. */
     public val id: EntityId
+    /** How the shape looks (see [ShapeStyle] for what it means for each kind of shape). */
     public val style: ShapeStyle
 
     /**

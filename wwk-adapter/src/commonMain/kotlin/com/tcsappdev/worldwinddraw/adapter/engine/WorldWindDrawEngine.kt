@@ -27,14 +27,34 @@ import kotlin.random.Random
  * input that lets a person draw and edit on it. It builds and connects those, so a host does not have to.
  *
  * ```
- * val engine = WorldWindDrawEngine(scope, overlay = JtsOverlayEngine())
- * engine.attachTo(worldWindow)          // adds the layer and takes the touches (a platform function, see below)
- * // once per frame, from the host's own clock:
- * engine.tick(deltaMs)
- * engine.startDrawing(DrawableEntityType.Polygon)
+ * // In a Compose screen (what the demo does; a plain Android or iOS host does the same three things):
+ * val engine = remember { WorldWindDrawEngine(scope, overlay = JtsOverlayEngine()) }   // 1. build it
+ *
+ * LaunchedEffect(engine) {                                                             // 2. give it the clock
+ *     var last = withFrameNanos { it }
+ *     while (true) {
+ *         val now = withFrameNanos { it }
+ *         engine.tick((now - last) / 1_000_000)
+ *         last = now
+ *     }
+ * }
+ *
+ * WorldWindow(
+ *     state = rememberWorldWindowState { ... },
+ *     onCreated = { window -> engine.attachTo(window) },                               // 3. put it on the map
+ * )
+ *
+ * // The host's own buttons:
+ * val state by engine.state.collectAsState()
+ * when (val mode = state.mode) {
+ *     is DrawMode.Draw -> { Button("Finish") { engine.finishDrawing() }; Button("Cancel") { engine.cancel() } }
+ *     is DrawMode.Edit -> Button("Done") { engine.stopEditing() }
+ *     is DrawMode.Select -> { Button("Edit") { engine.edit(mode.entityId) }; Button("Delete") { engine.deleteSelected() } }
+ *     else -> Button("Draw") { engine.startDrawing(DrawableEntityType.Polygon) }
+ * }
  * ```
  *
- * **What the host does:** [attachTo] its map window (there is one for each platform, because WorldWind's `WorldWindow` is not one common
+ * **What the host does:** `attachTo` its map window (there is one for each platform, because WorldWind's `WorldWindow` is not one common
  * type), and call [tick] once per frame so that animations (the selected shape's pulse, an effect that is playing) advance: the engine has
  * no clock of its own. Everything else is the engine's.
  *
@@ -71,10 +91,10 @@ public class WorldWindDrawEngine(
     // The map window is only known when the host attaches it, and the layer asks for a redraw from the start: it goes through this.
     private var requestRedraw: () -> Unit = {}
 
-    /** The layer that shows the shapes on the map; [attachTo] adds it to a window. */
+    /** The layer that shows the shapes on the map; `attachTo` adds it to a window. */
     public val layer: DrawLayer = DrawLayer(repository, stateMachine, scope, { requestRedraw() }, handleStyle, highlightStyle, buildOnFirstFrame)
 
-    /** Where the touches on the map go: taps and drags to select, draw and edit. [attachTo] gives it to the window. */
+    /** Where the touches on the map go: taps and drags to select, draw and edit. `attachTo` gives it to the window. */
     public val input: SelectDragCallback = PickInputBridge(stateMachine)
 
     private val animation = AnimationController().also { it.register(layer) }
@@ -92,8 +112,8 @@ public class WorldWindDrawEngine(
     public val canRedo: StateFlow<Boolean> = history.canRedo
 
     /**
-     * Lets the engine ask the host's window to draw again when something changed (a shape, a selection, a step undone). [attachTo] does this;
-     * call it yourself to use a window [attachTo] does not know.
+     * Lets the engine ask the host's window to draw again when something changed (a shape, a selection, a step undone). `attachTo` does this;
+     * call it yourself to use a window `attachTo` does not know.
      */
     public fun onRedrawNeeded(request: () -> Unit) {
         requestRedraw = request
@@ -108,8 +128,10 @@ public class WorldWindDrawEngine(
     /** Stops moving [animatable] (an effect that has finished); the opposite of [play]. */
     public fun stop(animatable: Animatable): Unit = animation.unregister(animatable)
 
+    /** Takes back the last step (see [HistoryManager.undo]); [canUndo] says whether there is one. */
     public fun undo(): Unit = history.undo()
 
+    /** Does again the step that was taken back (see [HistoryManager.redo]); [canRedo] says whether there is one. */
     public fun redo(): Unit = history.redo()
 
     /** Gives the engine any [event] (what the buttons below do, and more: see [DrawEvent]). */
