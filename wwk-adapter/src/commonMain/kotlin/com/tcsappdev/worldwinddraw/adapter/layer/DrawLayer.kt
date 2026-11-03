@@ -86,7 +86,7 @@ import kotlinx.coroutines.flow.onEach
  * redraws), but hitting Undo right after silently changed the data with no visible effect
  * until an unrelated touch forced a redraw.
  */
-class DrawLayer(
+public class DrawLayer(
     entityRepository: EntityRepository,
     stateMachine: DrawStateMachine,
     scope: CoroutineScope,
@@ -102,14 +102,14 @@ class DrawLayer(
      * How big and what colour the edit handles are (see [HandleStyle]). Safe to change at any
      * time — e.g. from a host app's settings screen — the layer rebuilds and redraws right away.
      */
-    var handleStyle: HandleStyle
+    public var handleStyle: HandleStyle
         get() = handleStyleFlow.value
         set(value) {
             handleStyleFlow.value = value
         }
 
     /** The colours of the selected/edited shape's outline (see [HighlightStyle]). Live-changeable, like [handleStyle]. */
-    var highlightStyle: HighlightStyle
+    public var highlightStyle: HighlightStyle
         get() = highlightStyleFlow.value
         set(value) {
             highlightStyleFlow.value = value
@@ -540,40 +540,40 @@ class DrawLayer(
 
     private fun <T : Renderable> T.tagged(entityId: EntityId): T = apply { putUserProperty(ENTITY_ID_KEY, entityId) }
 
-    companion object {
+    public companion object {
         /** [Renderable.putUserProperty] key every renderable this layer creates is tagged with. */
-        const val ENTITY_ID_KEY = "com.tcsappdev.worldwinddraw.entityId"
+        public const val ENTITY_ID_KEY: String = "com.tcsappdev.worldwinddraw.entityId"
 
         /** [Renderable.putUserProperty] key a vertex-handle [Placemark] is additionally tagged with. */
-        const val VERTEX_ID_KEY = "com.tcsappdev.worldwinddraw.vertexId"
+        public const val VERTEX_ID_KEY: String = "com.tcsappdev.worldwinddraw.vertexId"
 
         /** [Renderable.putUserProperty] key a midpoint-handle [Placemark] is additionally tagged with. */
-        const val EDGE_INDEX_KEY = "com.tcsappdev.worldwinddraw.edgeIndex"
+        public const val EDGE_INDEX_KEY: String = "com.tcsappdev.worldwinddraw.edgeIndex"
 
         /** [Renderable.putUserProperty] key a midpoint handle is tagged with, next to [EDGE_INDEX_KEY]: which ring of a polygon the edge is in. */
-        const val RING_INDEX_KEY = "com.tcsappdev.worldwinddraw.ringIndex"
+        public const val RING_INDEX_KEY: String = "com.tcsappdev.worldwinddraw.ringIndex"
 
         /** Tags on a vertex handle that has hidden vertices next to it: the handled vertex before and after it (see `DrawEvent.DragStart.hitSpanPrevId`). */
-        const val SPAN_PREV_KEY = "com.tcsappdev.worldwinddraw.spanPrev"
+        public const val SPAN_PREV_KEY: String = "com.tcsappdev.worldwinddraw.spanPrev"
 
         /** Tags the "+" handle that sits on a hidden vertex in the middle of a stretch between two handled vertices (it moves that vertex, it does not add one). */
-        const val STRETCH_MIDDLE_KEY = "com.tcsappdev.worldwinddraw.stretchMiddle"
+        public const val STRETCH_MIDDLE_KEY: String = "com.tcsappdev.worldwinddraw.stretchMiddle"
 
         /** See [SPAN_PREV_KEY]. */
-        const val SPAN_NEXT_KEY = "com.tcsappdev.worldwinddraw.spanNext"
+        public const val SPAN_NEXT_KEY: String = "com.tcsappdev.worldwinddraw.spanNext"
 
         /** [Renderable.putUserProperty] key the move target of the marker being edited is additionally tagged with. */
-        const val MARKER_MOVE_KEY = "com.tcsappdev.worldwinddraw.markerMove"
+        public const val MARKER_MOVE_KEY: String = "com.tcsappdev.worldwinddraw.markerMove"
 
         /**
          * Keys for the handles of a shape that is still being drawn (`DrawMode.Draw`). There is no
          * entity or vertex id yet, so these handles carry no [ENTITY_ID_KEY]; they are addressed by
          * index into the draft's points / edges instead.
          */
-        const val DRAFT_POINT_INDEX_KEY = "com.tcsappdev.worldwinddraw.draftPointIndex"
+        public const val DRAFT_POINT_INDEX_KEY: String = "com.tcsappdev.worldwinddraw.draftPointIndex"
 
         /** See [DRAFT_POINT_INDEX_KEY]. */
-        const val DRAFT_EDGE_INDEX_KEY = "com.tcsappdev.worldwinddraw.draftEdgeIndex"
+        public const val DRAFT_EDGE_INDEX_KEY: String = "com.tcsappdev.worldwinddraw.draftEdgeIndex"
 
         /** Placeholder id for the rendering-only phantom vertex spliced in during a live [DrawMode.Edit.ActiveDrag.NewVertex] preview — never persisted, discarded on the next rebuild. */
         private val PHANTOM_VERTEX_ID = VertexId("__phantom__")

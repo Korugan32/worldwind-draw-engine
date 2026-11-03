@@ -14,14 +14,14 @@ import com.tcsappdev.worldwinddraw.core.style.StyleState
  * compiler to handle every case — adding a new mode later surfaces every place that
  * needs updating as a compile error.
  */
-sealed interface DrawMode {
+public sealed interface DrawMode {
     /**
      * Which [StyleState] [entityId] should be rendered in while the engine is in this mode:
      * [StyleState.EDITING] or [StyleState.SELECTED] for the one entity [Edit]/[Select] names,
      * [StyleState.DEFAULT] for every other entity and every other mode. `HOVER` and
      * `DISABLED` aren't derivable from a mode — nothing in the engine produces them yet.
      */
-    fun styleStateFor(entityId: EntityId): StyleState = when {
+    public fun styleStateFor(entityId: EntityId): StyleState = when {
         this is Edit && this.entityId == entityId -> StyleState.EDITING
         this is Select && this.entityId == entityId -> StyleState.SELECTED
         this is Combine && this.entityId == entityId -> StyleState.SELECTED
@@ -29,10 +29,10 @@ sealed interface DrawMode {
     }
 
     /** Nothing is happening; a tap can select a shape or fall through to panning. */
-    object Idle : DrawMode
+    public object Idle : DrawMode
 
     /** The user is moving the camera; drawing/editing gestures are suspended. */
-    object Pan : DrawMode
+    public object Pan : DrawMode
 
     /**
      * A new shape is being sketched. [pendingVertices] holds the points placed so far.
@@ -56,7 +56,7 @@ sealed interface DrawMode {
      * the drawing session and is not itself something undo can take back; the ring can be deleted again, see [DrawEvent.DeleteSelectedRing]).
      * Only meaningful for [DrawableEntityType.Polygon].
      */
-    data class Draw(
+    public data class Draw(
         val entityType: DrawableEntityType,
         val pendingVertices: List<GeoPosition>,
         val style: ShapeStyle = DEFAULT_STYLE,
@@ -64,13 +64,13 @@ sealed interface DrawMode {
         val targetEntityId: EntityId? = null,
     ) : DrawMode {
         /** What an in-progress drag inside [Draw] is doing. */
-        sealed interface ActiveDrag {
+        public sealed interface ActiveDrag {
             /**
              * The point at [index] in `pendingVertices` is being repositioned (it follows the drag
              * live). [origin] is where it was when the drag began: the "before" of the one undo
              * step recorded when the drag ends.
              */
-            data class MovingPoint(val index: Int, val origin: GeoPosition) : ActiveDrag
+            public data class MovingPoint(val index: Int, val origin: GeoPosition) : ActiveDrag
 
             /**
              * A midpoint handle on edge [edgeIndex] is being dragged into a new point. Like
@@ -78,7 +78,7 @@ sealed interface DrawMode {
              * [position] only drives a live preview — and the point is inserted (after point
              * [edgeIndex]) once, at the end of the drag.
              */
-            data class InsertingPoint(val edgeIndex: Int, val position: GeoPosition) : ActiveDrag
+            public data class InsertingPoint(val edgeIndex: Int, val position: GeoPosition) : ActiveDrag
         }
 
         /** Whether the draft's last point connects back to the first: only a polygon with the 3 points it takes to enclose anything. */
@@ -95,7 +95,7 @@ sealed interface DrawMode {
             else -> (pendingVertices.size - 1).coerceAtLeast(0)
         }
 
-        companion object {
+        public companion object {
             private val DEFAULT_STYLE = ShapeStyle.SolidColor(ColorRgba(red = 66, green = 133, blue = 244, alpha = 180))
         }
     }
@@ -106,7 +106,7 @@ sealed interface DrawMode {
      * [activeDrag] is non-null only between a `DragStart` and its matching `DragEnd` — see
      * [ActiveDrag] for the two things a drag can mean.
      */
-    data class Edit(
+    public data class Edit(
         val entityId: EntityId,
         val activeDrag: ActiveDrag? = null,
         /** The vertex last tapped or grabbed, which [DrawEvent.DeleteSelectedVertex] removes; `null` when none is. */
@@ -118,14 +118,14 @@ sealed interface DrawMode {
          * vertex" and "dragging a not-yet-real new vertex into existence" can't be
          * represented at the same time or confused with each other.
          */
-        sealed interface ActiveDrag {
+        public sealed interface ActiveDrag {
             /**
              * [vertexId] (an existing vertex) is being repositioned. [origin] is fixed at
              * the position the drag started from — the "old" position for the single
              * [com.tcsappdev.worldwinddraw.core.history.commands.MoveVertexCommand] that
              * gets recorded once the gesture finishes (see `DrawEngineReducer`).
              */
-            data class ExistingVertex(
+            public data class ExistingVertex(
                 val vertexId: VertexId,
                 val origin: GeoPosition,
                 /** Set when the hidden vertices next to this one move with it (see [VertexSpan]); `null` for a plain one-vertex drag. */
@@ -142,7 +142,7 @@ sealed interface DrawMode {
              * for undo (remove) than for redo (re-insert at the right position), which is
              * exactly the kind of state a pure reducer can't safely fake.
              */
-            data class NewVertex(val edgeIndex: Int, val position: GeoPosition, val ringIndex: Int = 0) : ActiveDrag
+            public data class NewVertex(val edgeIndex: Int, val position: GeoPosition, val ringIndex: Int = 0) : ActiveDrag
 
             /**
              * The marker being edited is being moved. [origin] is where it was when the drag began: the
@@ -150,12 +150,12 @@ sealed interface DrawMode {
              * recorded when the gesture finishes. Unlike a new vertex, the marker really exists, so it
              * follows the drag live (through preview commands) like an existing vertex does.
              */
-            data class MovingMarker(val origin: GeoPosition) : ActiveDrag
+            public data class MovingMarker(val origin: GeoPosition) : ActiveDrag
         }
     }
 
     /** [entityId] is highlighted as selected, but not yet in edit mode. */
-    data class Select(val entityId: EntityId) : DrawMode
+    public data class Select(val entityId: EntityId) : DrawMode
 
     /**
      * Waiting for the second shape of a merge or a cut: the polygon [entityId] is the one that was selected, and the next tap on another
@@ -168,11 +168,11 @@ sealed interface DrawMode {
      * [OverlayEngine][com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine] and [entityId] is a polygon, so a host can offer merging and cutting
      * by whether this mode can be entered.
      */
-    data class Combine(val entityId: EntityId, val kind: CombineKind, val idPrefix: String) : DrawMode
+    public data class Combine(val entityId: EntityId, val kind: CombineKind, val idPrefix: String) : DrawMode
 }
 
 /** What a [DrawMode.Combine] does with the polygon that is tapped second. */
-enum class CombineKind {
+public enum class CombineKind {
     /** The tapped polygon is merged into the selected one: [DrawEvent.MergeWith]. */
     Merge,
 

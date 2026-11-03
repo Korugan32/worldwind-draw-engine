@@ -1,0 +1,21 @@
+public final class com/tcsappdev/worldwinddraw/booleanops/JtsOverlayEngine : com/tcsappdev/worldwinddraw/core/overlay/OverlayEngine {
+	public fun <init> ()V
+	public fun <init> (D)V
+	public synthetic fun <init> (DILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun difference (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lkotlin/jvm/functions/Function0;)Ljava/util/List;
+	public fun union (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lkotlin/jvm/functions/Function0;)Ljava/util/List;
+	public fun validate (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;)Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/booleanops/PolygonOverlay {
+	public static final field DEFAULT_GRID_SIZE D
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/booleanops/PolygonOverlay;
+	public final fun difference (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;DLkotlin/jvm/functions/Function0;)Ljava/util/List;
+	public static synthetic fun difference$default (Lcom/tcsappdev/worldwinddraw/booleanops/PolygonOverlay;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;DLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/util/List;
+	public final fun intersection (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;DLkotlin/jvm/functions/Function0;)Ljava/util/List;
+	public static synthetic fun intersection$default (Lcom/tcsappdev/worldwinddraw/booleanops/PolygonOverlay;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;DLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/util/List;
+	public final fun union (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;DLkotlin/jvm/functions/Function0;)Ljava/util/List;
+	public static synthetic fun union$default (Lcom/tcsappdev/worldwinddraw/booleanops/PolygonOverlay;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;DLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/util/List;
+	public final fun validate (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;)Ljava/lang/String;
+}
+

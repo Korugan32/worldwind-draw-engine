@@ -17,7 +17,7 @@ import kotlin.math.cos
  *
  * Like [PathSimplifier] it returns indices of the points to keep, so every kept point is one of the originals.
  */
-object Visvalingam {
+internal object Visvalingam {
     /**
      * Indices (increasing) of the [keepCount] points to keep of [points]. For an open path the first and last point are always
      * kept (so at least 2); for a closed ring (the last point not repeated) at least 3 are kept. A [keepCount] above the number of

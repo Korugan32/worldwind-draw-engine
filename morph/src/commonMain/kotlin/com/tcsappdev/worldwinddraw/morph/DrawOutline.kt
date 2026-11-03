@@ -27,7 +27,7 @@ import kotlin.math.roundToInt
  * @property glow how much the line shines, like a neon tube: 0 for a plain line, 1 for a halo round the line and a hot core;
  * more than 1 makes the light stronger and wider.
  */
-data class DrawOutlineOptions(
+public data class DrawOutlineOptions(
     val drawShare: Float = 0.7f,
     val startAt: VertexId? = null,
     val reversed: Boolean = false,
@@ -69,8 +69,8 @@ data class DrawOutlineOptions(
  * `<id>#draw<ring>.<band>` for each piece of the trail), with `~<layer>` added to the id of a layer of light round it. The vertices of a
  * line are `<its id>-<n>`.
  */
-object DrawOutline {
-    fun at(polygon: DrawnPolygon, t: Float, options: DrawOutlineOptions = DrawOutlineOptions()): List<DrawableEntity> {
+public object DrawOutline {
+    public fun at(polygon: DrawnPolygon, t: Float, options: DrawOutlineOptions = DrawOutlineOptions()): List<DrawableEntity> {
         require(!t.isNaN()) { "t is not a number" }
         if (t >= 1f) return listOf(polygon)
 

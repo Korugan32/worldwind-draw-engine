@@ -22,7 +22,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  *
  * @throws IllegalArgumentException if [spec] has no duration or repeats.
  */
-class DrawOutlineEffect(
+public class DrawOutlineEffect(
     private val repository: EntityRepository,
     private val polygon: DrawnPolygon,
     spec: AnimationSpec,
@@ -40,7 +40,7 @@ class DrawOutlineEffect(
     private var before: List<DrawableEntity>? = null
     private var after: List<DrawableEntity> = emptyList()
 
-    var isFinished = false
+    public var isFinished: Boolean = false
         private set
 
     override fun onTick(deltaMs: Long) {

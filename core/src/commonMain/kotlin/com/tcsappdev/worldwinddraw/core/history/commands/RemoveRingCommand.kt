@@ -13,7 +13,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * reducer can build the command without reading the repository). Does nothing if the entity isn't a polygon, the vertex isn't in
  * it, or the ring is its only one: a polygon cannot go without one.
  */
-class RemoveRingCommand(
+internal class RemoveRingCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val vertexId: VertexId,

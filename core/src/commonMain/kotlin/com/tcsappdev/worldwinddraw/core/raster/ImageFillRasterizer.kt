@@ -1,5 +1,7 @@
 package com.tcsappdev.worldwinddraw.core.raster
 
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
+
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.GreatCircle
 import com.tcsappdev.worldwinddraw.core.geometry.PolygonCenter
@@ -16,12 +18,13 @@ import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 /** An [ImageFillRasterizer] result: the picture, and the geographic box ([minLat]..[maxLat], [minLon]..[maxLon]) its edges correspond to. */
-class RasterizedFill(
-    val image: PixelImage,
-    val minLatitude: Double,
-    val minLongitude: Double,
-    val maxLatitude: Double,
-    val maxLongitude: Double,
+@InternalWorldWindDrawApi
+public class RasterizedFill(
+    public val image: PixelImage,
+    public val minLatitude: Double,
+    public val minLongitude: Double,
+    public val maxLatitude: Double,
+    public val maxLongitude: Double,
 )
 
 /**
@@ -31,7 +34,8 @@ class RasterizedFill(
  * are linear in the pixel grid. Pure Kotlin so it behaves the same on every target and is testable
  * without a map.
  */
-object ImageFillRasterizer {
+@InternalWorldWindDrawApi
+public object ImageFillRasterizer {
     /** Vertical samples per pixel row when measuring how much of a pixel the shape covers. */
     private const val SUBSAMPLES = 4
 
@@ -48,7 +52,7 @@ object ImageFillRasterizer {
      * *ground* (a degree of longitude is shorter than a degree of latitude away from the equator),
      * so the picture isn't stretched sideways when it is laid back over the box.
      */
-    fun render(
+    public fun render(
         source: PixelImage,
         rings: List<List<GeoPosition>>,
         fit: ImageFit,

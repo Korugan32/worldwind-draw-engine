@@ -15,14 +15,14 @@ import earth.worldwind.shape.ShapeAttributes
  * internally — not the `Color(Float, Float, Float, Float)` overload, which would treat
  * 0-255 values as already-normalized and produce out-of-range colors.
  */
-fun ColorRgba.toWwkColor(): Color = Color(red, green, blue, alpha)
+public fun ColorRgba.toWwkColor(): Color = Color(red, green, blue, alpha)
 
 /**
  * Converts to [ShapeAttributes] with this style applied to the **interior** — for entities
  * that have a fillable area (currently just `DrawnPolygon`). For a line's own color, use
  * [toWwkLineAttributes] instead.
  */
-fun ShapeStyle.toWwkShapeAttributes(): ShapeAttributes {
+public fun ShapeStyle.toWwkShapeAttributes(): ShapeAttributes {
     return when (this) {
         is ShapeStyle.SolidColor -> ShapeAttributes().apply {
             interiorColor = color.toWwkColor()
@@ -42,7 +42,7 @@ fun ShapeStyle.toWwkShapeAttributes(): ShapeAttributes {
  * but writes `outlineColor`/`outlineImageSource`/`outlineWidth` instead of the `interior*`
  * properties.
  */
-fun ShapeStyle.toWwkLineAttributes(width: Float): ShapeAttributes {
+public fun ShapeStyle.toWwkLineAttributes(width: Float): ShapeAttributes {
     return when (this) {
         is ShapeStyle.SolidColor -> ShapeAttributes().apply {
             outlineColor = color.toWwkColor()
@@ -65,7 +65,7 @@ fun ShapeStyle.toWwkLineAttributes(width: Float): ShapeAttributes {
  * [toWwkLineAttributes]: a marker has no interior, so this writes `imageColor`/
  * `imageSource`/`imageScale` rather than `interior*`.
  */
-fun ShapeStyle.toWwkPlacemarkAttributes(size: Float): PlacemarkAttributes {
+public fun ShapeStyle.toWwkPlacemarkAttributes(size: Float): PlacemarkAttributes {
     return when (this) {
         is ShapeStyle.SolidColor -> PlacemarkAttributes().apply {
             imageColor = color.toWwkColor()

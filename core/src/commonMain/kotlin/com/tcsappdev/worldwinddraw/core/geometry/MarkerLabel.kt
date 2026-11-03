@@ -3,7 +3,7 @@ package com.tcsappdev.worldwinddraw.core.geometry
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 
 /** Where a [MarkerLabel] is written, as seen from the marker's icon. */
-enum class LabelPosition {
+public enum class LabelPosition {
     /** Above the icon, centred on it. */
     Above,
 
@@ -30,7 +30,7 @@ enum class LabelPosition {
  * none; its alpha is the outline's opacity.
  * @property position where the text sits against the icon.
  */
-data class MarkerLabel(
+public data class MarkerLabel(
     val text: String,
     val color: ColorRgba = ColorRgba(255, 255, 255),
     val size: Int = 14,

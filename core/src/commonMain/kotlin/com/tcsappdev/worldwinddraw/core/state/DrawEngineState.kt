@@ -5,6 +5,6 @@ package com.tcsappdev.worldwinddraw.core.state
  * drawn shapes themselves — those live in a separate entity repository — only what mode
  * the engine is in and that mode's associated data.
  */
-data class DrawEngineState(
+public data class DrawEngineState(
     val mode: DrawMode = DrawMode.Idle
 )

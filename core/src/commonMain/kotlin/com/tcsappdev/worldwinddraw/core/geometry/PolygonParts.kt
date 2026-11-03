@@ -1,5 +1,7 @@
 package com.tcsappdev.worldwinddraw.core.geometry
 
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
+
 /**
  * Tells the separate parts of a shape of several rings (see [DrawnPolygon]) from each other: which rings are a part's outline and which
  * are holes in it. There is nothing in the rings that says so, it follows from where they lie under the even-odd rule: a ring inside an
@@ -8,12 +10,13 @@ package com.tcsappdev.worldwinddraw.core.geometry
  *
  * A ring is judged by one of its vertices, so rings are expected not to cross each other or share points, as the model asks for.
  */
-object PolygonParts {
+@InternalWorldWindDrawApi
+public object PolygonParts {
     /**
      * The parts of the shape the [rings] enclose, in the order of their outlines: each part is a list with its outline first and its holes
      * after it. An island in a lake in a country is a part of its own. Rings of fewer than 3 points are left out.
      */
-    fun split(rings: List<List<GeoPosition>>): List<List<List<GeoPosition>>> {
+    public fun split(rings: List<List<GeoPosition>>): List<List<List<GeoPosition>>> {
         val usable = rings.filter { it.size >= 3 }
         // A ring can only lie around a point inside its own bounding box, which is what is asked first: most pairs of rings (the islands
         // of an archipelago) are told apart by that alone, so the ring-by-ring test runs for few of them.

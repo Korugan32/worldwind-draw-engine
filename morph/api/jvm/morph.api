@@ -1,0 +1,129 @@
+public final class com/tcsappdev/worldwinddraw/morph/DrawOutline {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/morph/DrawOutline;
+	public final fun at (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;FLcom/tcsappdev/worldwinddraw/morph/DrawOutlineOptions;)Ljava/util/List;
+	public static synthetic fun at$default (Lcom/tcsappdev/worldwinddraw/morph/DrawOutline;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;FLcom/tcsappdev/worldwinddraw/morph/DrawOutlineOptions;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/DrawOutlineEffect : com/tcsappdev/worldwinddraw/core/animation/Animatable {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;Lcom/tcsappdev/worldwinddraw/morph/DrawOutlineOptions;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;Lcom/tcsappdev/worldwinddraw/morph/DrawOutlineOptions;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun isFinished ()Z
+	public fun onTick (J)V
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/DrawOutlineOptions {
+	public synthetic fun <init> (FLjava/lang/String;ZLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Ljava/lang/Float;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;FIFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FLjava/lang/String;ZLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Ljava/lang/Float;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;FIFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun component10 ()F
+	public final fun component2-njm_F8Q ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun component4 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component5 ()Ljava/lang/Float;
+	public final fun component6 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component7 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component8 ()F
+	public final fun component9 ()I
+	public final fun copy-Dy9vQYA (FLjava/lang/String;ZLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Ljava/lang/Float;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;FIF)Lcom/tcsappdev/worldwinddraw/morph/DrawOutlineOptions;
+	public static synthetic fun copy-Dy9vQYA$default (Lcom/tcsappdev/worldwinddraw/morph/DrawOutlineOptions;FLjava/lang/String;ZLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Ljava/lang/Float;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;FIFILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/morph/DrawOutlineOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDrawShare ()F
+	public final fun getGlow ()F
+	public final fun getHeadColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getLineColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getLineWidth ()Ljava/lang/Float;
+	public final fun getPenColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getReversed ()Z
+	public final fun getStartAt-njm_F8Q ()Ljava/lang/String;
+	public final fun getTrailBands ()I
+	public final fun getTrailShare ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/Morph {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/morph/Morph;
+	public final fun between (Lcom/tcsappdev/worldwinddraw/morph/Snapshot;Lcom/tcsappdev/worldwinddraw/morph/Snapshot;F)Ljava/util/List;
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/RouteEffect : com/tcsappdev/worldwinddraw/core/animation/Animatable {
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Ljava/lang/String;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;Lcom/tcsappdev/worldwinddraw/morph/RouteOptions;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Ljava/lang/String;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;Lcom/tcsappdev/worldwinddraw/morph/RouteOptions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun isFinished ()Z
+	public fun onTick (J)V
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/RouteMotion {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/morph/RouteMotion;
+	public final fun at--DNAZGA (Ljava/lang/String;Ljava/util/List;FLcom/tcsappdev/worldwinddraw/morph/RouteOptions;)Ljava/util/List;
+	public static synthetic fun at--DNAZGA$default (Lcom/tcsappdev/worldwinddraw/morph/RouteMotion;Ljava/lang/String;Ljava/util/List;FLcom/tcsappdev/worldwinddraw/morph/RouteOptions;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/RouteOptions {
+	public fun <init> ()V
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;FFIFLcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;FFFFIFLcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;ZZI)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;FFIFLcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;FFFFIFLcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;ZZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component10 ()F
+	public final fun component11 ()F
+	public final fun component12 ()I
+	public final fun component13 ()F
+	public final fun component14 ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun component15 ()Z
+	public final fun component16 ()Z
+	public final fun component17 ()I
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun component5 ()I
+	public final fun component6 ()F
+	public final fun component7 ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun component8 ()F
+	public final fun component9 ()F
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;FFIFLcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;FFFFIFLcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;ZZI)Lcom/tcsappdev/worldwinddraw/morph/RouteOptions;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/morph/RouteOptions;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;FFIFLcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;FFFFIFLcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;ZZIILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/morph/RouteOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArc ()F
+	public final fun getArcSteps ()I
+	public final fun getGlow ()F
+	public final fun getHeadColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getHeight ()F
+	public final fun getKeepTrail ()Z
+	public final fun getKeepVehicle ()Z
+	public final fun getLift ()F
+	public final fun getLineColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getLineWidth ()F
+	public final fun getShadow ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun getTrailBands ()I
+	public final fun getTrailShare ()F
+	public final fun getVehicle ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun getVehicleSize ()F
+	public final fun getVehicleTurn ()F
+	public final fun getZIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/Snapshot {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/tcsappdev/worldwinddraw/morph/Snapshot;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/morph/Snapshot;Ljava/util/List;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/morph/Snapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntities ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/SnapshotKt {
+	public static final fun restore (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/morph/Snapshot;)V
+	public static final fun snapshot (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;)Lcom/tcsappdev/worldwinddraw/morph/Snapshot;
+}
+
+public final class com/tcsappdev/worldwinddraw/morph/SnapshotTransition : com/tcsappdev/worldwinddraw/core/animation/Animatable {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/morph/Snapshot;Lcom/tcsappdev/worldwinddraw/morph/Snapshot;Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/morph/Snapshot;Lcom/tcsappdev/worldwinddraw/morph/Snapshot;Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun isFinished ()Z
+	public fun onTick (J)V
+}
+

@@ -10,7 +10,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * undoing puts back the ones it had when this ran, read at that moment so the pure reducer can build the command without reading the
  * repository. Works for every kind of shape. Does nothing if the entity no longer exists.
  */
-class SetPropertiesCommand(
+internal class SetPropertiesCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val newProperties: Map<String, String>,

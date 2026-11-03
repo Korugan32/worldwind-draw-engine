@@ -1,5 +1,7 @@
 package com.tcsappdev.worldwinddraw.core.geometry
 
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
+
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.asin
@@ -21,16 +23,17 @@ import kotlin.math.sqrt
  * every point that is kept is one of the originals, so a caller can map it back to the vertex it
  * came from.
  */
-object PathSimplifier {
+@InternalWorldWindDrawApi
+public object PathSimplifier {
     /** Mean Earth radius, meters: the sphere the tolerance is measured on. */
-    const val EARTH_RADIUS_METERS = 6_371_008.8
+    public const val EARTH_RADIUS_METERS: Double = 6_371_008.8
 
     /**
      * Indices of the points to keep of an open path, always including the first and the last. Every
      * dropped point is within [toleranceMeters] of the arc between its kept neighbours. A tolerance
      * of 0 (or less) keeps everything.
      */
-    fun simplifyPath(points: List<GeoPosition>, toleranceMeters: Double): List<Int> {
+    public fun simplifyPath(points: List<GeoPosition>, toleranceMeters: Double): List<Int> {
         val n = points.size
         if (n <= 2 || toleranceMeters <= 0.0) return points.indices.toList()
         val vectors = UnitVectors(points)
@@ -47,7 +50,7 @@ object PathSimplifier {
      * has that many. Like [simplifyPath], dropped points stay within [toleranceMeters] of the
      * outline that is kept. A tolerance of 0 (or less) keeps everything.
      */
-    fun simplifyRing(points: List<GeoPosition>, toleranceMeters: Double): List<Int> {
+    public fun simplifyRing(points: List<GeoPosition>, toleranceMeters: Double): List<Int> {
         val n = points.size
         if (n <= 3 || toleranceMeters <= 0.0) return points.indices.toList()
         val vectors = UnitVectors(points)

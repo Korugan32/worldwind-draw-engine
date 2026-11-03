@@ -1,5 +1,7 @@
 package com.tcsappdev.worldwinddraw.core.geometry
 
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
+
 import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.cos
@@ -18,14 +20,15 @@ import kotlin.math.sqrt
  * The displacement is a difference in latitude and longitude degrees, which is exact enough for the size of an
  * editing gesture; "how far along" is measured on the sphere, by great-circle distance along the stretch.
  */
-object SpanMover {
+@InternalWorldWindDrawApi
+public object SpanMover {
     /**
      * A copy of [vertices] with [movedId] at [newPosition] and the vertices between [prevId] and it, and between it and
      * [nextId], moved in proportion. Either neighbour may be `null` (an end of an open path has no neighbour on one
      * side): that side then has no stretch. [isClosed] says the vertices form a ring, so a stretch may run past the
      * end of the list back to its start. Returns [vertices] unchanged if [movedId] isn't among them.
      */
-    fun move(vertices: List<Vertex>, movedId: VertexId, prevId: VertexId?, nextId: VertexId?, newPosition: GeoPosition, isClosed: Boolean): List<Vertex> {
+    public fun move(vertices: List<Vertex>, movedId: VertexId, prevId: VertexId?, nextId: VertexId?, newPosition: GeoPosition, isClosed: Boolean): List<Vertex> {
         val n = vertices.size
         val moved = vertices.indexOfFirst { it.id == movedId }
         if (moved < 0) return vertices

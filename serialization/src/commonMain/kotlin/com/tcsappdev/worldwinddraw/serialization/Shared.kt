@@ -10,10 +10,10 @@ import com.tcsappdev.worldwinddraw.core.geometry.VertexId
  * two points), so a host can say "3 things were not imported" without reading the lines. Things that were imported but guessed, like
  * a colour that wasn't one, are only in [warnings].
  */
-class ImportResult(
-    val entities: List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>,
-    val warnings: List<String>,
-    val leftOut: Map<String, Int> = emptyMap(),
+public class ImportResult(
+    public val entities: List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>,
+    public val warnings: List<String>,
+    public val leftOut: Map<String, Int> = emptyMap(),
 )
 
 /** What the readers keep while reading: the warnings, and the count of what was left out, by kind. */

@@ -15,7 +15,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * `VertexEditController` in a later phase) are expected to prevent that case in the UI
  * — e.g. disable the remove action — rather than this command swallowing the error.
  */
-class RemoveVertexCommand private constructor(
+internal class RemoveVertexCommand private constructor(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val vertexId: VertexId,

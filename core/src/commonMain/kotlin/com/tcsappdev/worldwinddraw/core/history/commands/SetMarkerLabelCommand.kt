@@ -11,7 +11,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * this ran. The old label is read at that moment, like [ResizeMarkerCommand] reads the old size, so the pure reducer can build the
  * command without reading the repository. Does nothing if [entityId] isn't a marker (or no longer exists).
  */
-class SetMarkerLabelCommand(
+internal class SetMarkerLabelCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val newLabel: MarkerLabel?,

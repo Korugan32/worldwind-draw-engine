@@ -1,0 +1,920 @@
+public abstract interface annotation class com/tcsappdev/worldwinddraw/core/InternalWorldWindDrawApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/animation/Animatable {
+	public abstract fun onTick (J)V
+}
+
+public final class com/tcsappdev/worldwinddraw/core/animation/AnimatedProperty : com/tcsappdev/worldwinddraw/core/animation/Animatable {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;Lkotlin/jvm/functions/Function3;)V
+	public final fun getValue ()Ljava/lang/Object;
+	public final fun isFinished ()Z
+	public fun onTick (J)V
+}
+
+public final class com/tcsappdev/worldwinddraw/core/animation/AnimationController {
+	public fun <init> ()V
+	public final fun register (Lcom/tcsappdev/worldwinddraw/core/animation/Animatable;)V
+	public final fun tick (J)V
+	public final fun unregister (Lcom/tcsappdev/worldwinddraw/core/animation/Animatable;)V
+}
+
+public final class com/tcsappdev/worldwinddraw/core/animation/AnimationSpec {
+	public fun <init> (JLcom/tcsappdev/worldwinddraw/core/animation/Easing;Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;)V
+	public synthetic fun <init> (JLcom/tcsappdev/worldwinddraw/core/animation/Easing;Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/animation/Easing;
+	public final fun component3 ()Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;
+	public final fun copy (JLcom/tcsappdev/worldwinddraw/core/animation/Easing;Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;)Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;JLcom/tcsappdev/worldwinddraw/core/animation/Easing;Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/animation/AnimationSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDurationMs ()J
+	public final fun getEasing ()Lcom/tcsappdev/worldwinddraw/core/animation/Easing;
+	public final fun getRepeatMode ()Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/animation/Easing {
+	public abstract fun transform (F)F
+}
+
+public final class com/tcsappdev/worldwinddraw/core/animation/RepeatMode : java/lang/Enum {
+	public static final field Loop Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;
+	public static final field Once Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;
+	public static final field Reverse Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/core/animation/RepeatMode;
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/geometry/DrawableEntity {
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getId-kgXfmeI ()Ljava/lang/String;
+	public abstract fun getProperties ()Ljava/util/Map;
+	public abstract fun getStyle ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public abstract fun getZIndex ()I
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/DrawableEntityKt {
+	public static final fun withDescription (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawableEntity;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawableEntity;
+	public static final fun withProperties (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawableEntity;Ljava/util/Map;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawableEntity;
+	public static final fun withZIndex (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawableEntity;I)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawableEntity;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/DrawnMarker : com/tcsappdev/worldwinddraw/core/geometry/DrawableEntity {
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;FLcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;Ljava/lang/String;ILjava/util/Map;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;FLcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;Ljava/lang/String;ILjava/util/Map;FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun component3 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun component4 ()F
+	public final fun component5 ()Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()I
+	public final fun component8 ()Ljava/util/Map;
+	public final fun component9 ()F
+	public final fun copy-FGZJO7Q (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;FLcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;Ljava/lang/String;ILjava/util/Map;F)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnMarker;
+	public static synthetic fun copy-FGZJO7Q$default (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnMarker;Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;FLcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;Ljava/lang/String;ILjava/util/Map;FILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnMarker;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public fun getId-kgXfmeI ()Ljava/lang/String;
+	public final fun getLabel ()Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun getProperties ()Ljava/util/Map;
+	public final fun getRotation ()F
+	public final fun getSize ()F
+	public fun getStyle ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public fun getZIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon : com/tcsappdev/worldwinddraw/core/geometry/DrawableEntity {
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;FLjava/util/List;Ljava/lang/String;ILjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;FLjava/util/List;Ljava/lang/String;ILjava/util/Map;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun component5 ()F
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()I
+	public final fun component9 ()Ljava/util/Map;
+	public final fun copy-FGZJO7Q (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;FLjava/util/List;Ljava/lang/String;ILjava/util/Map;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;
+	public static synthetic fun copy-FGZJO7Q$default (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;FLjava/util/List;Ljava/lang/String;ILjava/util/Map;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getExtraRings ()Ljava/util/List;
+	public fun getId-kgXfmeI ()Ljava/lang/String;
+	public final fun getOutlineStyle ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun getOutlineWidth ()F
+	public fun getProperties ()Ljava/util/Map;
+	public final fun getRings ()Ljava/util/List;
+	public fun getStyle ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun getVertices ()Ljava/util/List;
+	public fun getZIndex ()I
+	public fun hashCode ()I
+	public final fun mapRings (Lkotlin/jvm/functions/Function1;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;
+	public final fun ringIndexOf-qbP5LK8 (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public final fun withExtraRing (Ljava/util/List;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;
+	public final fun withRing (ILjava/util/List;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;
+	public final fun withRingInserted (ILjava/util/List;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;
+	public final fun withoutRing (I)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/DrawnPolyline : com/tcsappdev/worldwinddraw/core/geometry/DrawableEntity {
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Ljava/util/List;FLjava/lang/String;ILjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Ljava/util/List;FLjava/lang/String;ILjava/util/Map;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()F
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()I
+	public final fun component7 ()Ljava/util/Map;
+	public final fun copy-libYkhc (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Ljava/util/List;FLjava/lang/String;ILjava/util/Map;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolyline;
+	public static synthetic fun copy-libYkhc$default (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolyline;Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Ljava/util/List;FLjava/lang/String;ILjava/util/Map;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolyline;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public fun getId-kgXfmeI ()Ljava/lang/String;
+	public final fun getLineWidth ()F
+	public fun getProperties ()Ljava/util/Map;
+	public fun getStyle ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun getVertices ()Ljava/util/List;
+	public fun getZIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/EntityId {
+	public static final synthetic fun box-impl (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/geometry/EntityId;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/GeoPosition {
+	public fun <init> (DDD)V
+	public synthetic fun <init> (DDDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun copy (DDD)Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;DDDILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAltitude ()D
+	public final fun getLatitude ()D
+	public final fun getLongitude ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/GreatCircle {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/core/geometry/GreatCircle;
+	public final fun angleBetween (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)D
+	public final fun bearing (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)D
+	public final fun destination (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;DD)Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun intermediatePoints (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;D)Ljava/util/List;
+	public final fun pointAt (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;D)Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/LabelPosition : java/lang/Enum {
+	public static final field Above Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+	public static final field Below Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+	public static final field Center Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+	public static final field Left Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+	public static final field Right Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/MarkerLabel {
+	public fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ILcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ILcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component3 ()I
+	public final fun component4 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component5 ()Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+	public final fun copy (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ILcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;)Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ILcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getOutlineColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/LabelPosition;
+	public final fun getSize ()I
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/PolygonCenter$VisualCenter {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;D)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun component2 ()D
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;D)Lcom/tcsappdev/worldwinddraw/core/geometry/PolygonCenter$VisualCenter;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/geometry/PolygonCenter$VisualCenter;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;DILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/geometry/PolygonCenter$VisualCenter;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun getRadiusMeters ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/Vertex {
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/util/Map;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-oCmg_Qg ()Ljava/lang/String;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun component3 ()Ljava/util/Map;
+	public final fun copy-heD6-VE (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/util/Map;)Lcom/tcsappdev/worldwinddraw/core/geometry/Vertex;
+	public static synthetic fun copy-heD6-VE$default (Lcom/tcsappdev/worldwinddraw/core/geometry/Vertex;Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/util/Map;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/geometry/Vertex;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId-oCmg_Qg ()Ljava/lang/String;
+	public final fun getMetadata ()Ljava/util/Map;
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/geometry/VertexId {
+	public static final synthetic fun box-impl (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/geometry/VertexId;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/history/HistoryManager {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clear ()V
+	public final fun getCanRedo ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getCanUndo ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun redo ()V
+	public final fun undo ()V
+}
+
+public final class com/tcsappdev/worldwinddraw/core/history/commands/VertexSpan {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getNextId-njm_F8Q ()Ljava/lang/String;
+	public final fun getOriginalVertices ()Ljava/util/List;
+	public final fun getPrevId-njm_F8Q ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/overlay/InvalidShapeException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/overlay/OverlayEngine {
+	public abstract fun difference (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lkotlin/jvm/functions/Function0;)Ljava/util/List;
+	public abstract fun union (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Lkotlin/jvm/functions/Function0;)Ljava/util/List;
+	public abstract fun validate (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;)Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/repository/EntityRepository {
+	public fun <init> ()V
+	public final fun add (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawableEntity;)V
+	public final fun getEntities ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun remove-KKtDD9c (Ljava/lang/String;)V
+	public final fun replaceAll (Ljava/util/List;)V
+	public final fun update (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawableEntity;)V
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/CombineKind : java/lang/Enum {
+	public static final field Cut Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;
+	public static final field Merge Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEngineState {
+	public fun <init> ()V
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEngineState;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEngineState;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEngineState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMode ()Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$BringToFront : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$BringToFront;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$Click : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun component2-Aaokli8 ()Ljava/lang/String;
+	public final fun component3-njm_F8Q ()Ljava/lang/String;
+	public final fun copy-gPmFA2Y (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$Click;
+	public static synthetic fun copy-gPmFA2Y$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$Click;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$Click;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHitEntityId-Aaokli8 ()Ljava/lang/String;
+	public final fun getHitVertexId-njm_F8Q ()Ljava/lang/String;
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$CutBy : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy-pzVkGBA (Ljava/lang/String;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$CutBy;
+	public static synthetic fun copy-pzVkGBA$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$CutBy;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$CutBy;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCutterId-kgXfmeI ()Ljava/lang/String;
+	public final fun getIdPrefix ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$DeleteSelected : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DeleteSelected;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$DeleteSelectedRing : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DeleteSelectedRing;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$DeleteSelectedVertex : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DeleteSelectedVertex;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$DragEnd : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun component2-njm_F8Q ()Ljava/lang/String;
+	public final fun copy--IeNS7I (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragEnd;
+	public static synthetic fun copy--IeNS7I$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragEnd;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragEnd;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNewVertexId-njm_F8Q ()Ljava/lang/String;
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$DragMove : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragMove;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragMove;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragMove;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$DragStart : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/lang/String;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun component10 ()I
+	public final fun component2-njm_F8Q ()Ljava/lang/String;
+	public final fun component3-Aaokli8 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun component6 ()Ljava/lang/Integer;
+	public final fun component7 ()Z
+	public final fun component8-njm_F8Q ()Ljava/lang/String;
+	public final fun component9-njm_F8Q ()Ljava/lang/String;
+	public final fun copy-OIzkQIs (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/lang/String;Ljava/lang/String;I)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragStart;
+	public static synthetic fun copy-OIzkQIs$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragStart;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ZLjava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$DragStart;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHitDraftEdgeIndex ()Ljava/lang/Integer;
+	public final fun getHitDraftPointIndex ()Ljava/lang/Integer;
+	public final fun getHitEdgeIndex ()Ljava/lang/Integer;
+	public final fun getHitEntityId-Aaokli8 ()Ljava/lang/String;
+	public final fun getHitMarker ()Z
+	public final fun getHitRingIndex ()I
+	public final fun getHitSpanNextId-njm_F8Q ()Ljava/lang/String;
+	public final fun getHitSpanPrevId-njm_F8Q ()Ljava/lang/String;
+	public final fun getHitVertexId-njm_F8Q ()Ljava/lang/String;
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$FinishDrawing : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy-pzVkGBA (Ljava/lang/String;Ljava/util/List;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$FinishDrawing;
+	public static synthetic fun copy-pzVkGBA$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$FinishDrawing;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$FinishDrawing;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntityId-kgXfmeI ()Ljava/lang/String;
+	public final fun getVertexIds ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$MergeWith : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy-pzVkGBA (Ljava/lang/String;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$MergeWith;
+	public static synthetic fun copy-pzVkGBA$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$MergeWith;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$MergeWith;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIdPrefix ()Ljava/lang/String;
+	public final fun getOtherId-kgXfmeI ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$ModeChange : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$ModeChange;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$ModeChange;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$ModeChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMode ()Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$ResizeMarker : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public fun <init> (F)V
+	public final fun component1 ()F
+	public final fun copy (F)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$ResizeMarker;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$ResizeMarker;FILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$ResizeMarker;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSize ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$SendToBack : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SendToBack;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$SetDescription : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetDescription;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetDescription;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetDescription;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$SetMarkerLabel : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetMarkerLabel;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetMarkerLabel;Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetMarkerLabel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabel ()Lcom/tcsappdev/worldwinddraw/core/geometry/MarkerLabel;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$SetProperties : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetProperties;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetProperties;Ljava/util/Map;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetProperties;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getProperties ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$SetZIndex : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetZIndex;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetZIndex;IILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SetZIndex;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getZIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawEvent$SimplifyShape : com/tcsappdev/worldwinddraw/core/state/DrawEvent {
+	public fun <init> (F)V
+	public final fun component1 ()F
+	public final fun copy (F)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SimplifyShape;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SimplifyShape;FILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent$SimplifyShape;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKeepFraction ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/state/DrawMode {
+	public fun styleStateFor-KKtDD9c (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Combine : com/tcsappdev/worldwinddraw/core/state/DrawMode {
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy-9mL3fqA (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Combine;
+	public static synthetic fun copy-9mL3fqA$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Combine;Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Combine;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntityId-kgXfmeI ()Ljava/lang/String;
+	public final fun getIdPrefix ()Ljava/lang/String;
+	public final fun getKind ()Lcom/tcsappdev/worldwinddraw/core/state/CombineKind;
+	public fun hashCode ()I
+	public fun styleStateFor-KKtDD9c (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$DefaultImpls {
+	public static fun styleStateFor-KKtDD9c (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Draw : com/tcsappdev/worldwinddraw/core/state/DrawMode {
+	public static final field Companion Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$Companion;
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun component4 ()Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag;
+	public final fun component5-Aaokli8 ()Ljava/lang/String;
+	public final fun copy-zOIGrVE (Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw;
+	public static synthetic fun copy-zOIGrVE$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw;Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActiveDrag ()Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag;
+	public final fun getEdgeCount ()I
+	public final fun getEntityType ()Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;
+	public final fun getPendingVertices ()Ljava/util/List;
+	public final fun getStyle ()Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;
+	public final fun getTargetEntityId-Aaokli8 ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isClosed ()Z
+	public fun styleStateFor-KKtDD9c (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag {
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag$InsertingPoint : com/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag {
+	public fun <init> (ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)V
+	public final fun component1 ()I
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun copy (ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag$InsertingPoint;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag$InsertingPoint;ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag$InsertingPoint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEdgeIndex ()I
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag$MovingPoint : com/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag {
+	public fun <init> (ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)V
+	public final fun component1 ()I
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun copy (ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag$MovingPoint;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag$MovingPoint;ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$ActiveDrag$MovingPoint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndex ()I
+	public final fun getOrigin ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Draw$Companion {
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Edit : com/tcsappdev/worldwinddraw/core/state/DrawMode {
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag;
+	public final fun component3-njm_F8Q ()Ljava/lang/String;
+	public final fun copy-IAa-W_k (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag;Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit;
+	public static synthetic fun copy-IAa-W_k$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit;Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActiveDrag ()Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag;
+	public final fun getEntityId-kgXfmeI ()Ljava/lang/String;
+	public final fun getSelectedVertexId-njm_F8Q ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun styleStateFor-KKtDD9c (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag {
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$ExistingVertex : com/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag {
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/history/commands/VertexSpan;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/history/commands/VertexSpan;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-oCmg_Qg ()Ljava/lang/String;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun component3 ()Lcom/tcsappdev/worldwinddraw/core/history/commands/VertexSpan;
+	public final fun copy-heD6-VE (Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/history/commands/VertexSpan;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$ExistingVertex;
+	public static synthetic fun copy-heD6-VE$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$ExistingVertex;Ljava/lang/String;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/history/commands/VertexSpan;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$ExistingVertex;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOrigin ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun getSpan ()Lcom/tcsappdev/worldwinddraw/core/history/commands/VertexSpan;
+	public final fun getVertexId-oCmg_Qg ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$MovingMarker : com/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$MovingMarker;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$MovingMarker;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$MovingMarker;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOrigin ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$NewVertex : com/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag {
+	public fun <init> (ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;I)V
+	public synthetic fun <init> (ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun component3 ()I
+	public final fun copy (ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;I)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$NewVertex;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$NewVertex;ILcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;IILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Edit$ActiveDrag$NewVertex;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEdgeIndex ()I
+	public final fun getPosition ()Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public final fun getRingIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Idle : com/tcsappdev/worldwinddraw/core/state/DrawMode {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Idle;
+	public fun styleStateFor-KKtDD9c (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Pan : com/tcsappdev/worldwinddraw/core/state/DrawMode {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Pan;
+	public fun styleStateFor-KKtDD9c (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawMode$Select : com/tcsappdev/worldwinddraw/core/state/DrawMode {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-kgXfmeI ()Ljava/lang/String;
+	public final fun copy-KKtDD9c (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Select;
+	public static synthetic fun copy-KKtDD9c$default (Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Select;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/state/DrawMode$Select;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntityId-kgXfmeI ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun styleStateFor-KKtDD9c (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawStateMachine {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/history/HistoryManager;Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/core/overlay/OverlayEngine;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/history/HistoryManager;Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/core/overlay/OverlayEngine;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getState ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun onEvent (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent;)V
+}
+
+public final class com/tcsappdev/worldwinddraw/core/state/DrawableEntityType : java/lang/Enum {
+	public static final field Marker Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;
+	public static final field Polygon Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;
+	public static final field Polyline Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/ColorRgba {
+	public fun <init> (IIII)V
+	public synthetic fun <init> (IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun copy (IIII)Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;IIIIILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlpha ()I
+	public final fun getBlue ()I
+	public final fun getGreen ()I
+	public final fun getRed ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/HandleDetail : java/lang/Enum {
+	public static final field Adaptive Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;
+	public static final field All Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/HandleStyle {
+	public fun <init> ()V
+	public fun <init> (FFFLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;)V
+	public synthetic fun <init> (FFFLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component5 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component6 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component7 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component8 ()Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;
+	public final fun copy (FFFLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;)Lcom/tcsappdev/worldwinddraw/core/style/HandleStyle;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/style/HandleStyle;FFFLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/style/HandleStyle;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDetail ()Lcom/tcsappdev/worldwinddraw/core/style/HandleDetail;
+	public final fun getFillColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getMidpointDiameter ()F
+	public final fun getPlusColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getRingColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getSelectedFillColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getTouchTargetDiameter ()F
+	public final fun getVertexDiameter ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun touchSizeFor (F)F
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/HatchPattern : java/lang/Enum {
+	public static final field Cross Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public static final field DiagonalDown Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public static final field DiagonalUp Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public static final field Dots Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public static final field Horizontal Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public static final field Vertical Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/HighlightStyle {
+	public fun <init> ()V
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun colorFor (Lcom/tcsappdev/worldwinddraw/core/style/StyleState;)Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;)Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEditingColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getSelectedColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/ImageFit : java/lang/Enum {
+	public static final field Contain Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;
+	public static final field Cover Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;
+	public static final field Inscribed Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;
+	public static final field Stretch Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/style/ImageRef {
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/ImageRef$Bytes : com/tcsappdev/worldwinddraw/core/style/ImageRef {
+	public fun <init> (Ljava/lang/String;[B)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()[B
+	public final fun getKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/ImageRef$Url : com/tcsappdev/worldwinddraw/core/style/ImageRef {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/ImageRef$Url;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/style/ImageRef$Url;Ljava/lang/String;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/style/ImageRef$Url;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/tcsappdev/worldwinddraw/core/style/ShapeStyle {
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/ShapeStyle$Hatch : com/tcsappdev/worldwinddraw/core/style/ShapeStyle {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;IF)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;IFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component3 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component4 ()I
+	public final fun component5 ()F
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;IF)Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$Hatch;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$Hatch;Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;IFILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$Hatch;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackgroundColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getPattern ()Lcom/tcsappdev/worldwinddraw/core/style/HatchPattern;
+	public final fun getSpacing ()I
+	public final fun getThickness ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/ShapeStyle$ImageFill : com/tcsappdev/worldwinddraw/core/style/ShapeStyle {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;FFLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ZLjava/lang/Float;Ljava/lang/Float;ZF)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;FFLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ZLjava/lang/Float;Ljava/lang/Float;ZFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;
+	public final fun component10 ()F
+	public final fun component2 ()Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun component5 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun component6 ()Z
+	public final fun component7 ()Ljava/lang/Float;
+	public final fun component8 ()Ljava/lang/Float;
+	public final fun component9 ()Z
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;FFLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ZLjava/lang/Float;Ljava/lang/Float;ZF)Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$ImageFill;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$ImageFill;Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;FFLcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ZLjava/lang/Float;Ljava/lang/Float;ZFILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$ImageFill;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnchorX ()Ljava/lang/Float;
+	public final fun getAnchorY ()Ljava/lang/Float;
+	public final fun getBackgroundColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun getEdgeSoftness ()F
+	public final fun getExtendEdges ()Z
+	public final fun getFit ()Lcom/tcsappdev/worldwinddraw/core/style/ImageFit;
+	public final fun getImage ()Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;
+	public final fun getOpacity ()F
+	public final fun getRepeat ()Z
+	public final fun getScale ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/ShapeStyle$ImagePattern : com/tcsappdev/worldwinddraw/core/style/ShapeStyle {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;F)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;F)V
+	public synthetic fun <init> (Ljava/lang/String;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;
+	public final fun component2 ()F
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;F)Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$ImagePattern;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$ImagePattern;Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;FILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$ImagePattern;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getImage ()Lcom/tcsappdev/worldwinddraw/core/style/ImageRef;
+	public final fun getOpacity ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/ShapeStyle$SolidColor : com/tcsappdev/worldwinddraw/core/style/ShapeStyle {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;)V
+	public final fun component1 ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public final fun copy (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;)Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$SolidColor;
+	public static synthetic fun copy$default (Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$SolidColor;Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle$SolidColor;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor ()Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/core/style/StyleState : java/lang/Enum {
+	public static final field DEFAULT Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public static final field DISABLED Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public static final field EDITING Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public static final field HOVER Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public static final field SELECTED Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/core/style/StyleState;
+}
+

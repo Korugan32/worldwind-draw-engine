@@ -25,7 +25,7 @@ import earth.worldwind.shape.Polygon
  * carrying both interior and outline settings, unlike `core`'s model where they're two
  * separate styles (see [DrawnPolygon]'s KDoc for why).
  */
-fun DrawnPolygon.toWwkPolygon(): Polygon =
+public fun DrawnPolygon.toWwkPolygon(): Polygon =
     Polygon(densifiedWwkPositions(vertices.map { it.position }, isClosed = true), style.toWwkShapeAttributes()).apply {
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND
         isFollowTerrain = true

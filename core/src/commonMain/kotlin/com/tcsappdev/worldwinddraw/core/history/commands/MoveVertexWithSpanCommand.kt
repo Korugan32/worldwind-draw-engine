@@ -18,9 +18,9 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * again. The commands therefore share this object, and the first one to run records the vertices in it. It is a holder,
  * not a value: two spans are never equal unless they are the same object.
  */
-class VertexSpan(val prevId: VertexId?, val nextId: VertexId?) {
+public class VertexSpan(public val prevId: VertexId?, public val nextId: VertexId?) {
     /** The vertices of the ring the dragged vertex is in, before the drag changed anything; `null` until the first command runs. */
-    var originalVertices: List<Vertex>? = null
+    public var originalVertices: List<Vertex>? = null
         internal set
 }
 
@@ -30,7 +30,7 @@ class VertexSpan(val prevId: VertexId?, val nextId: VertexId?) {
  * gives the same result as running it once: it always starts from the vertices [span] remembers, so a drag's live
  * previews and its final, recorded command don't add up, and undo puts every vertex back.
  */
-class MoveVertexWithSpanCommand(
+internal class MoveVertexWithSpanCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val vertexId: VertexId,

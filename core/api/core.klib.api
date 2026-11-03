@@ -1,0 +1,1066 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <worldwind-draw-engine:core>
+open annotation class com.tcsappdev.worldwinddraw.core/InternalWorldWindDrawApi : kotlin/Annotation { // com.tcsappdev.worldwinddraw.core/InternalWorldWindDrawApi|null[0]
+    constructor <init>() // com.tcsappdev.worldwinddraw.core/InternalWorldWindDrawApi.<init>|<init>(){}[0]
+}
+
+final enum class com.tcsappdev.worldwinddraw.core.animation/RepeatMode : kotlin/Enum<com.tcsappdev.worldwinddraw.core.animation/RepeatMode> { // com.tcsappdev.worldwinddraw.core.animation/RepeatMode|null[0]
+    enum entry Loop // com.tcsappdev.worldwinddraw.core.animation/RepeatMode.Loop|null[0]
+    enum entry Once // com.tcsappdev.worldwinddraw.core.animation/RepeatMode.Once|null[0]
+    enum entry Reverse // com.tcsappdev.worldwinddraw.core.animation/RepeatMode.Reverse|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.core.animation/RepeatMode.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.core.animation/RepeatMode> // com.tcsappdev.worldwinddraw.core.animation/RepeatMode.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.core.animation/RepeatMode // com.tcsappdev.worldwinddraw.core.animation/RepeatMode.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.core.animation/RepeatMode> // com.tcsappdev.worldwinddraw.core.animation/RepeatMode.values|values#static(){}[0]
+}
+
+final enum class com.tcsappdev.worldwinddraw.core.geometry/LabelPosition : kotlin/Enum<com.tcsappdev.worldwinddraw.core.geometry/LabelPosition> { // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition|null[0]
+    enum entry Above // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.Above|null[0]
+    enum entry Below // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.Below|null[0]
+    enum entry Center // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.Center|null[0]
+    enum entry Left // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.Left|null[0]
+    enum entry Right // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.Right|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.core.geometry/LabelPosition> // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.core.geometry/LabelPosition // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.core.geometry/LabelPosition> // com.tcsappdev.worldwinddraw.core.geometry/LabelPosition.values|values#static(){}[0]
+}
+
+final enum class com.tcsappdev.worldwinddraw.core.state/CombineKind : kotlin/Enum<com.tcsappdev.worldwinddraw.core.state/CombineKind> { // com.tcsappdev.worldwinddraw.core.state/CombineKind|null[0]
+    enum entry Cut // com.tcsappdev.worldwinddraw.core.state/CombineKind.Cut|null[0]
+    enum entry Merge // com.tcsappdev.worldwinddraw.core.state/CombineKind.Merge|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.core.state/CombineKind.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.core.state/CombineKind> // com.tcsappdev.worldwinddraw.core.state/CombineKind.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.core.state/CombineKind // com.tcsappdev.worldwinddraw.core.state/CombineKind.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.core.state/CombineKind> // com.tcsappdev.worldwinddraw.core.state/CombineKind.values|values#static(){}[0]
+}
+
+final enum class com.tcsappdev.worldwinddraw.core.state/DrawableEntityType : kotlin/Enum<com.tcsappdev.worldwinddraw.core.state/DrawableEntityType> { // com.tcsappdev.worldwinddraw.core.state/DrawableEntityType|null[0]
+    enum entry Marker // com.tcsappdev.worldwinddraw.core.state/DrawableEntityType.Marker|null[0]
+    enum entry Polygon // com.tcsappdev.worldwinddraw.core.state/DrawableEntityType.Polygon|null[0]
+    enum entry Polyline // com.tcsappdev.worldwinddraw.core.state/DrawableEntityType.Polyline|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.core.state/DrawableEntityType.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.core.state/DrawableEntityType> // com.tcsappdev.worldwinddraw.core.state/DrawableEntityType.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.core.state/DrawableEntityType // com.tcsappdev.worldwinddraw.core.state/DrawableEntityType.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.core.state/DrawableEntityType> // com.tcsappdev.worldwinddraw.core.state/DrawableEntityType.values|values#static(){}[0]
+}
+
+final enum class com.tcsappdev.worldwinddraw.core.style/HandleDetail : kotlin/Enum<com.tcsappdev.worldwinddraw.core.style/HandleDetail> { // com.tcsappdev.worldwinddraw.core.style/HandleDetail|null[0]
+    enum entry Adaptive // com.tcsappdev.worldwinddraw.core.style/HandleDetail.Adaptive|null[0]
+    enum entry All // com.tcsappdev.worldwinddraw.core.style/HandleDetail.All|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.core.style/HandleDetail.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.core.style/HandleDetail> // com.tcsappdev.worldwinddraw.core.style/HandleDetail.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.core.style/HandleDetail // com.tcsappdev.worldwinddraw.core.style/HandleDetail.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.core.style/HandleDetail> // com.tcsappdev.worldwinddraw.core.style/HandleDetail.values|values#static(){}[0]
+}
+
+final enum class com.tcsappdev.worldwinddraw.core.style/HatchPattern : kotlin/Enum<com.tcsappdev.worldwinddraw.core.style/HatchPattern> { // com.tcsappdev.worldwinddraw.core.style/HatchPattern|null[0]
+    enum entry Cross // com.tcsappdev.worldwinddraw.core.style/HatchPattern.Cross|null[0]
+    enum entry DiagonalDown // com.tcsappdev.worldwinddraw.core.style/HatchPattern.DiagonalDown|null[0]
+    enum entry DiagonalUp // com.tcsappdev.worldwinddraw.core.style/HatchPattern.DiagonalUp|null[0]
+    enum entry Dots // com.tcsappdev.worldwinddraw.core.style/HatchPattern.Dots|null[0]
+    enum entry Horizontal // com.tcsappdev.worldwinddraw.core.style/HatchPattern.Horizontal|null[0]
+    enum entry Vertical // com.tcsappdev.worldwinddraw.core.style/HatchPattern.Vertical|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.core.style/HatchPattern.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.core.style/HatchPattern> // com.tcsappdev.worldwinddraw.core.style/HatchPattern.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.core.style/HatchPattern // com.tcsappdev.worldwinddraw.core.style/HatchPattern.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.core.style/HatchPattern> // com.tcsappdev.worldwinddraw.core.style/HatchPattern.values|values#static(){}[0]
+}
+
+final enum class com.tcsappdev.worldwinddraw.core.style/ImageFit : kotlin/Enum<com.tcsappdev.worldwinddraw.core.style/ImageFit> { // com.tcsappdev.worldwinddraw.core.style/ImageFit|null[0]
+    enum entry Contain // com.tcsappdev.worldwinddraw.core.style/ImageFit.Contain|null[0]
+    enum entry Cover // com.tcsappdev.worldwinddraw.core.style/ImageFit.Cover|null[0]
+    enum entry Inscribed // com.tcsappdev.worldwinddraw.core.style/ImageFit.Inscribed|null[0]
+    enum entry Stretch // com.tcsappdev.worldwinddraw.core.style/ImageFit.Stretch|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.core.style/ImageFit.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.core.style/ImageFit> // com.tcsappdev.worldwinddraw.core.style/ImageFit.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.core.style/ImageFit // com.tcsappdev.worldwinddraw.core.style/ImageFit.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.core.style/ImageFit> // com.tcsappdev.worldwinddraw.core.style/ImageFit.values|values#static(){}[0]
+}
+
+final enum class com.tcsappdev.worldwinddraw.core.style/StyleState : kotlin/Enum<com.tcsappdev.worldwinddraw.core.style/StyleState> { // com.tcsappdev.worldwinddraw.core.style/StyleState|null[0]
+    enum entry DEFAULT // com.tcsappdev.worldwinddraw.core.style/StyleState.DEFAULT|null[0]
+    enum entry DISABLED // com.tcsappdev.worldwinddraw.core.style/StyleState.DISABLED|null[0]
+    enum entry EDITING // com.tcsappdev.worldwinddraw.core.style/StyleState.EDITING|null[0]
+    enum entry HOVER // com.tcsappdev.worldwinddraw.core.style/StyleState.HOVER|null[0]
+    enum entry SELECTED // com.tcsappdev.worldwinddraw.core.style/StyleState.SELECTED|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.core.style/StyleState.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.core.style/StyleState> // com.tcsappdev.worldwinddraw.core.style/StyleState.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.core.style/StyleState // com.tcsappdev.worldwinddraw.core.style/StyleState.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.core.style/StyleState> // com.tcsappdev.worldwinddraw.core.style/StyleState.values|values#static(){}[0]
+}
+
+abstract fun interface com.tcsappdev.worldwinddraw.core.animation/Easing { // com.tcsappdev.worldwinddraw.core.animation/Easing|null[0]
+    abstract fun transform(kotlin/Float): kotlin/Float // com.tcsappdev.worldwinddraw.core.animation/Easing.transform|transform(kotlin.Float){}[0]
+}
+
+abstract interface com.tcsappdev.worldwinddraw.core.animation/Animatable { // com.tcsappdev.worldwinddraw.core.animation/Animatable|null[0]
+    abstract fun onTick(kotlin/Long) // com.tcsappdev.worldwinddraw.core.animation/Animatable.onTick|onTick(kotlin.Long){}[0]
+}
+
+abstract interface com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine { // com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine|null[0]
+    abstract fun difference(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId>): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine.difference|difference(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+    abstract fun union(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId>): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine.union|union(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+    abstract fun validate(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon): kotlin/String? // com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine.validate|validate(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon){}[0]
+}
+
+sealed interface com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity { // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity|null[0]
+    abstract val description // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.description|{}description[0]
+        abstract fun <get-description>(): kotlin/String? // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.description.<get-description>|<get-description>(){}[0]
+    abstract val id // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.id|{}id[0]
+        abstract fun <get-id>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.id.<get-id>|<get-id>(){}[0]
+    abstract val properties // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.properties|{}properties[0]
+        abstract fun <get-properties>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.properties.<get-properties>|<get-properties>(){}[0]
+    abstract val style // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.style|{}style[0]
+        abstract fun <get-style>(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.style.<get-style>|<get-style>(){}[0]
+    abstract val zIndex // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.zIndex|{}zIndex[0]
+        abstract fun <get-zIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity.zIndex.<get-zIndex>|<get-zIndex>(){}[0]
+}
+
+sealed interface com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent|null[0]
+    final class Click : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.geometry/EntityId?, com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ...) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.EntityId?;com.tcsappdev.worldwinddraw.core.geometry.VertexId?){}[0]
+
+        final val hitEntityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.hitEntityId|{}hitEntityId[0]
+            final fun <get-hitEntityId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.hitEntityId.<get-hitEntityId>|<get-hitEntityId>(){}[0]
+        final val hitVertexId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.hitVertexId|{}hitVertexId[0]
+            final fun <get-hitVertexId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.hitVertexId.<get-hitVertexId>|<get-hitVertexId>(){}[0]
+        final val position // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.position|{}position[0]
+            final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.position.<get-position>|<get-position>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.component1|component1(){}[0]
+        final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/EntityId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.component2|component2(){}[0]
+        final fun component3(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.component3|component3(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ..., com.tcsappdev.worldwinddraw.core.geometry/EntityId? = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.EntityId?;com.tcsappdev.worldwinddraw.core.geometry.VertexId?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.Click.toString|toString(){}[0]
+    }
+
+    final class CutBy : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId, kotlin/String) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.String){}[0]
+
+        final val cutterId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.cutterId|{}cutterId[0]
+            final fun <get-cutterId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.cutterId.<get-cutterId>|<get-cutterId>(){}[0]
+        final val idPrefix // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.idPrefix|{}idPrefix[0]
+            final fun <get-idPrefix>(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.idPrefix.<get-idPrefix>|<get-idPrefix>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.component1|component1(){}[0]
+        final fun component2(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.component2|component2(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ..., kotlin/String = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.CutBy.toString|toString(){}[0]
+    }
+
+    final class DragEnd : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ...) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.VertexId?){}[0]
+
+        final val newVertexId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.newVertexId|{}newVertexId[0]
+            final fun <get-newVertexId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.newVertexId.<get-newVertexId>|<get-newVertexId>(){}[0]
+        final val position // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.position|{}position[0]
+            final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.position.<get-position>|<get-position>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.component1|component1(){}[0]
+        final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.component2|component2(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.VertexId?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragEnd.toString|toString(){}[0]
+    }
+
+    final class DragMove : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+
+        final val position // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove.position|{}position[0]
+            final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove.position.<get-position>|<get-position>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove.component1|component1(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragMove.toString|toString(){}[0]
+    }
+
+    final class DragStart : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.geometry/VertexId?, com.tcsappdev.worldwinddraw.core.geometry/EntityId?, kotlin/Int? = ..., kotlin/Int? = ..., kotlin/Int? = ..., kotlin/Boolean = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ..., kotlin/Int = ...) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.VertexId?;com.tcsappdev.worldwinddraw.core.geometry.EntityId?;kotlin.Int?;kotlin.Int?;kotlin.Int?;kotlin.Boolean;com.tcsappdev.worldwinddraw.core.geometry.VertexId?;com.tcsappdev.worldwinddraw.core.geometry.VertexId?;kotlin.Int){}[0]
+
+        final val hitDraftEdgeIndex // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitDraftEdgeIndex|{}hitDraftEdgeIndex[0]
+            final fun <get-hitDraftEdgeIndex>(): kotlin/Int? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitDraftEdgeIndex.<get-hitDraftEdgeIndex>|<get-hitDraftEdgeIndex>(){}[0]
+        final val hitDraftPointIndex // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitDraftPointIndex|{}hitDraftPointIndex[0]
+            final fun <get-hitDraftPointIndex>(): kotlin/Int? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitDraftPointIndex.<get-hitDraftPointIndex>|<get-hitDraftPointIndex>(){}[0]
+        final val hitEdgeIndex // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitEdgeIndex|{}hitEdgeIndex[0]
+            final fun <get-hitEdgeIndex>(): kotlin/Int? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitEdgeIndex.<get-hitEdgeIndex>|<get-hitEdgeIndex>(){}[0]
+        final val hitEntityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitEntityId|{}hitEntityId[0]
+            final fun <get-hitEntityId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitEntityId.<get-hitEntityId>|<get-hitEntityId>(){}[0]
+        final val hitMarker // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitMarker|{}hitMarker[0]
+            final fun <get-hitMarker>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitMarker.<get-hitMarker>|<get-hitMarker>(){}[0]
+        final val hitRingIndex // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitRingIndex|{}hitRingIndex[0]
+            final fun <get-hitRingIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitRingIndex.<get-hitRingIndex>|<get-hitRingIndex>(){}[0]
+        final val hitSpanNextId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitSpanNextId|{}hitSpanNextId[0]
+            final fun <get-hitSpanNextId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitSpanNextId.<get-hitSpanNextId>|<get-hitSpanNextId>(){}[0]
+        final val hitSpanPrevId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitSpanPrevId|{}hitSpanPrevId[0]
+            final fun <get-hitSpanPrevId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitSpanPrevId.<get-hitSpanPrevId>|<get-hitSpanPrevId>(){}[0]
+        final val hitVertexId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitVertexId|{}hitVertexId[0]
+            final fun <get-hitVertexId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hitVertexId.<get-hitVertexId>|<get-hitVertexId>(){}[0]
+        final val position // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.position|{}position[0]
+            final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.position.<get-position>|<get-position>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component1|component1(){}[0]
+        final fun component10(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component10|component10(){}[0]
+        final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component2|component2(){}[0]
+        final fun component3(): com.tcsappdev.worldwinddraw.core.geometry/EntityId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component3|component3(){}[0]
+        final fun component4(): kotlin/Int? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component4|component4(){}[0]
+        final fun component5(): kotlin/Int? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component5|component5(){}[0]
+        final fun component6(): kotlin/Int? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component6|component6(){}[0]
+        final fun component7(): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component7|component7(){}[0]
+        final fun component8(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component8|component8(){}[0]
+        final fun component9(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.component9|component9(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ..., com.tcsappdev.worldwinddraw.core.geometry/EntityId? = ..., kotlin/Int? = ..., kotlin/Int? = ..., kotlin/Int? = ..., kotlin/Boolean = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ..., kotlin/Int = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.VertexId?;com.tcsappdev.worldwinddraw.core.geometry.EntityId?;kotlin.Int?;kotlin.Int?;kotlin.Int?;kotlin.Boolean;com.tcsappdev.worldwinddraw.core.geometry.VertexId?;com.tcsappdev.worldwinddraw.core.geometry.VertexId?;kotlin.Int){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DragStart.toString|toString(){}[0]
+    }
+
+    final class FinishDrawing : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/VertexId>) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+
+        final val entityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.entityId|{}entityId[0]
+            final fun <get-entityId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.entityId.<get-entityId>|<get-entityId>(){}[0]
+        final val vertexIds // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.vertexIds|{}vertexIds[0]
+            final fun <get-vertexIds>(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/VertexId> // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.vertexIds.<get-vertexIds>|<get-vertexIds>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.component1|component1(){}[0]
+        final fun component2(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/VertexId> // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.component2|component2(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ..., kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/VertexId> = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.FinishDrawing.toString|toString(){}[0]
+    }
+
+    final class MergeWith : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId, kotlin/String) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.String){}[0]
+
+        final val idPrefix // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.idPrefix|{}idPrefix[0]
+            final fun <get-idPrefix>(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.idPrefix.<get-idPrefix>|<get-idPrefix>(){}[0]
+        final val otherId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.otherId|{}otherId[0]
+            final fun <get-otherId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.otherId.<get-otherId>|<get-otherId>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.component1|component1(){}[0]
+        final fun component2(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.component2|component2(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ..., kotlin/String = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.MergeWith.toString|toString(){}[0]
+    }
+
+    final class ModeChange : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.state/DrawMode) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange.<init>|<init>(com.tcsappdev.worldwinddraw.core.state.DrawMode){}[0]
+
+        final val mode // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange.mode|{}mode[0]
+            final fun <get-mode>(): com.tcsappdev.worldwinddraw.core.state/DrawMode // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange.mode.<get-mode>|<get-mode>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.state/DrawMode // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange.component1|component1(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.state/DrawMode = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange.copy|copy(com.tcsappdev.worldwinddraw.core.state.DrawMode){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ModeChange.toString|toString(){}[0]
+    }
+
+    final class ResizeMarker : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker|null[0]
+        constructor <init>(kotlin/Float) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker.<init>|<init>(kotlin.Float){}[0]
+
+        final val size // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker.size|{}size[0]
+            final fun <get-size>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker.size.<get-size>|<get-size>(){}[0]
+
+        final fun component1(): kotlin/Float // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker.component1|component1(){}[0]
+        final fun copy(kotlin/Float = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker.copy|copy(kotlin.Float){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.ResizeMarker.toString|toString(){}[0]
+    }
+
+    final class SetDescription : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription|null[0]
+        constructor <init>(kotlin/String?) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription.<init>|<init>(kotlin.String?){}[0]
+
+        final val description // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription.description|{}description[0]
+            final fun <get-description>(): kotlin/String? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription.description.<get-description>|<get-description>(){}[0]
+
+        final fun component1(): kotlin/String? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription.component1|component1(){}[0]
+        final fun copy(kotlin/String? = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription.copy|copy(kotlin.String?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetDescription.toString|toString(){}[0]
+    }
+
+    final class SetMarkerLabel : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel?) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.MarkerLabel?){}[0]
+
+        final val label // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel.label|{}label[0]
+            final fun <get-label>(): com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel.label.<get-label>|<get-label>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel? // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel.component1|component1(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel? = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.MarkerLabel?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetMarkerLabel.toString|toString(){}[0]
+    }
+
+    final class SetProperties : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties|null[0]
+        constructor <init>(kotlin.collections/Map<kotlin/String, kotlin/String>) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties.<init>|<init>(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+        final val properties // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties.properties|{}properties[0]
+            final fun <get-properties>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties.properties.<get-properties>|<get-properties>(){}[0]
+
+        final fun component1(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties.component1|component1(){}[0]
+        final fun copy(kotlin.collections/Map<kotlin/String, kotlin/String> = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties.copy|copy(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetProperties.toString|toString(){}[0]
+    }
+
+    final class SetZIndex : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex|null[0]
+        constructor <init>(kotlin/Int) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex.<init>|<init>(kotlin.Int){}[0]
+
+        final val zIndex // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex.zIndex|{}zIndex[0]
+            final fun <get-zIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex.zIndex.<get-zIndex>|<get-zIndex>(){}[0]
+
+        final fun component1(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex.component1|component1(){}[0]
+        final fun copy(kotlin/Int = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex.copy|copy(kotlin.Int){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SetZIndex.toString|toString(){}[0]
+    }
+
+    final class SimplifyShape : com.tcsappdev.worldwinddraw.core.state/DrawEvent { // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape|null[0]
+        constructor <init>(kotlin/Float) // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape.<init>|<init>(kotlin.Float){}[0]
+
+        final val keepFraction // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape.keepFraction|{}keepFraction[0]
+            final fun <get-keepFraction>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape.keepFraction.<get-keepFraction>|<get-keepFraction>(){}[0]
+
+        final fun component1(): kotlin/Float // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape.component1|component1(){}[0]
+        final fun copy(kotlin/Float = ...): com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape.copy|copy(kotlin.Float){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SimplifyShape.toString|toString(){}[0]
+    }
+
+    final object BringToFront : com.tcsappdev.worldwinddraw.core.state/DrawEvent // com.tcsappdev.worldwinddraw.core.state/DrawEvent.BringToFront|null[0]
+
+    final object DeleteSelected : com.tcsappdev.worldwinddraw.core.state/DrawEvent // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DeleteSelected|null[0]
+
+    final object DeleteSelectedRing : com.tcsappdev.worldwinddraw.core.state/DrawEvent // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DeleteSelectedRing|null[0]
+
+    final object DeleteSelectedVertex : com.tcsappdev.worldwinddraw.core.state/DrawEvent // com.tcsappdev.worldwinddraw.core.state/DrawEvent.DeleteSelectedVertex|null[0]
+
+    final object SendToBack : com.tcsappdev.worldwinddraw.core.state/DrawEvent // com.tcsappdev.worldwinddraw.core.state/DrawEvent.SendToBack|null[0]
+}
+
+sealed interface com.tcsappdev.worldwinddraw.core.state/DrawMode { // com.tcsappdev.worldwinddraw.core.state/DrawMode|null[0]
+    open fun styleStateFor(com.tcsappdev.worldwinddraw.core.geometry/EntityId): com.tcsappdev.worldwinddraw.core.style/StyleState // com.tcsappdev.worldwinddraw.core.state/DrawMode.styleStateFor|styleStateFor(com.tcsappdev.worldwinddraw.core.geometry.EntityId){}[0]
+
+    final class Combine : com.tcsappdev.worldwinddraw.core.state/DrawMode { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId, com.tcsappdev.worldwinddraw.core.state/CombineKind, kotlin/String) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.state.CombineKind;kotlin.String){}[0]
+
+        final val entityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.entityId|{}entityId[0]
+            final fun <get-entityId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.entityId.<get-entityId>|<get-entityId>(){}[0]
+        final val idPrefix // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.idPrefix|{}idPrefix[0]
+            final fun <get-idPrefix>(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.idPrefix.<get-idPrefix>|<get-idPrefix>(){}[0]
+        final val kind // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.kind|{}kind[0]
+            final fun <get-kind>(): com.tcsappdev.worldwinddraw.core.state/CombineKind // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.kind.<get-kind>|<get-kind>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.component1|component1(){}[0]
+        final fun component2(): com.tcsappdev.worldwinddraw.core.state/CombineKind // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.component2|component2(){}[0]
+        final fun component3(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.component3|component3(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ..., com.tcsappdev.worldwinddraw.core.state/CombineKind = ..., kotlin/String = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.state.CombineKind;kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Combine.toString|toString(){}[0]
+    }
+
+    final class Draw : com.tcsappdev.worldwinddraw.core.state/DrawMode { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.state/DrawableEntityType, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition>, com.tcsappdev.worldwinddraw.core.style/ShapeStyle = ..., com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag? = ..., com.tcsappdev.worldwinddraw.core.geometry/EntityId? = ...) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.<init>|<init>(com.tcsappdev.worldwinddraw.core.state.DrawableEntityType;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.GeoPosition>;com.tcsappdev.worldwinddraw.core.style.ShapeStyle;com.tcsappdev.worldwinddraw.core.state.DrawMode.Draw.ActiveDrag?;com.tcsappdev.worldwinddraw.core.geometry.EntityId?){}[0]
+
+        final val activeDrag // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.activeDrag|{}activeDrag[0]
+            final fun <get-activeDrag>(): com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.activeDrag.<get-activeDrag>|<get-activeDrag>(){}[0]
+        final val edgeCount // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.edgeCount|{}edgeCount[0]
+            final fun <get-edgeCount>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.edgeCount.<get-edgeCount>|<get-edgeCount>(){}[0]
+        final val entityType // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.entityType|{}entityType[0]
+            final fun <get-entityType>(): com.tcsappdev.worldwinddraw.core.state/DrawableEntityType // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.entityType.<get-entityType>|<get-entityType>(){}[0]
+        final val isClosed // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.isClosed|{}isClosed[0]
+            final fun <get-isClosed>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.isClosed.<get-isClosed>|<get-isClosed>(){}[0]
+        final val pendingVertices // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.pendingVertices|{}pendingVertices[0]
+            final fun <get-pendingVertices>(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition> // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.pendingVertices.<get-pendingVertices>|<get-pendingVertices>(){}[0]
+        final val style // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.style|{}style[0]
+            final fun <get-style>(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.style.<get-style>|<get-style>(){}[0]
+        final val targetEntityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.targetEntityId|{}targetEntityId[0]
+            final fun <get-targetEntityId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.targetEntityId.<get-targetEntityId>|<get-targetEntityId>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.state/DrawableEntityType // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.component1|component1(){}[0]
+        final fun component2(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition> // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.component2|component2(){}[0]
+        final fun component3(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.component3|component3(){}[0]
+        final fun component4(): com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.component4|component4(){}[0]
+        final fun component5(): com.tcsappdev.worldwinddraw.core.geometry/EntityId? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.component5|component5(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.state/DrawableEntityType = ..., kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition> = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle = ..., com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag? = ..., com.tcsappdev.worldwinddraw.core.geometry/EntityId? = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.copy|copy(com.tcsappdev.worldwinddraw.core.state.DrawableEntityType;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.GeoPosition>;com.tcsappdev.worldwinddraw.core.style.ShapeStyle;com.tcsappdev.worldwinddraw.core.state.DrawMode.Draw.ActiveDrag?;com.tcsappdev.worldwinddraw.core.geometry.EntityId?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.toString|toString(){}[0]
+
+        sealed interface ActiveDrag { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag|null[0]
+            final class InsertingPoint : com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint|null[0]
+                constructor <init>(kotlin/Int, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.<init>|<init>(kotlin.Int;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+
+                final val edgeIndex // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.edgeIndex|{}edgeIndex[0]
+                    final fun <get-edgeIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.edgeIndex.<get-edgeIndex>|<get-edgeIndex>(){}[0]
+                final val position // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.position|{}position[0]
+                    final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.position.<get-position>|<get-position>(){}[0]
+
+                final fun component1(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.component1|component1(){}[0]
+                final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.component2|component2(){}[0]
+                final fun copy(kotlin/Int = ..., com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.copy|copy(kotlin.Int;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+                final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.equals|equals(kotlin.Any?){}[0]
+                final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.hashCode|hashCode(){}[0]
+                final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.InsertingPoint.toString|toString(){}[0]
+            }
+
+            final class MovingPoint : com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint|null[0]
+                constructor <init>(kotlin/Int, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.<init>|<init>(kotlin.Int;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+
+                final val index // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.index|{}index[0]
+                    final fun <get-index>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.index.<get-index>|<get-index>(){}[0]
+                final val origin // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.origin|{}origin[0]
+                    final fun <get-origin>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.origin.<get-origin>|<get-origin>(){}[0]
+
+                final fun component1(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.component1|component1(){}[0]
+                final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.component2|component2(){}[0]
+                final fun copy(kotlin/Int = ..., com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.copy|copy(kotlin.Int;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+                final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.equals|equals(kotlin.Any?){}[0]
+                final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.hashCode|hashCode(){}[0]
+                final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.ActiveDrag.MovingPoint.toString|toString(){}[0]
+            }
+        }
+
+        final object Companion // com.tcsappdev.worldwinddraw.core.state/DrawMode.Draw.Companion|null[0]
+    }
+
+    final class Edit : com.tcsappdev.worldwinddraw.core.state/DrawMode { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId, com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag? = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ...) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.state.DrawMode.Edit.ActiveDrag?;com.tcsappdev.worldwinddraw.core.geometry.VertexId?){}[0]
+
+        final val activeDrag // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.activeDrag|{}activeDrag[0]
+            final fun <get-activeDrag>(): com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.activeDrag.<get-activeDrag>|<get-activeDrag>(){}[0]
+        final val entityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.entityId|{}entityId[0]
+            final fun <get-entityId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.entityId.<get-entityId>|<get-entityId>(){}[0]
+        final val selectedVertexId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.selectedVertexId|{}selectedVertexId[0]
+            final fun <get-selectedVertexId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.selectedVertexId.<get-selectedVertexId>|<get-selectedVertexId>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.component1|component1(){}[0]
+        final fun component2(): com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.component2|component2(){}[0]
+        final fun component3(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.component3|component3(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ..., com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag? = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.state.DrawMode.Edit.ActiveDrag?;com.tcsappdev.worldwinddraw.core.geometry.VertexId?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.toString|toString(){}[0]
+
+        sealed interface ActiveDrag { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag|null[0]
+            final class ExistingVertex : com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex|null[0]
+                constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/VertexId, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan? = ...) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.VertexId;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.history.commands.VertexSpan?){}[0]
+
+                final val origin // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.origin|{}origin[0]
+                    final fun <get-origin>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.origin.<get-origin>|<get-origin>(){}[0]
+                final val span // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.span|{}span[0]
+                    final fun <get-span>(): com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.span.<get-span>|<get-span>(){}[0]
+                final val vertexId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.vertexId|{}vertexId[0]
+                    final fun <get-vertexId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.vertexId.<get-vertexId>|<get-vertexId>(){}[0]
+
+                final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/VertexId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.component1|component1(){}[0]
+                final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.component2|component2(){}[0]
+                final fun component3(): com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan? // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.component3|component3(){}[0]
+                final fun copy(com.tcsappdev.worldwinddraw.core.geometry/VertexId = ..., com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ..., com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan? = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.VertexId;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.history.commands.VertexSpan?){}[0]
+                final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.equals|equals(kotlin.Any?){}[0]
+                final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.hashCode|hashCode(){}[0]
+                final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.ExistingVertex.toString|toString(){}[0]
+            }
+
+            final class MovingMarker : com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker|null[0]
+                constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+
+                final val origin // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker.origin|{}origin[0]
+                    final fun <get-origin>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker.origin.<get-origin>|<get-origin>(){}[0]
+
+                final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker.component1|component1(){}[0]
+                final fun copy(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+                final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker.equals|equals(kotlin.Any?){}[0]
+                final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker.hashCode|hashCode(){}[0]
+                final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.MovingMarker.toString|toString(){}[0]
+            }
+
+            final class NewVertex : com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex|null[0]
+                constructor <init>(kotlin/Int, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, kotlin/Int = ...) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.<init>|<init>(kotlin.Int;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.Int){}[0]
+
+                final val edgeIndex // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.edgeIndex|{}edgeIndex[0]
+                    final fun <get-edgeIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.edgeIndex.<get-edgeIndex>|<get-edgeIndex>(){}[0]
+                final val position // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.position|{}position[0]
+                    final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.position.<get-position>|<get-position>(){}[0]
+                final val ringIndex // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.ringIndex|{}ringIndex[0]
+                    final fun <get-ringIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.ringIndex.<get-ringIndex>|<get-ringIndex>(){}[0]
+
+                final fun component1(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.component1|component1(){}[0]
+                final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.component2|component2(){}[0]
+                final fun component3(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.component3|component3(){}[0]
+                final fun copy(kotlin/Int = ..., com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ..., kotlin/Int = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.copy|copy(kotlin.Int;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.Int){}[0]
+                final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.equals|equals(kotlin.Any?){}[0]
+                final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.hashCode|hashCode(){}[0]
+                final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Edit.ActiveDrag.NewVertex.toString|toString(){}[0]
+            }
+        }
+    }
+
+    final class Select : com.tcsappdev.worldwinddraw.core.state/DrawMode { // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId) // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId){}[0]
+
+        final val entityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select.entityId|{}entityId[0]
+            final fun <get-entityId>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select.entityId.<get-entityId>|<get-entityId>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select.component1|component1(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ...): com.tcsappdev.worldwinddraw.core.state/DrawMode.Select // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawMode.Select.toString|toString(){}[0]
+    }
+
+    final object Idle : com.tcsappdev.worldwinddraw.core.state/DrawMode // com.tcsappdev.worldwinddraw.core.state/DrawMode.Idle|null[0]
+
+    final object Pan : com.tcsappdev.worldwinddraw.core.state/DrawMode // com.tcsappdev.worldwinddraw.core.state/DrawMode.Pan|null[0]
+}
+
+sealed interface com.tcsappdev.worldwinddraw.core.style/ImageRef { // com.tcsappdev.worldwinddraw.core.style/ImageRef|null[0]
+    final class Bytes : com.tcsappdev.worldwinddraw.core.style/ImageRef { // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes|null[0]
+        constructor <init>(kotlin/String, kotlin/ByteArray) // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes.<init>|<init>(kotlin.String;kotlin.ByteArray){}[0]
+
+        final val data // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes.data|{}data[0]
+            final fun <get-data>(): kotlin/ByteArray // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes.data.<get-data>|<get-data>(){}[0]
+        final val key // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes.key|{}key[0]
+            final fun <get-key>(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes.key.<get-key>|<get-key>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ImageRef.Bytes.toString|toString(){}[0]
+    }
+
+    final class Url : com.tcsappdev.worldwinddraw.core.style/ImageRef { // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url|null[0]
+        constructor <init>(kotlin/String) // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url.<init>|<init>(kotlin.String){}[0]
+
+        final val url // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url.url|{}url[0]
+            final fun <get-url>(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url.url.<get-url>|<get-url>(){}[0]
+
+        final fun component1(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): com.tcsappdev.worldwinddraw.core.style/ImageRef.Url // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ImageRef.Url.toString|toString(){}[0]
+    }
+}
+
+sealed interface com.tcsappdev.worldwinddraw.core.style/ShapeStyle { // com.tcsappdev.worldwinddraw.core.style/ShapeStyle|null[0]
+    final class Hatch : com.tcsappdev.worldwinddraw.core.style/ShapeStyle { // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.style/HatchPattern, com.tcsappdev.worldwinddraw.core.style/ColorRgba, com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Int = ..., kotlin/Float = ...) // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.<init>|<init>(com.tcsappdev.worldwinddraw.core.style.HatchPattern;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Int;kotlin.Float){}[0]
+
+        final val backgroundColor // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.backgroundColor|{}backgroundColor[0]
+            final fun <get-backgroundColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.backgroundColor.<get-backgroundColor>|<get-backgroundColor>(){}[0]
+        final val color // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.color|{}color[0]
+            final fun <get-color>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.color.<get-color>|<get-color>(){}[0]
+        final val pattern // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.pattern|{}pattern[0]
+            final fun <get-pattern>(): com.tcsappdev.worldwinddraw.core.style/HatchPattern // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.pattern.<get-pattern>|<get-pattern>(){}[0]
+        final val spacing // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.spacing|{}spacing[0]
+            final fun <get-spacing>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.spacing.<get-spacing>|<get-spacing>(){}[0]
+        final val thickness // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.thickness|{}thickness[0]
+            final fun <get-thickness>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.thickness.<get-thickness>|<get-thickness>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.style/HatchPattern // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.component1|component1(){}[0]
+        final fun component2(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.component2|component2(){}[0]
+        final fun component3(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.component3|component3(){}[0]
+        final fun component4(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.component4|component4(){}[0]
+        final fun component5(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.component5|component5(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.style/HatchPattern = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Int = ..., kotlin/Float = ...): com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.copy|copy(com.tcsappdev.worldwinddraw.core.style.HatchPattern;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Int;kotlin.Float){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.Hatch.toString|toString(){}[0]
+    }
+
+    final class ImageFill : com.tcsappdev.worldwinddraw.core.style/ShapeStyle { // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.style/ImageRef, com.tcsappdev.worldwinddraw.core.style/ImageFit = ..., kotlin/Float = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Boolean = ..., kotlin/Float? = ..., kotlin/Float? = ..., kotlin/Boolean = ..., kotlin/Float = ...) // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.<init>|<init>(com.tcsappdev.worldwinddraw.core.style.ImageRef;com.tcsappdev.worldwinddraw.core.style.ImageFit;kotlin.Float;kotlin.Float;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Boolean;kotlin.Float?;kotlin.Float?;kotlin.Boolean;kotlin.Float){}[0]
+
+        final val anchorX // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.anchorX|{}anchorX[0]
+            final fun <get-anchorX>(): kotlin/Float? // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.anchorX.<get-anchorX>|<get-anchorX>(){}[0]
+        final val anchorY // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.anchorY|{}anchorY[0]
+            final fun <get-anchorY>(): kotlin/Float? // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.anchorY.<get-anchorY>|<get-anchorY>(){}[0]
+        final val backgroundColor // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.backgroundColor|{}backgroundColor[0]
+            final fun <get-backgroundColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.backgroundColor.<get-backgroundColor>|<get-backgroundColor>(){}[0]
+        final val edgeSoftness // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.edgeSoftness|{}edgeSoftness[0]
+            final fun <get-edgeSoftness>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.edgeSoftness.<get-edgeSoftness>|<get-edgeSoftness>(){}[0]
+        final val extendEdges // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.extendEdges|{}extendEdges[0]
+            final fun <get-extendEdges>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.extendEdges.<get-extendEdges>|<get-extendEdges>(){}[0]
+        final val fit // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.fit|{}fit[0]
+            final fun <get-fit>(): com.tcsappdev.worldwinddraw.core.style/ImageFit // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.fit.<get-fit>|<get-fit>(){}[0]
+        final val image // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.image|{}image[0]
+            final fun <get-image>(): com.tcsappdev.worldwinddraw.core.style/ImageRef // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.image.<get-image>|<get-image>(){}[0]
+        final val opacity // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.opacity|{}opacity[0]
+            final fun <get-opacity>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.opacity.<get-opacity>|<get-opacity>(){}[0]
+        final val repeat // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.repeat|{}repeat[0]
+            final fun <get-repeat>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.repeat.<get-repeat>|<get-repeat>(){}[0]
+        final val scale // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.scale|{}scale[0]
+            final fun <get-scale>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.scale.<get-scale>|<get-scale>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.style/ImageRef // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component1|component1(){}[0]
+        final fun component10(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component10|component10(){}[0]
+        final fun component2(): com.tcsappdev.worldwinddraw.core.style/ImageFit // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component2|component2(){}[0]
+        final fun component3(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component3|component3(){}[0]
+        final fun component4(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component4|component4(){}[0]
+        final fun component5(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component5|component5(){}[0]
+        final fun component6(): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component6|component6(){}[0]
+        final fun component7(): kotlin/Float? // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component7|component7(){}[0]
+        final fun component8(): kotlin/Float? // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component8|component8(){}[0]
+        final fun component9(): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.component9|component9(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.style/ImageRef = ..., com.tcsappdev.worldwinddraw.core.style/ImageFit = ..., kotlin/Float = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Boolean = ..., kotlin/Float? = ..., kotlin/Float? = ..., kotlin/Boolean = ..., kotlin/Float = ...): com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.copy|copy(com.tcsappdev.worldwinddraw.core.style.ImageRef;com.tcsappdev.worldwinddraw.core.style.ImageFit;kotlin.Float;kotlin.Float;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Boolean;kotlin.Float?;kotlin.Float?;kotlin.Boolean;kotlin.Float){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImageFill.toString|toString(){}[0]
+    }
+
+    final class ImagePattern : com.tcsappdev.worldwinddraw.core.style/ShapeStyle { // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.style/ImageRef, kotlin/Float = ...) // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.<init>|<init>(com.tcsappdev.worldwinddraw.core.style.ImageRef;kotlin.Float){}[0]
+        constructor <init>(kotlin/String, kotlin/Float = ...) // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.<init>|<init>(kotlin.String;kotlin.Float){}[0]
+
+        final val image // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.image|{}image[0]
+            final fun <get-image>(): com.tcsappdev.worldwinddraw.core.style/ImageRef // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.image.<get-image>|<get-image>(){}[0]
+        final val opacity // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.opacity|{}opacity[0]
+            final fun <get-opacity>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.opacity.<get-opacity>|<get-opacity>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.style/ImageRef // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.component1|component1(){}[0]
+        final fun component2(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.component2|component2(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.style/ImageRef = ..., kotlin/Float = ...): com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.copy|copy(com.tcsappdev.worldwinddraw.core.style.ImageRef;kotlin.Float){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.ImagePattern.toString|toString(){}[0]
+    }
+
+    final class SolidColor : com.tcsappdev.worldwinddraw.core.style/ShapeStyle { // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor|null[0]
+        constructor <init>(com.tcsappdev.worldwinddraw.core.style/ColorRgba) // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor.<init>|<init>(com.tcsappdev.worldwinddraw.core.style.ColorRgba){}[0]
+
+        final val color // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor.color|{}color[0]
+            final fun <get-color>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor.color.<get-color>|<get-color>(){}[0]
+
+        final fun component1(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor.component1|component1(){}[0]
+        final fun copy(com.tcsappdev.worldwinddraw.core.style/ColorRgba = ...): com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor.copy|copy(com.tcsappdev.worldwinddraw.core.style.ColorRgba){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ShapeStyle.SolidColor.toString|toString(){}[0]
+    }
+}
+
+final class <#A: kotlin/Any?> com.tcsappdev.worldwinddraw.core.animation/AnimatedProperty : com.tcsappdev.worldwinddraw.core.animation/Animatable { // com.tcsappdev.worldwinddraw.core.animation/AnimatedProperty|null[0]
+    constructor <init>(#A, #A, com.tcsappdev.worldwinddraw.core.animation/AnimationSpec, kotlin/Function3<#A, #A, kotlin/Float, #A>) // com.tcsappdev.worldwinddraw.core.animation/AnimatedProperty.<init>|<init>(1:0;1:0;com.tcsappdev.worldwinddraw.core.animation.AnimationSpec;kotlin.Function3<1:0,1:0,kotlin.Float,1:0>){}[0]
+
+    final var isFinished // com.tcsappdev.worldwinddraw.core.animation/AnimatedProperty.isFinished|{}isFinished[0]
+        final fun <get-isFinished>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.animation/AnimatedProperty.isFinished.<get-isFinished>|<get-isFinished>(){}[0]
+    final var value // com.tcsappdev.worldwinddraw.core.animation/AnimatedProperty.value|{}value[0]
+        final fun <get-value>(): #A // com.tcsappdev.worldwinddraw.core.animation/AnimatedProperty.value.<get-value>|<get-value>(){}[0]
+
+    final fun onTick(kotlin/Long) // com.tcsappdev.worldwinddraw.core.animation/AnimatedProperty.onTick|onTick(kotlin.Long){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.animation/AnimationController { // com.tcsappdev.worldwinddraw.core.animation/AnimationController|null[0]
+    constructor <init>() // com.tcsappdev.worldwinddraw.core.animation/AnimationController.<init>|<init>(){}[0]
+
+    final fun register(com.tcsappdev.worldwinddraw.core.animation/Animatable) // com.tcsappdev.worldwinddraw.core.animation/AnimationController.register|register(com.tcsappdev.worldwinddraw.core.animation.Animatable){}[0]
+    final fun tick(kotlin/Long) // com.tcsappdev.worldwinddraw.core.animation/AnimationController.tick|tick(kotlin.Long){}[0]
+    final fun unregister(com.tcsappdev.worldwinddraw.core.animation/Animatable) // com.tcsappdev.worldwinddraw.core.animation/AnimationController.unregister|unregister(com.tcsappdev.worldwinddraw.core.animation.Animatable){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.animation/AnimationSpec { // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec|null[0]
+    constructor <init>(kotlin/Long, com.tcsappdev.worldwinddraw.core.animation/Easing, com.tcsappdev.worldwinddraw.core.animation/RepeatMode = ...) // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.<init>|<init>(kotlin.Long;com.tcsappdev.worldwinddraw.core.animation.Easing;com.tcsappdev.worldwinddraw.core.animation.RepeatMode){}[0]
+
+    final val durationMs // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.durationMs|{}durationMs[0]
+        final fun <get-durationMs>(): kotlin/Long // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.durationMs.<get-durationMs>|<get-durationMs>(){}[0]
+    final val easing // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.easing|{}easing[0]
+        final fun <get-easing>(): com.tcsappdev.worldwinddraw.core.animation/Easing // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.easing.<get-easing>|<get-easing>(){}[0]
+    final val repeatMode // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.repeatMode|{}repeatMode[0]
+        final fun <get-repeatMode>(): com.tcsappdev.worldwinddraw.core.animation/RepeatMode // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.repeatMode.<get-repeatMode>|<get-repeatMode>(){}[0]
+
+    final fun component1(): kotlin/Long // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.component1|component1(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.animation/Easing // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.component2|component2(){}[0]
+    final fun component3(): com.tcsappdev.worldwinddraw.core.animation/RepeatMode // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.component3|component3(){}[0]
+    final fun copy(kotlin/Long = ..., com.tcsappdev.worldwinddraw.core.animation/Easing = ..., com.tcsappdev.worldwinddraw.core.animation/RepeatMode = ...): com.tcsappdev.worldwinddraw.core.animation/AnimationSpec // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.copy|copy(kotlin.Long;com.tcsappdev.worldwinddraw.core.animation.Easing;com.tcsappdev.worldwinddraw.core.animation.RepeatMode){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.animation/AnimationSpec.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker : com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity { // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId, com.tcsappdev.worldwinddraw.core.style/ShapeStyle, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel? = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/Float = ...) // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.style.ShapeStyle;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.Float;com.tcsappdev.worldwinddraw.core.geometry.MarkerLabel?;kotlin.String?;kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.Float){}[0]
+
+    final val description // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.description.<get-description>|<get-description>(){}[0]
+    final val id // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.id|{}id[0]
+        final fun <get-id>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.id.<get-id>|<get-id>(){}[0]
+    final val label // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.label|{}label[0]
+        final fun <get-label>(): com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel? // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.label.<get-label>|<get-label>(){}[0]
+    final val position // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.position|{}position[0]
+        final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.position.<get-position>|<get-position>(){}[0]
+    final val properties // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.properties|{}properties[0]
+        final fun <get-properties>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.properties.<get-properties>|<get-properties>(){}[0]
+    final val rotation // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.rotation|{}rotation[0]
+        final fun <get-rotation>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.rotation.<get-rotation>|<get-rotation>(){}[0]
+    final val size // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.size|{}size[0]
+        final fun <get-size>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.size.<get-size>|<get-size>(){}[0]
+    final val style // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.style|{}style[0]
+        final fun <get-style>(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.style.<get-style>|<get-style>(){}[0]
+    final val zIndex // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.zIndex|{}zIndex[0]
+        final fun <get-zIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.zIndex.<get-zIndex>|<get-zIndex>(){}[0]
+
+    final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component1|component1(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component2|component2(){}[0]
+    final fun component3(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component4|component4(){}[0]
+    final fun component5(): com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel? // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component5|component5(){}[0]
+    final fun component6(): kotlin/String? // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component6|component6(){}[0]
+    final fun component7(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component7|component7(){}[0]
+    final fun component8(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component8|component8(){}[0]
+    final fun component9(): kotlin/Float // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.component9|component9(){}[0]
+    final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle = ..., com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel? = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/Float = ...): com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.style.ShapeStyle;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.Float;com.tcsappdev.worldwinddraw.core.geometry.MarkerLabel?;kotlin.String?;kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon : com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity { // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId, com.tcsappdev.worldwinddraw.core.style/ShapeStyle, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>, com.tcsappdev.worldwinddraw.core.style/ShapeStyle? = ..., kotlin/Float = ..., kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.style.ShapeStyle;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>;com.tcsappdev.worldwinddraw.core.style.ShapeStyle?;kotlin.Float;kotlin.collections.List<kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>>;kotlin.String?;kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val description // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.description.<get-description>|<get-description>(){}[0]
+    final val extraRings // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.extraRings|{}extraRings[0]
+        final fun <get-extraRings>(): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.extraRings.<get-extraRings>|<get-extraRings>(){}[0]
+    final val id // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.id|{}id[0]
+        final fun <get-id>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.id.<get-id>|<get-id>(){}[0]
+    final val outlineStyle // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.outlineStyle|{}outlineStyle[0]
+        final fun <get-outlineStyle>(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle? // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.outlineStyle.<get-outlineStyle>|<get-outlineStyle>(){}[0]
+    final val outlineWidth // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.outlineWidth|{}outlineWidth[0]
+        final fun <get-outlineWidth>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.outlineWidth.<get-outlineWidth>|<get-outlineWidth>(){}[0]
+    final val properties // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.properties|{}properties[0]
+        final fun <get-properties>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.properties.<get-properties>|<get-properties>(){}[0]
+    final val rings // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.rings|{}rings[0]
+        final fun <get-rings>(): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.rings.<get-rings>|<get-rings>(){}[0]
+    final val style // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.style|{}style[0]
+        final fun <get-style>(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.style.<get-style>|<get-style>(){}[0]
+    final val vertices // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.vertices|{}vertices[0]
+        final fun <get-vertices>(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.vertices.<get-vertices>|<get-vertices>(){}[0]
+    final val zIndex // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.zIndex|{}zIndex[0]
+        final fun <get-zIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.zIndex.<get-zIndex>|<get-zIndex>(){}[0]
+
+    final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component1|component1(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component3|component3(){}[0]
+    final fun component4(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle? // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component4|component4(){}[0]
+    final fun component5(): kotlin/Float // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component6|component6(){}[0]
+    final fun component7(): kotlin/String? // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component7|component7(){}[0]
+    final fun component8(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component8|component8(){}[0]
+    final fun component9(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.component9|component9(){}[0]
+    final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle = ..., kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex> = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle? = ..., kotlin/Float = ..., kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...): com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.style.ShapeStyle;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>;com.tcsappdev.worldwinddraw.core.style.ShapeStyle?;kotlin.Float;kotlin.collections.List<kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>>;kotlin.String?;kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.hashCode|hashCode(){}[0]
+    final fun mapRings(kotlin/Function1<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>>): com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.mapRings|mapRings(kotlin.Function1<kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>,kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>>){}[0]
+    final fun ringIndexOf(com.tcsappdev.worldwinddraw.core.geometry/VertexId): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.ringIndexOf|ringIndexOf(com.tcsappdev.worldwinddraw.core.geometry.VertexId){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.toString|toString(){}[0]
+    final fun withExtraRing(kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>): com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.withExtraRing|withExtraRing(kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>){}[0]
+    final fun withRing(kotlin/Int, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>): com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.withRing|withRing(kotlin.Int;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>){}[0]
+    final fun withRingInserted(kotlin/Int, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>): com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.withRingInserted|withRingInserted(kotlin.Int;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>){}[0]
+    final fun withoutRing(kotlin/Int): com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon.withoutRing|withoutRing(kotlin.Int){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline : com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity { // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/EntityId, com.tcsappdev.worldwinddraw.core.style/ShapeStyle, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>, kotlin/Float = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.style.ShapeStyle;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>;kotlin.Float;kotlin.String?;kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val description // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.description.<get-description>|<get-description>(){}[0]
+    final val id // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.id|{}id[0]
+        final fun <get-id>(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.id.<get-id>|<get-id>(){}[0]
+    final val lineWidth // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.lineWidth|{}lineWidth[0]
+        final fun <get-lineWidth>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.lineWidth.<get-lineWidth>|<get-lineWidth>(){}[0]
+    final val properties // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.properties|{}properties[0]
+        final fun <get-properties>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.properties.<get-properties>|<get-properties>(){}[0]
+    final val style // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.style|{}style[0]
+        final fun <get-style>(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.style.<get-style>|<get-style>(){}[0]
+    final val vertices // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.vertices|{}vertices[0]
+        final fun <get-vertices>(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.vertices.<get-vertices>|<get-vertices>(){}[0]
+    final val zIndex // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.zIndex|{}zIndex[0]
+        final fun <get-zIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.zIndex.<get-zIndex>|<get-zIndex>(){}[0]
+
+    final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/EntityId // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.component1|component1(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.component5|component5(){}[0]
+    final fun component6(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.component6|component6(){}[0]
+    final fun component7(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.component7|component7(){}[0]
+    final fun copy(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle = ..., kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex> = ..., kotlin/Float = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...): com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;com.tcsappdev.worldwinddraw.core.style.ShapeStyle;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>;kotlin.Float;kotlin.String?;kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.geometry/GeoPosition { // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double = ...) // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+
+    final val altitude // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.altitude|{}altitude[0]
+        final fun <get-altitude>(): kotlin/Double // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.altitude.<get-altitude>|<get-altitude>(){}[0]
+    final val latitude // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.latitude|{}latitude[0]
+        final fun <get-latitude>(): kotlin/Double // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.latitude.<get-latitude>|<get-latitude>(){}[0]
+    final val longitude // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.longitude|{}longitude[0]
+        final fun <get-longitude>(): kotlin/Double // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.longitude.<get-longitude>|<get-longitude>(){}[0]
+
+    final fun component1(): kotlin/Double // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.component3|component3(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ...): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/GeoPosition.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel { // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel|null[0]
+    constructor <init>(kotlin/String, com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., kotlin/Int = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., com.tcsappdev.worldwinddraw.core.geometry/LabelPosition = ...) // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.<init>|<init>(kotlin.String;com.tcsappdev.worldwinddraw.core.style.ColorRgba;kotlin.Int;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;com.tcsappdev.worldwinddraw.core.geometry.LabelPosition){}[0]
+
+    final val color // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.color|{}color[0]
+        final fun <get-color>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.color.<get-color>|<get-color>(){}[0]
+    final val outlineColor // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.outlineColor|{}outlineColor[0]
+        final fun <get-outlineColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.outlineColor.<get-outlineColor>|<get-outlineColor>(){}[0]
+    final val position // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.position|{}position[0]
+        final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/LabelPosition // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.position.<get-position>|<get-position>(){}[0]
+    final val size // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.size|{}size[0]
+        final fun <get-size>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.size.<get-size>|<get-size>(){}[0]
+    final val text // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.text|{}text[0]
+        final fun <get-text>(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.text.<get-text>|<get-text>(){}[0]
+
+    final fun component1(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.component1|component1(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.component2|component2(){}[0]
+    final fun component3(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.component3|component3(){}[0]
+    final fun component4(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.component4|component4(){}[0]
+    final fun component5(): com.tcsappdev.worldwinddraw.core.geometry/LabelPosition // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., kotlin/Int = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., com.tcsappdev.worldwinddraw.core.geometry/LabelPosition = ...): com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.copy|copy(kotlin.String;com.tcsappdev.worldwinddraw.core.style.ColorRgba;kotlin.Int;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;com.tcsappdev.worldwinddraw.core.geometry.LabelPosition){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/MarkerLabel.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.geometry/Vertex { // com.tcsappdev.worldwinddraw.core.geometry/Vertex|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/VertexId, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // com.tcsappdev.worldwinddraw.core.geometry/Vertex.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.VertexId;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val id // com.tcsappdev.worldwinddraw.core.geometry/Vertex.id|{}id[0]
+        final fun <get-id>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId // com.tcsappdev.worldwinddraw.core.geometry/Vertex.id.<get-id>|<get-id>(){}[0]
+    final val metadata // com.tcsappdev.worldwinddraw.core.geometry/Vertex.metadata|{}metadata[0]
+        final fun <get-metadata>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/Vertex.metadata.<get-metadata>|<get-metadata>(){}[0]
+    final val position // com.tcsappdev.worldwinddraw.core.geometry/Vertex.position|{}position[0]
+        final fun <get-position>(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.geometry/Vertex.position.<get-position>|<get-position>(){}[0]
+
+    final fun component1(): com.tcsappdev.worldwinddraw.core.geometry/VertexId // com.tcsappdev.worldwinddraw.core.geometry/Vertex.component1|component1(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.geometry/Vertex.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.tcsappdev.worldwinddraw.core.geometry/Vertex.component3|component3(){}[0]
+    final fun copy(com.tcsappdev.worldwinddraw.core.geometry/VertexId = ..., com.tcsappdev.worldwinddraw.core.geometry/GeoPosition = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...): com.tcsappdev.worldwinddraw.core.geometry/Vertex // com.tcsappdev.worldwinddraw.core.geometry/Vertex.copy|copy(com.tcsappdev.worldwinddraw.core.geometry.VertexId;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.geometry/Vertex.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/Vertex.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/Vertex.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan { // com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.geometry/VertexId?, com.tcsappdev.worldwinddraw.core.geometry/VertexId?) // com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan.<init>|<init>(com.tcsappdev.worldwinddraw.core.geometry.VertexId?;com.tcsappdev.worldwinddraw.core.geometry.VertexId?){}[0]
+
+    final val nextId // com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan.nextId|{}nextId[0]
+        final fun <get-nextId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan.nextId.<get-nextId>|<get-nextId>(){}[0]
+    final val prevId // com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan.prevId|{}prevId[0]
+        final fun <get-prevId>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan.prevId.<get-prevId>|<get-prevId>(){}[0]
+
+    final var originalVertices // com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan.originalVertices|{}originalVertices[0]
+        final fun <get-originalVertices>(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>? // com.tcsappdev.worldwinddraw.core.history.commands/VertexSpan.originalVertices.<get-originalVertices>|<get-originalVertices>(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.history/HistoryManager { // com.tcsappdev.worldwinddraw.core.history/HistoryManager|null[0]
+    constructor <init>(kotlin/Int = ...) // com.tcsappdev.worldwinddraw.core.history/HistoryManager.<init>|<init>(kotlin.Int){}[0]
+
+    final val canRedo // com.tcsappdev.worldwinddraw.core.history/HistoryManager.canRedo|{}canRedo[0]
+        final fun <get-canRedo>(): kotlinx.coroutines.flow/StateFlow<kotlin/Boolean> // com.tcsappdev.worldwinddraw.core.history/HistoryManager.canRedo.<get-canRedo>|<get-canRedo>(){}[0]
+    final val canUndo // com.tcsappdev.worldwinddraw.core.history/HistoryManager.canUndo|{}canUndo[0]
+        final fun <get-canUndo>(): kotlinx.coroutines.flow/StateFlow<kotlin/Boolean> // com.tcsappdev.worldwinddraw.core.history/HistoryManager.canUndo.<get-canUndo>|<get-canUndo>(){}[0]
+
+    final fun clear() // com.tcsappdev.worldwinddraw.core.history/HistoryManager.clear|clear(){}[0]
+    final fun redo() // com.tcsappdev.worldwinddraw.core.history/HistoryManager.redo|redo(){}[0]
+    final fun undo() // com.tcsappdev.worldwinddraw.core.history/HistoryManager.undo|undo(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.overlay/InvalidShapeException : kotlin/Exception { // com.tcsappdev.worldwinddraw.core.overlay/InvalidShapeException|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable? = ...) // com.tcsappdev.worldwinddraw.core.overlay/InvalidShapeException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.repository/EntityRepository { // com.tcsappdev.worldwinddraw.core.repository/EntityRepository|null[0]
+    constructor <init>() // com.tcsappdev.worldwinddraw.core.repository/EntityRepository.<init>|<init>(){}[0]
+
+    final val entities // com.tcsappdev.worldwinddraw.core.repository/EntityRepository.entities|{}entities[0]
+        final fun <get-entities>(): kotlinx.coroutines.flow/StateFlow<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity>> // com.tcsappdev.worldwinddraw.core.repository/EntityRepository.entities.<get-entities>|<get-entities>(){}[0]
+
+    final fun add(com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity) // com.tcsappdev.worldwinddraw.core.repository/EntityRepository.add|add(com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity){}[0]
+    final fun remove(com.tcsappdev.worldwinddraw.core.geometry/EntityId) // com.tcsappdev.worldwinddraw.core.repository/EntityRepository.remove|remove(com.tcsappdev.worldwinddraw.core.geometry.EntityId){}[0]
+    final fun replaceAll(kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity>) // com.tcsappdev.worldwinddraw.core.repository/EntityRepository.replaceAll|replaceAll(kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>){}[0]
+    final fun update(com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity) // com.tcsappdev.worldwinddraw.core.repository/EntityRepository.update|update(com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.state/DrawEngineState { // com.tcsappdev.worldwinddraw.core.state/DrawEngineState|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.state/DrawMode = ...) // com.tcsappdev.worldwinddraw.core.state/DrawEngineState.<init>|<init>(com.tcsappdev.worldwinddraw.core.state.DrawMode){}[0]
+
+    final val mode // com.tcsappdev.worldwinddraw.core.state/DrawEngineState.mode|{}mode[0]
+        final fun <get-mode>(): com.tcsappdev.worldwinddraw.core.state/DrawMode // com.tcsappdev.worldwinddraw.core.state/DrawEngineState.mode.<get-mode>|<get-mode>(){}[0]
+
+    final fun component1(): com.tcsappdev.worldwinddraw.core.state/DrawMode // com.tcsappdev.worldwinddraw.core.state/DrawEngineState.component1|component1(){}[0]
+    final fun copy(com.tcsappdev.worldwinddraw.core.state/DrawMode = ...): com.tcsappdev.worldwinddraw.core.state/DrawEngineState // com.tcsappdev.worldwinddraw.core.state/DrawEngineState.copy|copy(com.tcsappdev.worldwinddraw.core.state.DrawMode){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.state/DrawEngineState.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.state/DrawEngineState.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.state/DrawEngineState.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.state/DrawStateMachine { // com.tcsappdev.worldwinddraw.core.state/DrawStateMachine|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.history/HistoryManager, com.tcsappdev.worldwinddraw.core.repository/EntityRepository, com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine? = ...) // com.tcsappdev.worldwinddraw.core.state/DrawStateMachine.<init>|<init>(com.tcsappdev.worldwinddraw.core.history.HistoryManager;com.tcsappdev.worldwinddraw.core.repository.EntityRepository;com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine?){}[0]
+
+    final val state // com.tcsappdev.worldwinddraw.core.state/DrawStateMachine.state|{}state[0]
+        final fun <get-state>(): kotlinx.coroutines.flow/StateFlow<com.tcsappdev.worldwinddraw.core.state/DrawEngineState> // com.tcsappdev.worldwinddraw.core.state/DrawStateMachine.state.<get-state>|<get-state>(){}[0]
+
+    final fun onEvent(com.tcsappdev.worldwinddraw.core.state/DrawEvent) // com.tcsappdev.worldwinddraw.core.state/DrawStateMachine.onEvent|onEvent(com.tcsappdev.worldwinddraw.core.state.DrawEvent){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.style/ColorRgba { // com.tcsappdev.worldwinddraw.core.style/ColorRgba|null[0]
+    constructor <init>(kotlin/Int, kotlin/Int, kotlin/Int, kotlin/Int = ...) // com.tcsappdev.worldwinddraw.core.style/ColorRgba.<init>|<init>(kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+
+    final val alpha // com.tcsappdev.worldwinddraw.core.style/ColorRgba.alpha|{}alpha[0]
+        final fun <get-alpha>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.alpha.<get-alpha>|<get-alpha>(){}[0]
+    final val blue // com.tcsappdev.worldwinddraw.core.style/ColorRgba.blue|{}blue[0]
+        final fun <get-blue>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.blue.<get-blue>|<get-blue>(){}[0]
+    final val green // com.tcsappdev.worldwinddraw.core.style/ColorRgba.green|{}green[0]
+        final fun <get-green>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.green.<get-green>|<get-green>(){}[0]
+    final val red // com.tcsappdev.worldwinddraw.core.style/ColorRgba.red|{}red[0]
+        final fun <get-red>(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.red.<get-red>|<get-red>(){}[0]
+
+    final fun component1(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.component2|component2(){}[0]
+    final fun component3(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.component3|component3(){}[0]
+    final fun component4(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.component4|component4(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ...): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/ColorRgba.copy|copy(kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/ColorRgba.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/ColorRgba.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/ColorRgba.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.style/HandleStyle { // com.tcsappdev.worldwinddraw.core.style/HandleStyle|null[0]
+    constructor <init>(kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/HandleDetail = ...) // com.tcsappdev.worldwinddraw.core.style/HandleStyle.<init>|<init>(kotlin.Float;kotlin.Float;kotlin.Float;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.HandleDetail){}[0]
+
+    final val detail // com.tcsappdev.worldwinddraw.core.style/HandleStyle.detail|{}detail[0]
+        final fun <get-detail>(): com.tcsappdev.worldwinddraw.core.style/HandleDetail // com.tcsappdev.worldwinddraw.core.style/HandleStyle.detail.<get-detail>|<get-detail>(){}[0]
+    final val fillColor // com.tcsappdev.worldwinddraw.core.style/HandleStyle.fillColor|{}fillColor[0]
+        final fun <get-fillColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HandleStyle.fillColor.<get-fillColor>|<get-fillColor>(){}[0]
+    final val midpointDiameter // com.tcsappdev.worldwinddraw.core.style/HandleStyle.midpointDiameter|{}midpointDiameter[0]
+        final fun <get-midpointDiameter>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/HandleStyle.midpointDiameter.<get-midpointDiameter>|<get-midpointDiameter>(){}[0]
+    final val plusColor // com.tcsappdev.worldwinddraw.core.style/HandleStyle.plusColor|{}plusColor[0]
+        final fun <get-plusColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HandleStyle.plusColor.<get-plusColor>|<get-plusColor>(){}[0]
+    final val ringColor // com.tcsappdev.worldwinddraw.core.style/HandleStyle.ringColor|{}ringColor[0]
+        final fun <get-ringColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HandleStyle.ringColor.<get-ringColor>|<get-ringColor>(){}[0]
+    final val selectedFillColor // com.tcsappdev.worldwinddraw.core.style/HandleStyle.selectedFillColor|{}selectedFillColor[0]
+        final fun <get-selectedFillColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HandleStyle.selectedFillColor.<get-selectedFillColor>|<get-selectedFillColor>(){}[0]
+    final val touchTargetDiameter // com.tcsappdev.worldwinddraw.core.style/HandleStyle.touchTargetDiameter|{}touchTargetDiameter[0]
+        final fun <get-touchTargetDiameter>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/HandleStyle.touchTargetDiameter.<get-touchTargetDiameter>|<get-touchTargetDiameter>(){}[0]
+    final val vertexDiameter // com.tcsappdev.worldwinddraw.core.style/HandleStyle.vertexDiameter|{}vertexDiameter[0]
+        final fun <get-vertexDiameter>(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/HandleStyle.vertexDiameter.<get-vertexDiameter>|<get-vertexDiameter>(){}[0]
+
+    final fun component1(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/HandleStyle.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/HandleStyle.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/HandleStyle.component3|component3(){}[0]
+    final fun component4(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HandleStyle.component4|component4(){}[0]
+    final fun component5(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HandleStyle.component5|component5(){}[0]
+    final fun component6(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HandleStyle.component6|component6(){}[0]
+    final fun component7(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HandleStyle.component7|component7(){}[0]
+    final fun component8(): com.tcsappdev.worldwinddraw.core.style/HandleDetail // com.tcsappdev.worldwinddraw.core.style/HandleStyle.component8|component8(){}[0]
+    final fun copy(kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/HandleDetail = ...): com.tcsappdev.worldwinddraw.core.style/HandleStyle // com.tcsappdev.worldwinddraw.core.style/HandleStyle.copy|copy(kotlin.Float;kotlin.Float;kotlin.Float;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.HandleDetail){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/HandleStyle.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/HandleStyle.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/HandleStyle.toString|toString(){}[0]
+    final fun touchSizeFor(kotlin/Float): kotlin/Float // com.tcsappdev.worldwinddraw.core.style/HandleStyle.touchSizeFor|touchSizeFor(kotlin.Float){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.core.style/HighlightStyle { // com.tcsappdev.worldwinddraw.core.style/HighlightStyle|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ...) // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.<init>|<init>(com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba){}[0]
+
+    final val editingColor // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.editingColor|{}editingColor[0]
+        final fun <get-editingColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.editingColor.<get-editingColor>|<get-editingColor>(){}[0]
+    final val selectedColor // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.selectedColor|{}selectedColor[0]
+        final fun <get-selectedColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.selectedColor.<get-selectedColor>|<get-selectedColor>(){}[0]
+
+    final fun colorFor(com.tcsappdev.worldwinddraw.core.style/StyleState): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.colorFor|colorFor(com.tcsappdev.worldwinddraw.core.style.StyleState){}[0]
+    final fun component1(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.component1|component1(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.component2|component2(){}[0]
+    final fun copy(com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ...): com.tcsappdev.worldwinddraw.core.style/HighlightStyle // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.copy|copy(com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.style/HighlightStyle.toString|toString(){}[0]
+}
+
+final value class com.tcsappdev.worldwinddraw.core.geometry/EntityId { // com.tcsappdev.worldwinddraw.core.geometry/EntityId|null[0]
+    constructor <init>(kotlin/String) // com.tcsappdev.worldwinddraw.core.geometry/EntityId.<init>|<init>(kotlin.String){}[0]
+
+    final val id // com.tcsappdev.worldwinddraw.core.geometry/EntityId.id|{}id[0]
+        final fun <get-id>(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/EntityId.id.<get-id>|<get-id>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.geometry/EntityId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/EntityId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/EntityId.toString|toString(){}[0]
+}
+
+final value class com.tcsappdev.worldwinddraw.core.geometry/VertexId { // com.tcsappdev.worldwinddraw.core.geometry/VertexId|null[0]
+    constructor <init>(kotlin/String) // com.tcsappdev.worldwinddraw.core.geometry/VertexId.<init>|<init>(kotlin.String){}[0]
+
+    final val id // com.tcsappdev.worldwinddraw.core.geometry/VertexId.id|{}id[0]
+        final fun <get-id>(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/VertexId.id.<get-id>|<get-id>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.core.geometry/VertexId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.core.geometry/VertexId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.core.geometry/VertexId.toString|toString(){}[0]
+}
+
+final object com.tcsappdev.worldwinddraw.core.geometry/GreatCircle { // com.tcsappdev.worldwinddraw.core.geometry/GreatCircle|null[0]
+    final fun angleBetween(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition): kotlin/Double // com.tcsappdev.worldwinddraw.core.geometry/GreatCircle.angleBetween|angleBetween(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+    final fun bearing(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition): kotlin/Double // com.tcsappdev.worldwinddraw.core.geometry/GreatCircle.bearing|bearing(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+    final fun destination(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, kotlin/Double, kotlin/Double): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.geometry/GreatCircle.destination|destination(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.Double;kotlin.Double){}[0]
+    final fun intermediatePoints(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, kotlin/Double): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition> // com.tcsappdev.worldwinddraw.core.geometry/GreatCircle.intermediatePoints|intermediatePoints(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.Double){}[0]
+    final fun pointAt(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, kotlin/Double): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.core.geometry/GreatCircle.pointAt|pointAt(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;kotlin.Double){}[0]
+}
+
+final fun (com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity).com.tcsappdev.worldwinddraw.core.geometry/withDescription(kotlin/String?): com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity // com.tcsappdev.worldwinddraw.core.geometry/withDescription|withDescription@com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity(kotlin.String?){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity).com.tcsappdev.worldwinddraw.core.geometry/withProperties(kotlin.collections/Map<kotlin/String, kotlin/String>): com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity // com.tcsappdev.worldwinddraw.core.geometry/withProperties|withProperties@com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity).com.tcsappdev.worldwinddraw.core.geometry/withZIndex(kotlin/Int): com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity // com.tcsappdev.worldwinddraw.core.geometry/withZIndex|withZIndex@com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity(kotlin.Int){}[0]

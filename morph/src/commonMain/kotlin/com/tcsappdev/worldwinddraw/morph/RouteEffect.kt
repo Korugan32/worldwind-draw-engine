@@ -25,7 +25,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  *
  * @throws IllegalArgumentException if [spec] has no duration or repeats, or [route] has fewer than 2 points.
  */
-class RouteEffect(
+public class RouteEffect(
     private val repository: EntityRepository,
     private val id: EntityId,
     private val route: List<GeoPosition>,
@@ -44,7 +44,7 @@ class RouteEffect(
     // What is on the map besides the route, taken when the first tick comes.
     private var others: List<DrawableEntity>? = null
 
-    var isFinished = false
+    public var isFinished: Boolean = false
         private set
 
     override fun onTick(deltaMs: Long) {

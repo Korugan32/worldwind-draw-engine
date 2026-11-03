@@ -11,7 +11,7 @@ import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
  *
  * @property lineWidth the stroke's thickness in screen pixels, must be greater than 0.
  */
-data class DrawnPolyline(
+public data class DrawnPolyline(
     override val id: EntityId,
     override val style: ShapeStyle,
     val vertices: List<Vertex>,

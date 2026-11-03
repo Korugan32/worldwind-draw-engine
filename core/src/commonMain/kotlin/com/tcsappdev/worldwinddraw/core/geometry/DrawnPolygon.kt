@@ -25,7 +25,7 @@ import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
  * @property outlineWidth the border's thickness in screen pixels, must be greater than 0.
  * Only meaningful when [outlineStyle] is non-null.
  */
-data class DrawnPolygon(
+public data class DrawnPolygon(
     override val id: EntityId,
     override val style: ShapeStyle,
     val vertices: List<Vertex>,
@@ -50,24 +50,24 @@ data class DrawnPolygon(
     val rings: List<List<Vertex>> = if (extraRings.isEmpty()) listOf(vertices) else listOf(vertices) + extraRings
 
     /** The index in [rings] of the ring that holds [vertexId], or -1 if no ring does. */
-    fun ringIndexOf(vertexId: VertexId): Int = rings.indexOfFirst { ring -> ring.any { it.id == vertexId } }
+    public fun ringIndexOf(vertexId: VertexId): Int = rings.indexOfFirst { ring -> ring.any { it.id == vertexId } }
 
     /** This polygon with the ring at [index] (in [rings]) replaced by [ring]. */
-    fun withRing(index: Int, ring: List<Vertex>): DrawnPolygon {
+    public fun withRing(index: Int, ring: List<Vertex>): DrawnPolygon {
         require(index in rings.indices) { "no ring $index in a polygon of ${rings.size} rings" }
         return if (index == 0) copy(vertices = ring)
         else copy(extraRings = extraRings.toMutableList().apply { this[index - 1] = ring })
     }
 
     /** This polygon with every ring replaced by what [transform] makes of it, keeping the order. */
-    fun mapRings(transform: (List<Vertex>) -> List<Vertex>): DrawnPolygon =
+    public fun mapRings(transform: (List<Vertex>) -> List<Vertex>): DrawnPolygon =
         copy(vertices = transform(vertices), extraRings = extraRings.map(transform))
 
     /** This polygon with [ring] added as one more ring (another part, or a hole in one). */
-    fun withExtraRing(ring: List<Vertex>): DrawnPolygon = copy(extraRings = extraRings + listOf(ring))
+    public fun withExtraRing(ring: List<Vertex>): DrawnPolygon = copy(extraRings = extraRings + listOf(ring))
 
     /** This polygon without the ring at [index]; the next one becomes the first when it is the first that goes. */
-    fun withoutRing(index: Int): DrawnPolygon {
+    public fun withoutRing(index: Int): DrawnPolygon {
         require(rings.size > 1) { "a polygon cannot lose its only ring" }
         require(index in rings.indices) { "no ring $index in a polygon of ${rings.size} rings" }
         val remaining = rings.filterIndexed { i, _ -> i != index }
@@ -75,7 +75,7 @@ data class DrawnPolygon(
     }
 
     /** This polygon with [ring] inserted at [index] in [rings] (the inverse of [withoutRing]). */
-    fun withRingInserted(index: Int, ring: List<Vertex>): DrawnPolygon {
+    public fun withRingInserted(index: Int, ring: List<Vertex>): DrawnPolygon {
         require(index in 0..rings.size) { "cannot insert a ring at $index in a polygon of ${rings.size} rings" }
         val all = rings.toMutableList().apply { add(index, ring) }
         return copy(vertices = all.first(), extraRings = all.drop(1))

@@ -7,6 +7,6 @@ package com.tcsappdev.worldwinddraw.core.animation
  * returns its input unchanged, while an "ease in" curve returns smaller values early on
  * so the animation starts slow and speeds up.
  */
-fun interface Easing {
-    fun transform(fraction: Float): Float
+public fun interface Easing {
+    public fun transform(fraction: Float): Float
 }

@@ -34,16 +34,16 @@ private val DRAWING_SESSION = Any()
  * are executed directly instead — see [ReduceResult]'s KDoc for why a live vertex drag
  * needs that distinction.
  */
-class DrawStateMachine(
+public class DrawStateMachine(
     private val historyManager: HistoryManager,
     private val entityRepository: EntityRepository,
     /** What merges and cuts polygons; without one [DrawEvent.MergeWith] and [DrawEvent.CutBy] do nothing (see [OverlayEngine]). */
     private val overlay: OverlayEngine? = null,
 ) {
     private val _state = MutableStateFlow(DrawEngineState())
-    val state: StateFlow<DrawEngineState> = _state.asStateFlow()
+    public val state: StateFlow<DrawEngineState> = _state.asStateFlow()
 
-    fun onEvent(event: DrawEvent) {
+    public fun onEvent(event: DrawEvent) {
         val modeBefore = _state.value.mode
         val result = DrawEngineReducer.reduce(_state.value, event, entityRepository, overlay)
         _state.value = result.state

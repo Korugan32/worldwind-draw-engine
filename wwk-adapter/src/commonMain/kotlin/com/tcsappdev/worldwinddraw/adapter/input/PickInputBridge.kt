@@ -55,7 +55,7 @@ import kotlin.random.Random
  * at [DragStart][DrawEvent.DragStart] and carried across the gesture by this bridge, not
  * regenerated on every step.
  */
-class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCallback {
+public class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCallback {
     private var isDragging = false
     private var pendingNewVertexId: VertexId? = null
 
@@ -65,7 +65,7 @@ class PickInputBridge(private val stateMachine: DrawStateMachine) : SelectDragCa
     private var grabOffsetLongitude = 0.0
 
     /** Must be true for [onObjectPicked] to ever fire — see [SelectDragCallback]'s KDoc. */
-    override fun canPickObjects(userObject: Any) = true
+    override fun canPickObjects(userObject: Any): Boolean = true
 
     override fun onObjectPicked(userObject: Any, position: Position) {
         // A tap on a draft's own handle must not add a point under it: dragging is how a handle is

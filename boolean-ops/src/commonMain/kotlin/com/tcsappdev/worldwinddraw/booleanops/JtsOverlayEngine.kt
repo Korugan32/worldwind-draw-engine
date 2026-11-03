@@ -16,7 +16,7 @@ import com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine
  * @param gridSize the size of a cell of the grid the overlay is done on, in degrees (see [PolygonOverlay]); the default closes the gaps and
  * overlaps of 1e-7 degrees (about a centimetre) that two sources of the same border leave between them.
  */
-class JtsOverlayEngine(private val gridSize: Double = PolygonOverlay.DEFAULT_GRID_SIZE) : OverlayEngine {
+public class JtsOverlayEngine(private val gridSize: Double = PolygonOverlay.DEFAULT_GRID_SIZE) : OverlayEngine {
     init {
         require(gridSize >= 0.0 && gridSize.isFinite()) { "gridSize must be 0 or more, was $gridSize" }
     }

@@ -5,7 +5,7 @@ package com.tcsappdev.worldwinddraw.core.history
  * small intermediate moves) collapses into a single undo, instead of the user having to
  * press undo once per intermediate step.
  */
-class CompositeCommand(private val commands: List<Command>) : Command {
+internal class CompositeCommand(private val commands: List<Command>) : Command {
     override fun execute() {
         commands.forEach { it.execute() }
     }

@@ -8,7 +8,7 @@ package com.tcsappdev.worldwinddraw.core.state
  * [com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker], there is no
  * [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity] instance yet to ask.
  */
-enum class DrawableEntityType {
+public enum class DrawableEntityType {
     Polygon,
     Polyline,
     Marker

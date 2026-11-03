@@ -1,5 +1,7 @@
 package com.tcsappdev.worldwinddraw.core.geometry
 
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
+
 import kotlin.math.PI
 
 /**
@@ -16,12 +18,13 @@ import kotlin.math.PI
  * @param startIndex the corner the pen starts at (an index into [ring]); a route always starts at its first point, so it must be 0.
  * @param reversed whether it goes the other way round, against the order of [ring].
  */
-class OutlineWalk(ring: List<GeoPosition>, startIndex: Int = 0, reversed: Boolean = false, closed: Boolean = true) {
+@InternalWorldWindDrawApi
+public class OutlineWalk(ring: List<GeoPosition>, startIndex: Int = 0, reversed: Boolean = false, closed: Boolean = true) {
     private val corners: List<GeoPosition>
     private val along: DoubleArray
 
     /** The whole way round, as the sum of the angles of the edges (radians). */
-    val length: Double
+    public val length: Double
 
     init {
         require(ring.size >= 2) { "an outline needs at least 2 points to be walked" }
@@ -41,13 +44,13 @@ class OutlineWalk(ring: List<GeoPosition>, startIndex: Int = 0, reversed: Boolea
     }
 
     /** How far round the walk the corner at [index] (an index into the points it was made from, for a route) is: 0 for the first, 1 for the last. */
-    fun fractionAtCorner(index: Int): Double {
+    public fun fractionAtCorner(index: Int): Double {
         require(index in 0 until corners.size) { "corner $index is not in a walk of ${corners.size} points" }
         return if (length <= 0.0) 0.0 else along[index] / length
     }
 
     /** Where the pen is when it is [fraction] (0 at the start, 1 back at the start; outside that it stops at the ends) of the way round. */
-    fun pointAt(fraction: Double): GeoPosition {
+    public fun pointAt(fraction: Double): GeoPosition {
         val at = locate(fraction)
         return cut(at)
     }
@@ -56,7 +59,7 @@ class OutlineWalk(ring: List<GeoPosition>, startIndex: Int = 0, reversed: Boolea
      * The direction the pen is going at [fraction] of the way, in radians clockwise from north (see [GreatCircle.bearing]): along the arc of
      * the edge it is on, so on a long edge the direction changes as it goes. At the very end it is the direction it arrived in.
      */
-    fun bearingAt(fraction: Double): Double {
+    public fun bearingAt(fraction: Double): Double {
         val at = locate(fraction)
         val end = corners[at.edge + 1]
         if (at.fraction >= 1.0) {
@@ -72,7 +75,7 @@ class OutlineWalk(ring: List<GeoPosition>, startIndex: Int = 0, reversed: Boolea
      * (too little for a line: the caller shows nothing yet), at 1 the whole outline, ending on the start again. Between two corners the
      * last point is on the arc WWK draws between them, so the line it makes with the corner before is the drawn edge cut short.
      */
-    fun pathTo(fraction: Double): List<GeoPosition> {
+    public fun pathTo(fraction: Double): List<GeoPosition> {
         val at = locate(fraction)
         val path = ArrayList<GeoPosition>(at.edge + 2)
         for (i in 0..at.edge) path += corners[i]
@@ -85,7 +88,7 @@ class OutlineWalk(ring: List<GeoPosition>, startIndex: Int = 0, reversed: Boolea
      * corners in between, to where it was at [to]. It begins and ends exactly where [pathTo] had the pen, so stretches that follow each
      * other join up. When [to] is not after [from] there is no stretch, only the one point.
      */
-    fun pathBetween(from: Double, to: Double): List<GeoPosition> {
+    public fun pathBetween(from: Double, to: Double): List<GeoPosition> {
         if (to <= from) return listOf(pointAt(from))
         val a = locate(from)
         val b = locate(to)

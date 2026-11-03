@@ -12,19 +12,19 @@ import kotlinx.coroutines.flow.asStateFlow
  * tracks interaction mode — [com.tcsappdev.worldwinddraw.core.history.Command]s (via
  * `HistoryManager`) are what mutate this.
  */
-class EntityRepository {
+public class EntityRepository {
     private val _entities = MutableStateFlow<List<DrawableEntity>>(emptyList())
-    val entities : StateFlow<List<DrawableEntity>> = _entities.asStateFlow()
+    public val entities : StateFlow<List<DrawableEntity>> = _entities.asStateFlow()
 
-    fun add(entity: DrawableEntity) {
+    public fun add(entity: DrawableEntity) {
         _entities.value += entity
     }
 
-    fun remove(entityId: EntityId) {
+    public fun remove(entityId: EntityId) {
         _entities.value = _entities.value.filter { it.id != entityId }
     }
 
-    fun update(entity: DrawableEntity) {
+    public fun update(entity: DrawableEntity) {
         _entities.value = _entities.value.map { if (it.id == entity.id) entity else it }
     }
 
@@ -37,7 +37,7 @@ class EntityRepository {
      *
      * @throws IllegalArgumentException if two of [newEntities] have the same id; nothing changes then.
      */
-    fun replaceAll(newEntities: List<DrawableEntity>) {
+    public fun replaceAll(newEntities: List<DrawableEntity>) {
         require(newEntities.map { it.id }.toSet().size == newEntities.size) { "two shapes have the same id" }
         _entities.value = newEntities.toList()
     }

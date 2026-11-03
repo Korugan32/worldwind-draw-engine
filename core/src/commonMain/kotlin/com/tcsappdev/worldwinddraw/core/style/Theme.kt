@@ -5,7 +5,7 @@ package com.tcsappdev.worldwinddraw.core.style
  * that state. Must define at least a [StyleState.DEFAULT] fill, which [fillFor] falls
  * back to for any state that isn't explicitly listed in [filledByState].
  */
-data class Theme(
+internal data class Theme(
     val name: String,
     val filledByState: Map<StyleState, ShapeStyle>,
 ) {

@@ -5,7 +5,7 @@ package com.tcsappdev.worldwinddraw.core.style
  * reusing a platform color class (e.g. Android's `Color`), since `core` must stay free of
  * any platform/UI dependency.
  */
-data class ColorRgba(
+public data class ColorRgba(
     val red: Int,
     val green: Int,
     val blue: Int,
@@ -36,9 +36,9 @@ data class ColorRgba(
  * single `interiorColor`, so a real gradient would need custom shader work that isn't
  * worth it for a feature judged not important enough to invest in right now.
  */
-sealed interface ShapeStyle {
+public sealed interface ShapeStyle {
     /** A single, flat color. */
-    data class SolidColor(val color: ColorRgba) : ShapeStyle
+    public data class SolidColor(val color: ColorRgba) : ShapeStyle
 
     /**
      * The shape is filled with [image], repeated as a pattern, drawn at [opacity].
@@ -60,13 +60,13 @@ sealed interface ShapeStyle {
      * (web and iOS for now), or the bytes aren't a decodable image, a neutral grey placeholder fill
      * is drawn instead of the image.
      */
-    data class ImagePattern(val image: ImageRef, val opacity: Float = 1f) : ShapeStyle {
+    public data class ImagePattern(val image: ImageRef, val opacity: Float = 1f) : ShapeStyle {
         init {
             require(opacity in 0f..1f) { "opacity must be between 0 and 1, was $opacity" }
         }
 
         /** A pattern from an `http`/`https` URL. */
-        constructor(imageUrl: String, opacity: Float = 1f) : this(ImageRef.Url(imageUrl), opacity)
+        public constructor(imageUrl: String, opacity: Float = 1f) : this(ImageRef.Url(imageUrl), opacity)
     }
 
     /**
@@ -107,7 +107,7 @@ sealed interface ShapeStyle {
      * (e.g. across the antimeridian) all fall back to a neutral grey placeholder fill. On a line or
      * a marker this behaves like [ImagePattern] (the image is the line's or the icon's picture).
      */
-    data class ImageFill(
+    public data class ImageFill(
         val image: ImageRef,
         val fit: ImageFit = ImageFit.Contain,
         val scale: Float = 1f,
@@ -141,7 +141,7 @@ sealed interface ShapeStyle {
      * distance measured along an axis (the lines themselves are `spacing / sqrt(2)` apart). [thickness] is a line's width, or the
      * diameter of a dot. On a line or a marker the hatching has nothing to fill, so [color] is used as a plain colour there.
      */
-    data class Hatch(
+    public data class Hatch(
         val pattern: HatchPattern,
         val color: ColorRgba,
         val backgroundColor: ColorRgba? = null,
@@ -156,7 +156,7 @@ sealed interface ShapeStyle {
 }
 
 /** How an [ShapeStyle.ImageFill]'s picture is sized against the shape's bounding box. Always centred, aspect ratio kept unless noted. */
-enum class ImageFit {
+public enum class ImageFit {
     /** As large as possible while still fitting entirely inside the box: nothing is cut off, the rest of the box stays empty. */
     Contain,
 
@@ -178,7 +178,7 @@ enum class ImageFit {
 }
 
 /** What a [ShapeStyle.Hatch] is drawn with. */
-enum class HatchPattern {
+public enum class HatchPattern {
     /** Lines rising to the right, like `/`. */
     DiagonalUp,
 

@@ -1,0 +1,25 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <worldwind-draw-engine:boolean-ops>
+final class com.tcsappdev.worldwinddraw.booleanops/JtsOverlayEngine : com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine { // com.tcsappdev.worldwinddraw.booleanops/JtsOverlayEngine|null[0]
+    constructor <init>(kotlin/Double = ...) // com.tcsappdev.worldwinddraw.booleanops/JtsOverlayEngine.<init>|<init>(kotlin.Double){}[0]
+
+    final fun difference(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId>): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.booleanops/JtsOverlayEngine.difference|difference(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+    final fun union(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId>): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.booleanops/JtsOverlayEngine.union|union(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+    final fun validate(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon): kotlin/String? // com.tcsappdev.worldwinddraw.booleanops/JtsOverlayEngine.validate|validate(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon){}[0]
+}
+
+final object com.tcsappdev.worldwinddraw.booleanops/PolygonOverlay { // com.tcsappdev.worldwinddraw.booleanops/PolygonOverlay|null[0]
+    final const val DEFAULT_GRID_SIZE // com.tcsappdev.worldwinddraw.booleanops/PolygonOverlay.DEFAULT_GRID_SIZE|{}DEFAULT_GRID_SIZE[0]
+        final fun <get-DEFAULT_GRID_SIZE>(): kotlin/Double // com.tcsappdev.worldwinddraw.booleanops/PolygonOverlay.DEFAULT_GRID_SIZE.<get-DEFAULT_GRID_SIZE>|<get-DEFAULT_GRID_SIZE>(){}[0]
+
+    final fun difference(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Double = ..., kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId> = ...): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.booleanops/PolygonOverlay.difference|difference(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Double;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+    final fun intersection(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Double = ..., kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId> = ...): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.booleanops/PolygonOverlay.intersection|intersection(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Double;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+    final fun union(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Double = ..., kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId> = ...): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.booleanops/PolygonOverlay.union|union(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Double;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+    final fun validate(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon): kotlin/String? // com.tcsappdev.worldwinddraw.booleanops/PolygonOverlay.validate|validate(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon){}[0]
+}

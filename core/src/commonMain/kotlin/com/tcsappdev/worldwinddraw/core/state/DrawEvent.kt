@@ -10,13 +10,13 @@ import com.tcsappdev.worldwinddraw.core.geometry.VertexId
  * pick/gesture callbacks in `wwk-adapter`) into a form [DrawEngineReducer] can act on
  * without knowing anything about that platform.
  */
-sealed interface DrawEvent {
+public sealed interface DrawEvent {
     /**
      * A tap/click at [position]. [hitEntityId] is whatever the adapter's own picking
      * determined was under that point, or `null` for empty space — hit-testing happens
      * in the adapter, not recomputed here.
      */
-    data class Click(val position: GeoPosition, val hitEntityId: EntityId?, val hitVertexId: VertexId? = null) : DrawEvent
+    public data class Click(val position: GeoPosition, val hitEntityId: EntityId?, val hitVertexId: VertexId? = null) : DrawEvent
 
     /**
      * A drag gesture begins at [position]. [hitEntityId] identifies which shape (if any)
@@ -40,7 +40,7 @@ sealed interface DrawEvent {
      *
      * [hitRingIndex] is which ring of a polygon [hitEdgeIndex] is an edge of (`0`, the first, for a shape with only one).
      */
-    data class DragStart(
+    public data class DragStart(
         val position: GeoPosition,
         val hitVertexId: VertexId?,
         val hitEntityId: EntityId?,
@@ -54,7 +54,7 @@ sealed interface DrawEvent {
     ) : DrawEvent
 
     /** The drag continues at [position]. What's being dragged is already known from the [DragStart] that began it. */
-    data class DragMove(val position: GeoPosition) : DrawEvent
+    public data class DragMove(val position: GeoPosition) : DrawEvent
 
     /**
      * The drag ends at [position]. [newVertexId] is a fresh id the adapter generates only
@@ -66,10 +66,10 @@ sealed interface DrawEvent {
      * matching how `null` fields elsewhere in [DrawEvent] mean "the adapter couldn't/didn't
      * supply this," not an error.
      */
-    data class DragEnd(val position: GeoPosition, val newVertexId: VertexId? = null) : DrawEvent
+    public data class DragEnd(val position: GeoPosition, val newVertexId: VertexId? = null) : DrawEvent
 
     /** An explicit request (e.g. a host UI button) to switch to [mode], regardless of the current mode. */
-    data class ModeChange(val mode: DrawMode) : DrawEvent
+    public data class ModeChange(val mode: DrawMode) : DrawEvent
 
     /**
      * An explicit request (e.g. a host UI "Finish" button) to commit [DrawMode.Draw]'s
@@ -82,14 +82,14 @@ sealed interface DrawEvent {
      * not in [DrawMode.Draw], or with too few points for the entity type, is also a no-op —
      * a host should gate its "Finish" button on both, but the reducer doesn't trust it to.
      */
-    data class FinishDrawing(val entityId: EntityId, val vertexIds: List<VertexId>) : DrawEvent
+    public data class FinishDrawing(val entityId: EntityId, val vertexIds: List<VertexId>) : DrawEvent
 
     /**
      * An explicit request (e.g. a host UI "+" / "-" button) to set the size of the marker that is
      * currently selected or being edited to [size] (screen pixels, the marker's longest side). A no-op
      * in any other mode, and if the selected shape isn't a marker. Undoable.
      */
-    data class ResizeMarker(val size: Float) : DrawEvent {
+    public data class ResizeMarker(val size: Float) : DrawEvent {
         init {
             require(size > 0f) { "size must be positive, was $size" }
         }
@@ -99,20 +99,20 @@ sealed interface DrawEvent {
      * An explicit request to give the marker that is currently selected or being edited the text [label], or to take its text away
      * with `null`. A no-op in any other mode, and if the selected shape isn't a marker. Undoable.
      */
-    data class SetMarkerLabel(val label: MarkerLabel?) : DrawEvent
+    public data class SetMarkerLabel(val label: MarkerLabel?) : DrawEvent
 
     /**
      * An explicit request to give the shape that is currently selected or being edited the description [description] (`null` for
      * none; see [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity.description]). A no-op in any other mode. Undoable.
      */
-    data class SetDescription(val description: String?) : DrawEvent
+    public data class SetDescription(val description: String?) : DrawEvent
 
     /**
      * An explicit request to give the shape that is currently selected or being edited the properties [properties], replacing all it
      * had (an empty map for none; see [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity.properties]). A no-op in any other
      * mode. Undoable.
      */
-    data class SetProperties(val properties: Map<String, String>) : DrawEvent
+    public data class SetProperties(val properties: Map<String, String>) : DrawEvent
 
     /**
      * An explicit request to merge the polygon [otherId] into the polygon that is currently selected or being edited: the selected one
@@ -121,29 +121,29 @@ sealed interface DrawEvent {
      * shape is missing or isn't a polygon, if they are the same shape, if either isn't a valid polygon, or if the state machine was given
      * no [com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine]. Undoable.
      */
-    data class MergeWith(val otherId: EntityId, val idPrefix: String) : DrawEvent
+    public data class MergeWith(val otherId: EntityId, val idPrefix: String) : DrawEvent
 
     /**
      * An explicit request to cut the polygon [cutterId] out of the polygon that is currently selected or being edited: the selected one
      * loses the part the other covers (and is removed if nothing is left, which leaves the selection), and [cutterId] stays as it is. Ids of
      * new vertices and the cases where nothing happens are as for [MergeWith]. Undoable.
      */
-    data class CutBy(val cutterId: EntityId, val idPrefix: String) : DrawEvent
+    public data class CutBy(val cutterId: EntityId, val idPrefix: String) : DrawEvent
 
     /**
      * An explicit request to put the shape that is currently selected or being edited at [zIndex] in the drawing order (see
      * [com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity.zIndex]). A no-op in any other mode. Undoable.
      */
-    data class SetZIndex(val zIndex: Int) : DrawEvent
+    public data class SetZIndex(val zIndex: Int) : DrawEvent
 
     /**
      * Draws the selected (or edited) shape over every other one, as one undo step: it is given a place one above the highest. Ignored
      * in any other mode, when it is the only shape, or when it is already above all the others.
      */
-    object BringToFront : DrawEvent
+    public object BringToFront : DrawEvent
 
     /** The opposite of [BringToFront]: draws the selected (or edited) shape below every other one. */
-    object SendToBack : DrawEvent
+    public object SendToBack : DrawEvent
 
     /**
      * An explicit request (e.g. a host UI "Delete" button) to delete the shape that is currently
@@ -152,20 +152,20 @@ sealed interface DrawEvent {
      * at by passing a stale id. Leaves the engine idle. Unlike finishing a drawing, this *is* an
      * undo step: undo brings the shape back (see `DrawStateMachine`).
      */
-    object DeleteSelected : DrawEvent
+    public object DeleteSelected : DrawEvent
 
     /**
      * Removes the vertex selected while editing (the one last tapped or grabbed, [DrawMode.Edit.selectedVertexId]) as one
      * undo step. Ignored when nothing is selected, or when removing it would leave its ring with too few vertices (a
      * polygon ring needs 3, a polyline 2): the shape stays as it is and the vertex stays selected.
      */
-    object DeleteSelectedVertex : DrawEvent
+    public object DeleteSelectedVertex : DrawEvent
 
     /**
      * Removes the whole ring of a polygon that holds the vertex selected while editing — a part, or a hole — as one undo step.
      * Ignored when nothing is selected, or when that ring is the polygon's only one (delete the shape instead).
      */
-    object DeleteSelectedRing : DrawEvent
+    public object DeleteSelectedRing : DrawEvent
 
     /**
      * Cuts the selected (or edited) polygon or polyline down to about [keepFraction] of its vertices, as one undo step: the least
@@ -173,7 +173,7 @@ sealed interface DrawEvent {
      * polyline 2. Ignored if no such shape is selected or nothing would be removed. Heavy reductions of a detailed shape can make
      * its outline cross itself, so a host should not offer to go all the way down.
      */
-    data class SimplifyShape(val keepFraction: Float) : DrawEvent {
+    public data class SimplifyShape(val keepFraction: Float) : DrawEvent {
         init {
             require(keepFraction > 0f && keepFraction <= 1f) { "keepFraction must be in (0, 1], was $keepFraction" }
         }

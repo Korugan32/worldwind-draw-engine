@@ -11,7 +11,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * it lies, see [DrawnPolygon]). Undo takes it out again. Does nothing if the entity isn't a polygon, or when [ring] has fewer than 3
  * vertices or a vertex id the polygon already has (the polygon would refuse it).
  */
-class AddRingCommand(
+internal class AddRingCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val ring: List<Vertex>,

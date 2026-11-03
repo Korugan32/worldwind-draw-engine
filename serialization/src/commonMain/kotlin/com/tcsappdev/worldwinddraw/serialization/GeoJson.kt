@@ -47,7 +47,7 @@ import kotlin.math.roundToInt
  * Coordinates are `[longitude, latitude]`, with the altitude as a third number only when it isn't 0. Nothing is reprojected: GeoJSON is
  * WGS 84 degrees, like the model.
  */
-object GeoJson {
+public object GeoJson {
     private val json = Json
     private val prettyJson = Json { prettyPrint = true }
 
@@ -56,7 +56,7 @@ object GeoJson {
      *
      * @throws DrawFormatException if [text] is not JSON, or JSON that is not GeoJSON (no recognisable `type`).
      */
-    fun decode(text: String): ImportResult {
+    public fun decode(text: String): ImportResult {
         val root = try {
             json.parseToJsonElement(text)
         } catch (e: SerializationException) {
@@ -70,7 +70,7 @@ object GeoJson {
     }
 
     /** A FeatureCollection of [entities], in their order. [pretty] adds line breaks and indentation; the content is the same. */
-    fun encode(entities: List<DrawableEntity>, pretty: Boolean = false): String {
+    public fun encode(entities: List<DrawableEntity>, pretty: Boolean = false): String {
         val collection = buildJsonObject {
             put("type", "FeatureCollection")
             put("features", buildJsonArray { entities.forEach { add(GeoJsonWriter.feature(it)) } })
