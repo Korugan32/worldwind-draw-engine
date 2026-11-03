@@ -40,6 +40,7 @@ public class DrawOutlineEffect(
     private var before: List<DrawableEntity>? = null
     private var after: List<DrawableEntity> = emptyList()
 
+    /** Whether the effect has played to the end (the polygon is back as it was and `onFinished` has been called). */
     public var isFinished: Boolean = false
         private set
 

@@ -18,9 +18,11 @@ public class HistoryManager(private val capacity: Int = 100) {
     private val redoStack = mutableListOf<Command>()
 
     private val _canUndo = MutableStateFlow(false)
+    /** Whether there is a step to [undo]; collect it to enable or disable an undo button. */
     public val canUndo: StateFlow<Boolean> = _canUndo.asStateFlow()
 
     private val _canRedo = MutableStateFlow(false)
+    /** Whether there is a step to [redo]; collect it to enable or disable a redo button. */
     public val canRedo: StateFlow<Boolean> = _canRedo.asStateFlow()
 
     internal fun execute(command: Command) {
@@ -36,6 +38,7 @@ public class HistoryManager(private val capacity: Int = 100) {
         updateFlags()
     }
 
+    /** Takes back the last step; it can be redone. Nothing happens if there is none. */
     public fun undo() {
         if (undoStack.isNotEmpty()) {
             val command = undoStack.removeAt(undoStack.lastIndex)
@@ -45,6 +48,7 @@ public class HistoryManager(private val capacity: Int = 100) {
         }
     }
 
+    /** Does again the step that was taken back last. Nothing happens if there is none (a new step clears what could be redone). */
     public fun redo() {
         if (redoStack.isNotEmpty()) {
             val command = redoStack.removeAt(redoStack.lastIndex)

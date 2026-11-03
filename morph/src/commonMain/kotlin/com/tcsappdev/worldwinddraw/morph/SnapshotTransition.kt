@@ -32,6 +32,7 @@ public class SnapshotTransition(
 
     private val progress = AnimatedProperty(0f, 1f, spec) { start, end, fraction -> start + (end - start) * fraction }
 
+    /** Whether the transition has played to the end (the repository holds exactly the second snapshot and `onFinished` has been called). */
     public var isFinished: Boolean = false
         private set
 

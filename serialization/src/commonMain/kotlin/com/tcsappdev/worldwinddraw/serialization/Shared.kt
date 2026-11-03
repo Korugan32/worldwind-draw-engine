@@ -9,6 +9,10 @@ import com.tcsappdev.worldwinddraw.core.geometry.VertexId
  * and in [leftOut] how many of each kind of thing was not imported at all (a `GroundOverlay`, a feature without a geometry, a ring of
  * two points), so a host can say "3 things were not imported" without reading the lines. Things that were imported but guessed, like
  * a colour that wasn't one, are only in [warnings].
+ *
+ * @property entities the shapes that were read, in the order of the text.
+ * @property warnings one line for everything that was left out or guessed.
+ * @property leftOut how many of each kind of thing was not imported at all, by the name of its kind.
  */
 public class ImportResult(
     public val entities: List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>,

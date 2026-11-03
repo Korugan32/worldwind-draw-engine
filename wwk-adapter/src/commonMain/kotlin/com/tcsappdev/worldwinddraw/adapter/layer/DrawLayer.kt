@@ -578,7 +578,7 @@ public class DrawLayer(
         /** Placeholder id for the rendering-only phantom vertex spliced in during a live [DrawMode.Edit.ActiveDrag.NewVertex] preview — never persisted, discarded on the next rebuild. */
         private val PHANTOM_VERTEX_ID = VertexId("__phantom__")
 
-        /** Drawn in place of an image fill whose picture can't be produced (see [withImageFillBelow]). */
+        /** Drawn in place of an image fill whose picture can't be produced (see `withImageFillBelow`). */
         private val IMAGE_FILL_PLACEHOLDER = ShapeStyle.SolidColor(ColorRgba(128, 128, 128, 128))
 
         /** Shapes are drawn simplified to about this many screen pixels of detail. */

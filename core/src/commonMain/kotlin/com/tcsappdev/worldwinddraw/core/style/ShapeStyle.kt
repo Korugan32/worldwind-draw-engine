@@ -171,7 +171,7 @@ public enum class ImageFit {
      * (the point farthest from its edges, see `PolygonCenter`) and just big enough to touch the biggest circle that fits
      * inside the shape, so it is shown entire, never cut and never repeated. A long, bent or lopsided shape (a country
      * with a long arm) gets its picture in its body rather than in the middle of its bounding box, which can lie outside
-     * the shape. [ImageFill.scale] sizes it from there: 1 is the whole picture inside that circle, more makes it bigger
+     * the shape. [ShapeStyle.ImageFill.scale] sizes it from there: 1 is the whole picture inside that circle, more makes it bigger
      * and lets the shape cut what sticks out. The first ring given is the outline it is centred in.
      */
     Inscribed,

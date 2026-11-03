@@ -14,16 +14,20 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 public class EntityRepository {
     private val _entities = MutableStateFlow<List<DrawableEntity>>(emptyList())
+    /** The shapes that exist now, in drawing order (the last is drawn on top of the ones before it, unless a [DrawableEntity.zIndex] says otherwise). Collect it to follow every change. */
     public val entities : StateFlow<List<DrawableEntity>> = _entities.asStateFlow()
 
+    /** Puts [entity] after the shapes there are. Not a history step (it cannot be undone). */
     public fun add(entity: DrawableEntity) {
         _entities.value += entity
     }
 
+    /** Takes away the shape with the id [entityId]; nothing happens if there is none. Not a history step. */
     public fun remove(entityId: EntityId) {
         _entities.value = _entities.value.filter { it.id != entityId }
     }
 
+    /** Replaces the shape that has the id of [entity] by [entity], in the same place in the order; nothing happens if there is none. Not a history step. */
     public fun update(entity: DrawableEntity) {
         _entities.value = _entities.value.map { if (it.id == entity.id) entity else it }
     }

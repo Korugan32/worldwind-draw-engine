@@ -44,6 +44,7 @@ public class RouteEffect(
     // What is on the map besides the route, taken when the first tick comes.
     private var others: List<DrawableEntity>? = null
 
+    /** Whether the trip has played to the end (what it leaves is in the repository and `onFinished` has been called). */
     public var isFinished: Boolean = false
         private set
 

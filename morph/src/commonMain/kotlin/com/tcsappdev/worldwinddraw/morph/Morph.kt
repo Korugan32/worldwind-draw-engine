@@ -29,6 +29,7 @@ import com.tcsappdev.worldwinddraw.core.geometry.VertexId
  * at 0 the result is exactly the first snapshot's shapes and at 1 exactly the second's, so a transition begins and ends on the real drawing.
  */
 public object Morph {
+    /** The shapes at [t] of the way from [from] (0) to [to] (1): exactly [from]'s shapes at 0 and [to]'s at 1 (outside 0..1 the nearest end). */
     public fun between(from: Snapshot, to: Snapshot, t: Float): List<DrawableEntity> {
         require(!t.isNaN()) { "t is not a number" }
         if (t <= 0f) return from.entities

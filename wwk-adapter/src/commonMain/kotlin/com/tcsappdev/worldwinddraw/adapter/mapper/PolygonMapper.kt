@@ -19,8 +19,8 @@ import earth.worldwind.shape.Polygon
  * Long edges get their great-circle points from [densifiedWwkPositions] rather than from WWK, which would set aside memory for
  * 63 of them on every edge (see there).
  *
- * [outlineStyle]/[outlineWidth] reuse [toWwkLineAttributes] (the same conversion
- * [DrawnPolyline] uses for its stroke) and get merged onto the interior attributes
+ * [DrawnPolygon.outlineStyle]/[DrawnPolygon.outlineWidth] reuse [toWwkLineAttributes] (the same conversion
+ * [com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline] uses for its stroke) and get merged onto the interior attributes
  * [toWwkShapeAttributes] already built — a `Polygon`'s [Polygon.attributes] is one object
  * carrying both interior and outline settings, unlike `core`'s model where they're two
  * separate styles (see [DrawnPolygon]'s KDoc for why).

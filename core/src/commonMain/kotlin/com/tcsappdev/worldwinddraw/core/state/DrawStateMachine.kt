@@ -41,8 +41,10 @@ public class DrawStateMachine(
     private val overlay: OverlayEngine? = null,
 ) {
     private val _state = MutableStateFlow(DrawEngineState())
+    /** What the engine is doing now (see [DrawEngineState]); collect it to follow every change. */
     public val state: StateFlow<DrawEngineState> = _state.asStateFlow()
 
+    /** Gives the engine [event] (a tap, a drag, a mode change, an edit...): it changes the state and the shapes as the event asks, and records the undo steps. */
     public fun onEvent(event: DrawEvent) {
         val modeBefore = _state.value.mode
         val result = DrawEngineReducer.reduce(_state.value, event, entityRepository, overlay)

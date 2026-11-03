@@ -15,9 +15,11 @@ public class AnimatedProperty<T>(
 ) : Animatable {
     private var elapsedMs: Long = 0L
 
+    /** Where it is now: the start value before the first tick, the interpolated value after each one, and the target once it has finished. */
     public var value: T = startValue
         private set
 
+    /** Whether it has reached its end (only an animation that plays once ends; a repeating one never finishes). */
     public var isFinished: Boolean = false
         private set
 
