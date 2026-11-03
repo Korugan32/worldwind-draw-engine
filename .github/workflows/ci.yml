@@ -11,9 +11,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    # macOS: the iOS targets need Xcode's tools. `build` runs the tests of every target, the lint and the API check (checkKotlinAbi).
-    runs-on: macos-latest
+  # Everything that does not need a Mac: the JVM, Android, JS and Wasm targets, their tests, the lint, the API check (checkKotlinAbi) and the
+  # API documentation (the Apple targets are skipped on Linux by themselves).
+  linux:
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -21,16 +22,43 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      - uses: android-actions/setup-android@v3   # the Android SDK and its licences
       - uses: gradle/actions/setup-gradle@v4
-      - name: Build and test
-        run: ./gradlew build --continue
-      - name: Build the API documentation
-        run: ./gradlew dokkaGenerate
-      - name: Keep the test reports when something failed
+      - name: Build, test and document
+        run: ./gradlew build dokkaGenerate --continue -Dorg.gradle.jvmargs="-Xmx5g -Dfile.encoding=UTF-8"
+      - name: Keep the reports when something failed
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: reports
+          name: reports-linux
+          path: |
+            **/build/reports/
+            **/build/test-results/
+
+  # The iOS targets need a Mac. A Mac runner is small, so this only compiles and tests the libraries for the iOS Simulator and compiles the
+  # demo for it, and leaves out the heavy release links of the demo.
+  apple:
+    runs-on: macos-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: iOS tests and compile
+        run: >
+          ./gradlew
+          :core:iosSimulatorArm64Test :serialization:iosSimulatorArm64Test :morph:iosSimulatorArm64Test
+          :boolean-ops:iosSimulatorArm64Test :wwk-adapter:iosSimulatorArm64Test
+          :demo-multiplatform:compileKotlinIosSimulatorArm64
+          --continue -Dorg.gradle.jvmargs="-Xmx4g -Dfile.encoding=UTF-8"
+      - name: Keep the reports when something failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-apple
           path: |
             **/build/reports/
             **/build/test-results/
