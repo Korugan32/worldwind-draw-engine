@@ -2,9 +2,9 @@
 
 All notable changes are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project follows [Semantic Versioning](https://semver.org/) (until 1.0, a minor version may change the API).
 
-## [0.1.0] - not released yet
+## [0.1.0] - 2026-11-04
 
-First release.
+First release, on Maven Central as `io.github.korugan32:worldwind-draw-{core,adapter,serialization,boolean-ops,morph}:0.1.0`.
 
 ### Added
 - **Drawing and editing** polygons (with holes and separate parts), polylines and markers on a WorldWind Kotlin globe: place points, drag corners, add a corner on an edge, move and resize markers; undo and redo that follow a drawing or editing session.
