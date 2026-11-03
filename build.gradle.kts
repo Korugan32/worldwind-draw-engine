@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.android.lint) apply false
     alias(libs.plugins.dokka)
+    alias(libs.plugins.vanniktech.publish) apply false
 }
 
 dependencies {
