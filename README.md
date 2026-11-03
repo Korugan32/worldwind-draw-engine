@@ -87,7 +87,7 @@ val json = DrawJson.encode(engine.entities.value)
 val imported = Kml.decode(kmlText)       // imported.entities, imported.warnings
 ```
 
-The full API is documented in the KDoc (`./gradlew dokkaGenerate`, then open `build/dokka/html/index.html`).
+The full API is documented in the KDoc: [the API reference](https://korugan32.github.io/worldwind-draw-engine/), or build it yourself with `./gradlew dokkaGenerate` and open `build/dokka/html/index.html`.
 
 ## Platforms
 
