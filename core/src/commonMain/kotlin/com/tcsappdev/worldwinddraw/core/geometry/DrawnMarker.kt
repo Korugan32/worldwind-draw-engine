@@ -18,7 +18,7 @@ import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
  * @property label text written next to the icon, or `null` for none (see [MarkerLabel]). For a marker that is only text, give it a
  * [style] that is fully transparent and a label whose position is [LabelPosition.Center].
  */
-data class DrawnMarker(
+public data class DrawnMarker(
     override val id: EntityId,
     override val style: ShapeStyle,
     val position: GeoPosition,

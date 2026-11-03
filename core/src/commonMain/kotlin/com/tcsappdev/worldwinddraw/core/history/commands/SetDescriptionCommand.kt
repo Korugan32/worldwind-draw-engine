@@ -10,7 +10,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * ran, read at that moment so the pure reducer can build the command without reading the repository. Works for every kind of shape.
  * Does nothing if the entity no longer exists.
  */
-class SetDescriptionCommand(
+internal class SetDescriptionCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val newDescription: String?,

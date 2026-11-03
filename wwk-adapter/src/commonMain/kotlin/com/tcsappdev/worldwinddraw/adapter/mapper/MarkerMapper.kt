@@ -25,7 +25,7 @@ import earth.worldwind.shape.TextAttributes
  * A [DrawnMarker.rotation] turns the icon on the globe (see [earth.worldwind.shape.Placemark.imageRotation]).
  * A [DrawnMarker.label] becomes the placemark's own label (see [applyLabel]).
  */
-fun DrawnMarker.toWwkPlacemark(): Placemark {
+public fun DrawnMarker.toWwkPlacemark(): Placemark {
     val markerLabel = label
     return Placemark(position.toWwkPosition(), style.toWwkPlacemarkAttributes(size)).apply {
         // On the ground, or, with some altitude, that many meters above it (a plane in the air).

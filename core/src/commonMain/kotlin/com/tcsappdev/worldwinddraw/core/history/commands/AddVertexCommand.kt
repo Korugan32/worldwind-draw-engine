@@ -11,7 +11,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * Undo removes it again by [newVertex]'s id. Only applies to [DrawnPolygon]/
  * [DrawnPolyline]; [DrawnMarker] has no vertices to insert into.
  */
-class AddVertexCommand(
+internal class AddVertexCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val afterEdgeIndex: Int,

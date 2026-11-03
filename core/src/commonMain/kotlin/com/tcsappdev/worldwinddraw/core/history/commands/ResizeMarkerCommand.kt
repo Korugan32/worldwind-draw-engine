@@ -11,7 +11,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * lets the pure reducer create one without reading the repository — the same approach as
  * [DeleteEntityCommand]. Does nothing if [entityId] isn't a marker (or no longer exists).
  */
-class ResizeMarkerCommand(
+internal class ResizeMarkerCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val newSize: Float,

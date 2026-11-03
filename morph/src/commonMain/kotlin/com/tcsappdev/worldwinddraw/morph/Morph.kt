@@ -28,8 +28,8 @@ import com.tcsappdev.worldwinddraw.core.geometry.VertexId
  * The result is in the order of the first snapshot, with what fades in after it in the order of the second. `t` is how far along it is:
  * at 0 the result is exactly the first snapshot's shapes and at 1 exactly the second's, so a transition begins and ends on the real drawing.
  */
-object Morph {
-    fun between(from: Snapshot, to: Snapshot, t: Float): List<DrawableEntity> {
+public object Morph {
+    public fun between(from: Snapshot, to: Snapshot, t: Float): List<DrawableEntity> {
         require(!t.isNaN()) { "t is not a number" }
         if (t <= 0f) return from.entities
         if (t >= 1f) return to.entities

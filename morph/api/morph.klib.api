@@ -1,0 +1,163 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <worldwind-draw-engine:morph>
+final class com.tcsappdev.worldwinddraw.morph/DrawOutlineEffect : com.tcsappdev.worldwinddraw.core.animation/Animatable { // com.tcsappdev.worldwinddraw.morph/DrawOutlineEffect|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.repository/EntityRepository, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.animation/AnimationSpec, com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions = ..., kotlin/Function0<kotlin/Unit> = ...) // com.tcsappdev.worldwinddraw.morph/DrawOutlineEffect.<init>|<init>(com.tcsappdev.worldwinddraw.core.repository.EntityRepository;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.animation.AnimationSpec;com.tcsappdev.worldwinddraw.morph.DrawOutlineOptions;kotlin.Function0<kotlin.Unit>){}[0]
+
+    final var isFinished // com.tcsappdev.worldwinddraw.morph/DrawOutlineEffect.isFinished|{}isFinished[0]
+        final fun <get-isFinished>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/DrawOutlineEffect.isFinished.<get-isFinished>|<get-isFinished>(){}[0]
+
+    final fun onTick(kotlin/Long) // com.tcsappdev.worldwinddraw.morph/DrawOutlineEffect.onTick|onTick(kotlin.Long){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions { // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions|null[0]
+    constructor <init>(kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ..., kotlin/Boolean = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Float? = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Float = ...) // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.<init>|<init>(kotlin.Float;com.tcsappdev.worldwinddraw.core.geometry.VertexId?;kotlin.Boolean;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Float?;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Float;kotlin.Int;kotlin.Float){}[0]
+
+    final val drawShare // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.drawShare|{}drawShare[0]
+        final fun <get-drawShare>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.drawShare.<get-drawShare>|<get-drawShare>(){}[0]
+    final val glow // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.glow|{}glow[0]
+        final fun <get-glow>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.glow.<get-glow>|<get-glow>(){}[0]
+    final val headColor // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.headColor|{}headColor[0]
+        final fun <get-headColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.headColor.<get-headColor>|<get-headColor>(){}[0]
+    final val lineColor // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.lineColor|{}lineColor[0]
+        final fun <get-lineColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.lineColor.<get-lineColor>|<get-lineColor>(){}[0]
+    final val lineWidth // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.lineWidth|{}lineWidth[0]
+        final fun <get-lineWidth>(): kotlin/Float? // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.lineWidth.<get-lineWidth>|<get-lineWidth>(){}[0]
+    final val penColor // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.penColor|{}penColor[0]
+        final fun <get-penColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.penColor.<get-penColor>|<get-penColor>(){}[0]
+    final val reversed // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.reversed|{}reversed[0]
+        final fun <get-reversed>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.reversed.<get-reversed>|<get-reversed>(){}[0]
+    final val startAt // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.startAt|{}startAt[0]
+        final fun <get-startAt>(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.startAt.<get-startAt>|<get-startAt>(){}[0]
+    final val trailBands // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.trailBands|{}trailBands[0]
+        final fun <get-trailBands>(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.trailBands.<get-trailBands>|<get-trailBands>(){}[0]
+    final val trailShare // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.trailShare|{}trailShare[0]
+        final fun <get-trailShare>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.trailShare.<get-trailShare>|<get-trailShare>(){}[0]
+
+    final fun component1(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component1|component1(){}[0]
+    final fun component10(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component10|component10(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.geometry/VertexId? // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component3|component3(){}[0]
+    final fun component4(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component4|component4(){}[0]
+    final fun component5(): kotlin/Float? // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component5|component5(){}[0]
+    final fun component6(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component6|component6(){}[0]
+    final fun component7(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component7|component7(){}[0]
+    final fun component8(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component8|component8(){}[0]
+    final fun component9(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.component9|component9(){}[0]
+    final fun copy(kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.geometry/VertexId? = ..., kotlin/Boolean = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Float? = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Float = ...): com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.copy|copy(kotlin.Float;com.tcsappdev.worldwinddraw.core.geometry.VertexId?;kotlin.Boolean;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Float?;com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Float;kotlin.Int;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.morph/RouteEffect : com.tcsappdev.worldwinddraw.core.animation/Animatable { // com.tcsappdev.worldwinddraw.morph/RouteEffect|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.repository/EntityRepository, com.tcsappdev.worldwinddraw.core.geometry/EntityId, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition>, com.tcsappdev.worldwinddraw.core.animation/AnimationSpec, com.tcsappdev.worldwinddraw.morph/RouteOptions = ..., kotlin/Function0<kotlin/Unit> = ...) // com.tcsappdev.worldwinddraw.morph/RouteEffect.<init>|<init>(com.tcsappdev.worldwinddraw.core.repository.EntityRepository;com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.GeoPosition>;com.tcsappdev.worldwinddraw.core.animation.AnimationSpec;com.tcsappdev.worldwinddraw.morph.RouteOptions;kotlin.Function0<kotlin.Unit>){}[0]
+
+    final var isFinished // com.tcsappdev.worldwinddraw.morph/RouteEffect.isFinished|{}isFinished[0]
+        final fun <get-isFinished>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/RouteEffect.isFinished.<get-isFinished>|<get-isFinished>(){}[0]
+
+    final fun onTick(kotlin/Long) // com.tcsappdev.worldwinddraw.morph/RouteEffect.onTick|onTick(kotlin.Long){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.morph/RouteOptions { // com.tcsappdev.worldwinddraw.morph/RouteOptions|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle? = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Int = ...) // com.tcsappdev.worldwinddraw.morph/RouteOptions.<init>|<init>(com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Float;kotlin.Float;kotlin.Int;kotlin.Float;com.tcsappdev.worldwinddraw.core.style.ShapeStyle?;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Int;kotlin.Float;com.tcsappdev.worldwinddraw.core.style.ShapeStyle?;kotlin.Boolean;kotlin.Boolean;kotlin.Int){}[0]
+
+    final val arc // com.tcsappdev.worldwinddraw.morph/RouteOptions.arc|{}arc[0]
+        final fun <get-arc>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.arc.<get-arc>|<get-arc>(){}[0]
+    final val arcSteps // com.tcsappdev.worldwinddraw.morph/RouteOptions.arcSteps|{}arcSteps[0]
+        final fun <get-arcSteps>(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/RouteOptions.arcSteps.<get-arcSteps>|<get-arcSteps>(){}[0]
+    final val glow // com.tcsappdev.worldwinddraw.morph/RouteOptions.glow|{}glow[0]
+        final fun <get-glow>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.glow.<get-glow>|<get-glow>(){}[0]
+    final val headColor // com.tcsappdev.worldwinddraw.morph/RouteOptions.headColor|{}headColor[0]
+        final fun <get-headColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.morph/RouteOptions.headColor.<get-headColor>|<get-headColor>(){}[0]
+    final val height // com.tcsappdev.worldwinddraw.morph/RouteOptions.height|{}height[0]
+        final fun <get-height>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.height.<get-height>|<get-height>(){}[0]
+    final val keepTrail // com.tcsappdev.worldwinddraw.morph/RouteOptions.keepTrail|{}keepTrail[0]
+        final fun <get-keepTrail>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/RouteOptions.keepTrail.<get-keepTrail>|<get-keepTrail>(){}[0]
+    final val keepVehicle // com.tcsappdev.worldwinddraw.morph/RouteOptions.keepVehicle|{}keepVehicle[0]
+        final fun <get-keepVehicle>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/RouteOptions.keepVehicle.<get-keepVehicle>|<get-keepVehicle>(){}[0]
+    final val lift // com.tcsappdev.worldwinddraw.morph/RouteOptions.lift|{}lift[0]
+        final fun <get-lift>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.lift.<get-lift>|<get-lift>(){}[0]
+    final val lineColor // com.tcsappdev.worldwinddraw.morph/RouteOptions.lineColor|{}lineColor[0]
+        final fun <get-lineColor>(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.morph/RouteOptions.lineColor.<get-lineColor>|<get-lineColor>(){}[0]
+    final val lineWidth // com.tcsappdev.worldwinddraw.morph/RouteOptions.lineWidth|{}lineWidth[0]
+        final fun <get-lineWidth>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.lineWidth.<get-lineWidth>|<get-lineWidth>(){}[0]
+    final val shadow // com.tcsappdev.worldwinddraw.morph/RouteOptions.shadow|{}shadow[0]
+        final fun <get-shadow>(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle? // com.tcsappdev.worldwinddraw.morph/RouteOptions.shadow.<get-shadow>|<get-shadow>(){}[0]
+    final val trailBands // com.tcsappdev.worldwinddraw.morph/RouteOptions.trailBands|{}trailBands[0]
+        final fun <get-trailBands>(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/RouteOptions.trailBands.<get-trailBands>|<get-trailBands>(){}[0]
+    final val trailShare // com.tcsappdev.worldwinddraw.morph/RouteOptions.trailShare|{}trailShare[0]
+        final fun <get-trailShare>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.trailShare.<get-trailShare>|<get-trailShare>(){}[0]
+    final val vehicle // com.tcsappdev.worldwinddraw.morph/RouteOptions.vehicle|{}vehicle[0]
+        final fun <get-vehicle>(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle? // com.tcsappdev.worldwinddraw.morph/RouteOptions.vehicle.<get-vehicle>|<get-vehicle>(){}[0]
+    final val vehicleSize // com.tcsappdev.worldwinddraw.morph/RouteOptions.vehicleSize|{}vehicleSize[0]
+        final fun <get-vehicleSize>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.vehicleSize.<get-vehicleSize>|<get-vehicleSize>(){}[0]
+    final val vehicleTurn // com.tcsappdev.worldwinddraw.morph/RouteOptions.vehicleTurn|{}vehicleTurn[0]
+        final fun <get-vehicleTurn>(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.vehicleTurn.<get-vehicleTurn>|<get-vehicleTurn>(){}[0]
+    final val zIndex // com.tcsappdev.worldwinddraw.morph/RouteOptions.zIndex|{}zIndex[0]
+        final fun <get-zIndex>(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/RouteOptions.zIndex.<get-zIndex>|<get-zIndex>(){}[0]
+
+    final fun component1(): com.tcsappdev.worldwinddraw.core.style/ColorRgba // com.tcsappdev.worldwinddraw.morph/RouteOptions.component1|component1(){}[0]
+    final fun component10(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.component10|component10(){}[0]
+    final fun component11(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.component11|component11(){}[0]
+    final fun component12(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/RouteOptions.component12|component12(){}[0]
+    final fun component13(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.component13|component13(){}[0]
+    final fun component14(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle? // com.tcsappdev.worldwinddraw.morph/RouteOptions.component14|component14(){}[0]
+    final fun component15(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/RouteOptions.component15|component15(){}[0]
+    final fun component16(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/RouteOptions.component16|component16(){}[0]
+    final fun component17(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/RouteOptions.component17|component17(){}[0]
+    final fun component2(): com.tcsappdev.worldwinddraw.core.style/ColorRgba? // com.tcsappdev.worldwinddraw.morph/RouteOptions.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.component4|component4(){}[0]
+    final fun component5(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/RouteOptions.component5|component5(){}[0]
+    final fun component6(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.component6|component6(){}[0]
+    final fun component7(): com.tcsappdev.worldwinddraw.core.style/ShapeStyle? // com.tcsappdev.worldwinddraw.morph/RouteOptions.component7|component7(){}[0]
+    final fun component8(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.component8|component8(){}[0]
+    final fun component9(): kotlin/Float // com.tcsappdev.worldwinddraw.morph/RouteOptions.component9|component9(){}[0]
+    final fun copy(com.tcsappdev.worldwinddraw.core.style/ColorRgba = ..., com.tcsappdev.worldwinddraw.core.style/ColorRgba? = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle? = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Float = ..., com.tcsappdev.worldwinddraw.core.style/ShapeStyle? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Int = ...): com.tcsappdev.worldwinddraw.morph/RouteOptions // com.tcsappdev.worldwinddraw.morph/RouteOptions.copy|copy(com.tcsappdev.worldwinddraw.core.style.ColorRgba;com.tcsappdev.worldwinddraw.core.style.ColorRgba?;kotlin.Float;kotlin.Float;kotlin.Int;kotlin.Float;com.tcsappdev.worldwinddraw.core.style.ShapeStyle?;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Int;kotlin.Float;com.tcsappdev.worldwinddraw.core.style.ShapeStyle?;kotlin.Boolean;kotlin.Boolean;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/RouteOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/RouteOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.morph/RouteOptions.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.morph/Snapshot { // com.tcsappdev.worldwinddraw.morph/Snapshot|null[0]
+    constructor <init>(kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity>) // com.tcsappdev.worldwinddraw.morph/Snapshot.<init>|<init>(kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>){}[0]
+
+    final val entities // com.tcsappdev.worldwinddraw.morph/Snapshot.entities|{}entities[0]
+        final fun <get-entities>(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity> // com.tcsappdev.worldwinddraw.morph/Snapshot.entities.<get-entities>|<get-entities>(){}[0]
+
+    final fun component1(): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity> // com.tcsappdev.worldwinddraw.morph/Snapshot.component1|component1(){}[0]
+    final fun copy(kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity> = ...): com.tcsappdev.worldwinddraw.morph/Snapshot // com.tcsappdev.worldwinddraw.morph/Snapshot.copy|copy(kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/Snapshot.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.tcsappdev.worldwinddraw.morph/Snapshot.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.tcsappdev.worldwinddraw.morph/Snapshot.toString|toString(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.morph/SnapshotTransition : com.tcsappdev.worldwinddraw.core.animation/Animatable { // com.tcsappdev.worldwinddraw.morph/SnapshotTransition|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.repository/EntityRepository, com.tcsappdev.worldwinddraw.morph/Snapshot, com.tcsappdev.worldwinddraw.morph/Snapshot, com.tcsappdev.worldwinddraw.core.animation/AnimationSpec, kotlin/Function0<kotlin/Unit> = ...) // com.tcsappdev.worldwinddraw.morph/SnapshotTransition.<init>|<init>(com.tcsappdev.worldwinddraw.core.repository.EntityRepository;com.tcsappdev.worldwinddraw.morph.Snapshot;com.tcsappdev.worldwinddraw.morph.Snapshot;com.tcsappdev.worldwinddraw.core.animation.AnimationSpec;kotlin.Function0<kotlin.Unit>){}[0]
+
+    final var isFinished // com.tcsappdev.worldwinddraw.morph/SnapshotTransition.isFinished|{}isFinished[0]
+        final fun <get-isFinished>(): kotlin/Boolean // com.tcsappdev.worldwinddraw.morph/SnapshotTransition.isFinished.<get-isFinished>|<get-isFinished>(){}[0]
+
+    final fun onTick(kotlin/Long) // com.tcsappdev.worldwinddraw.morph/SnapshotTransition.onTick|onTick(kotlin.Long){}[0]
+}
+
+final object com.tcsappdev.worldwinddraw.morph/DrawOutline { // com.tcsappdev.worldwinddraw.morph/DrawOutline|null[0]
+    final fun at(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Float, com.tcsappdev.worldwinddraw.morph/DrawOutlineOptions = ...): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity> // com.tcsappdev.worldwinddraw.morph/DrawOutline.at|at(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Float;com.tcsappdev.worldwinddraw.morph.DrawOutlineOptions){}[0]
+}
+
+final object com.tcsappdev.worldwinddraw.morph/Morph { // com.tcsappdev.worldwinddraw.morph/Morph|null[0]
+    final fun between(com.tcsappdev.worldwinddraw.morph/Snapshot, com.tcsappdev.worldwinddraw.morph/Snapshot, kotlin/Float): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity> // com.tcsappdev.worldwinddraw.morph/Morph.between|between(com.tcsappdev.worldwinddraw.morph.Snapshot;com.tcsappdev.worldwinddraw.morph.Snapshot;kotlin.Float){}[0]
+}
+
+final object com.tcsappdev.worldwinddraw.morph/RouteMotion { // com.tcsappdev.worldwinddraw.morph/RouteMotion|null[0]
+    final fun at(com.tcsappdev.worldwinddraw.core.geometry/EntityId, kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition>, kotlin/Float, com.tcsappdev.worldwinddraw.morph/RouteOptions = ...): kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity> // com.tcsappdev.worldwinddraw.morph/RouteMotion.at|at(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.GeoPosition>;kotlin.Float;com.tcsappdev.worldwinddraw.morph.RouteOptions){}[0]
+}
+
+final fun (com.tcsappdev.worldwinddraw.core.repository/EntityRepository).com.tcsappdev.worldwinddraw.morph/restore(com.tcsappdev.worldwinddraw.morph/Snapshot) // com.tcsappdev.worldwinddraw.morph/restore|restore@com.tcsappdev.worldwinddraw.core.repository.EntityRepository(com.tcsappdev.worldwinddraw.morph.Snapshot){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.repository/EntityRepository).com.tcsappdev.worldwinddraw.morph/snapshot(): com.tcsappdev.worldwinddraw.morph/Snapshot // com.tcsappdev.worldwinddraw.morph/snapshot|snapshot@com.tcsappdev.worldwinddraw.core.repository.EntityRepository(){}[0]

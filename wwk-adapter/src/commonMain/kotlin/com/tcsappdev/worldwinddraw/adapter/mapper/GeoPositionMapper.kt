@@ -9,10 +9,10 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /** Converts to the WWK position type every renderable/camera API in `wwk-adapter` expects. */
-fun GeoPosition.toWwkPosition(): Position = Position.fromDegrees(latitude, longitude, altitude)
+public fun GeoPosition.toWwkPosition(): Position = Position.fromDegrees(latitude, longitude, altitude)
 
 /** Converts a WWK [Position] back to our platform-independent [GeoPosition]. */
-fun Position.toGeoPosition(): GeoPosition = GeoPosition(latitude.inDegrees, longitude.inDegrees, altitude)
+public fun Position.toGeoPosition(): GeoPosition = GeoPosition(latitude.inDegrees, longitude.inDegrees, altitude)
 
 /**
  * The longest stretch of an edge that is drawn as one straight piece, in degrees of arc: what WWK itself uses (its default is 64 pieces

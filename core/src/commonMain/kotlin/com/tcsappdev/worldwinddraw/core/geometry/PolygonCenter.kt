@@ -1,5 +1,7 @@
 package com.tcsappdev.worldwinddraw.core.geometry
 
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
+
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -25,9 +27,10 @@ import kotlin.math.sqrt
  * size; for one that crosses the antimeridian (its longitudes would have to be unwrapped first) or reaches a pole it is
  * only an approximation.
  */
-object PolygonCenter {
+@InternalWorldWindDrawApi
+public object PolygonCenter {
     /** A [position] and the [radiusMeters] of the biggest circle around it that stays inside the polygon. */
-    data class VisualCenter(val position: GeoPosition, val radiusMeters: Double)
+    public data class VisualCenter(val position: GeoPosition, val radiusMeters: Double)
 
     /** Meters per degree of latitude (and, after the shrinking, of longitude). */
     internal const val METERS_PER_DEGREE = 111_194.9
@@ -40,7 +43,7 @@ object PolygonCenter {
      * [relativePrecision] of the polygon's size (the default, 0.1%, is far finer than a label or picture can show).
      * A ring of fewer than 3 points has no inside: the first point, radius 0.
      */
-    fun visualCenter(ring: List<GeoPosition>, relativePrecision: Double = 0.001): VisualCenter =
+    public fun visualCenter(ring: List<GeoPosition>, relativePrecision: Double = 0.001): VisualCenter =
         visualCenterOfRings(listOf(ring), relativePrecision)
 
     /**
@@ -48,7 +51,7 @@ object PolygonCenter {
      * is the one used when there is nothing to find (no ring has 3 points, or the shape has no area). Rings of fewer than 3
      * points are ignored.
      */
-    fun visualCenterOfRings(rings: List<List<GeoPosition>>, relativePrecision: Double = 0.001): VisualCenter {
+    public fun visualCenterOfRings(rings: List<List<GeoPosition>>, relativePrecision: Double = 0.001): VisualCenter {
         val first = rings.firstOrNull()?.firstOrNull() ?: throw IllegalArgumentException("A ring needs at least one point")
         val usable = rings.filter { it.size >= 3 }
         if (usable.isEmpty()) return VisualCenter(first, 0.0)

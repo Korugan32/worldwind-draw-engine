@@ -5,7 +5,7 @@ import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 
 /** A shape that cannot be used in an overlay because it is not a valid polygon (it crosses itself, a hole lies outside it, ...). */
-class InvalidShapeException(message: String, cause: Throwable? = null) : Exception(message, cause)
+public class InvalidShapeException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 /**
  * What joins two polygons or cuts one out of another, as `core` needs it. `core` has no geometry engine of its own (an overlay is hard to
@@ -16,13 +16,13 @@ class InvalidShapeException(message: String, cause: Throwable? = null) : Excepti
  * followed by its holes, all in one list. An empty list means nothing is left. The vertices of the inputs that are still on the outline of the
  * result keep their id; new ones (where the outlines cross) take their ids from `newVertexId`.
  */
-interface OverlayEngine {
+public interface OverlayEngine {
     /** Why [polygon] cannot be used (a line crosses itself, a hole is outside it, ...), or `null` if it can. */
-    fun validate(polygon: DrawnPolygon): String?
+    public fun validate(polygon: DrawnPolygon): String?
 
     /** The rings of [a] together with [b]. @throws InvalidShapeException if either is not a valid polygon. */
-    fun union(a: DrawnPolygon, b: DrawnPolygon, newVertexId: () -> VertexId): List<List<Vertex>>
+    public fun union(a: DrawnPolygon, b: DrawnPolygon, newVertexId: () -> VertexId): List<List<Vertex>>
 
     /** The rings of [a] with [b] cut out of it. @throws InvalidShapeException if either is not a valid polygon. */
-    fun difference(a: DrawnPolygon, b: DrawnPolygon, newVertexId: () -> VertexId): List<List<Vertex>>
+    public fun difference(a: DrawnPolygon, b: DrawnPolygon, newVertexId: () -> VertexId): List<List<Vertex>>
 }

@@ -18,7 +18,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  *
  * @throws IllegalArgumentException if [spec] has no duration or repeats: a transition goes from one snapshot to the other once.
  */
-class SnapshotTransition(
+public class SnapshotTransition(
     private val repository: EntityRepository,
     private val from: Snapshot,
     private val to: Snapshot,
@@ -32,7 +32,7 @@ class SnapshotTransition(
 
     private val progress = AnimatedProperty(0f, 1f, spec) { start, end, fraction -> start + (end - start) * fraction }
 
-    var isFinished = false
+    public var isFinished: Boolean = false
         private set
 
     override fun onTick(deltaMs: Long) {

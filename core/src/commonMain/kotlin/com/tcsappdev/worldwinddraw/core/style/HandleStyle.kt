@@ -27,7 +27,7 @@ package com.tcsappdev.worldwinddraw.core.style
  * Colours are applied where the platform can draw handle images (Android today); elsewhere
  * handles are plain [fillColor] squares and [ringColor]/[plusColor] have no effect.
  */
-data class HandleStyle(
+public data class HandleStyle(
     val vertexDiameter: Float = 27f,
     val midpointDiameter: Float = 24f,
     val touchTargetDiameter: Float = 48f,
@@ -46,11 +46,11 @@ data class HandleStyle(
     }
 
     /** The side of the grab area for a handle drawn [visibleDiameter] wide: [touchTargetDiameter], but never smaller than the handle itself. */
-    fun touchSizeFor(visibleDiameter: Float): Float = maxOf(touchTargetDiameter, visibleDiameter)
+    public fun touchSizeFor(visibleDiameter: Float): Float = maxOf(touchTargetDiameter, visibleDiameter)
 }
 
 /** How many of a shape's vertices get an editing handle. */
-enum class HandleDetail {
+public enum class HandleDetail {
     /**
      * Every vertex of a shape with few points; for one with many, seen from far away, only the vertices that matter at that
      * zoom (about 14 screen pixels apart), with the hidden ones between them following when a handle is dragged. More

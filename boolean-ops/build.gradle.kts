@@ -6,6 +6,23 @@ plugins {
 }
 
 kotlin {
+    explicitApi()
+
+    // The public API is written down in api/ and checked on every build: a change to it shows up as a difference to review (checkKotlinAbi),
+    // and is accepted on purpose with updateKotlinAbi. What is marked as internal to the modules is not part of it.
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation {
+        filters {
+            exclude {
+                annotatedWith.add("com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi")
+            }
+        }
+    }
+
+    // The library's own modules use what is marked as internal to them from one another; a host app does not (it has to opt in itself).
+    compilerOptions {
+        optIn.add("com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi")
+    }
 
     // Target declarations - add or remove as needed below. These define
     // which platforms this KMP module supports.

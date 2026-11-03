@@ -42,7 +42,7 @@ import kotlin.math.roundToInt
  * per pixel of movement. Only the final position, at `DragEnd`, becomes a real, undoable
  * [commands] entry.
  */
-data class ReduceResult(
+internal data class ReduceResult(
     val state: DrawEngineState,
     val commands: List<Command> = emptyList(),
     val previewCommands: List<Command> = emptyList(),
@@ -60,7 +60,7 @@ data class ReduceResult(
  * described too, but they are session boundaries, which the `DrawStateMachine` does not record
  * (see its KDoc). Switching between select/edit is navigation, not an edit, and is not described.
  */
-data class UndoableModeChange(val before: DrawMode, val after: DrawMode)
+internal data class UndoableModeChange(val before: DrawMode, val after: DrawMode)
 
 /**
  * The pure `(state, event) -> new state` core of the draw engine. Has no side effects
@@ -69,7 +69,7 @@ data class UndoableModeChange(val before: DrawMode, val after: DrawMode)
  * mode/event combination testable in isolation (see `DrawEngineReducerTest`) with no UI or
  * rendering engine running.
  */
-object DrawEngineReducer {
+internal object DrawEngineReducer {
     /**
      * [overlay] is what merges and cuts polygons; without one [DrawEvent.MergeWith] and [DrawEvent.CutBy] do nothing. It is only asked,
      * never changes anything, so the reducer stays pure.

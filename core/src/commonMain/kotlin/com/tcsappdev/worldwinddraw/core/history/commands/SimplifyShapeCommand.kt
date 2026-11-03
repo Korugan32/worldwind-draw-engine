@@ -18,7 +18,7 @@ import kotlin.math.roundToInt
  * The shape's vertices are remembered when [execute] first runs, so the pure reducer can build the command without reading the
  * repository, and running it again (redo) gives the same result from the same starting vertices.
  */
-class SimplifyShapeCommand(
+internal class SimplifyShapeCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val keepFraction: Float,

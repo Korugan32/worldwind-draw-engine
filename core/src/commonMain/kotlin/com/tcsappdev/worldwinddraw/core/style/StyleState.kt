@@ -5,7 +5,7 @@ package com.tcsappdev.worldwinddraw.core.style
  * currently in, driven by user interaction. A [Theme] maps each of these states to the
  * [ShapeStyle] that should be shown while a shape is in that state.
  */
-enum class StyleState {
+public enum class StyleState {
     DEFAULT,
     HOVER,
     SELECTED,

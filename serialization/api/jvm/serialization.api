@@ -1,0 +1,36 @@
+public final class com/tcsappdev/worldwinddraw/serialization/DrawFormatException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/tcsappdev/worldwinddraw/serialization/DrawJson {
+	public static final field FORMAT Ljava/lang/String;
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/serialization/DrawJson;
+	public static final field VERSION I
+	public final fun decode (Ljava/lang/String;)Ljava/util/List;
+	public final fun encode (Ljava/util/List;Z)Ljava/lang/String;
+	public static synthetic fun encode$default (Lcom/tcsappdev/worldwinddraw/serialization/DrawJson;Ljava/util/List;ZILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/serialization/GeoJson {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/serialization/GeoJson;
+	public final fun decode (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/serialization/ImportResult;
+	public final fun encode (Ljava/util/List;Z)Ljava/lang/String;
+	public static synthetic fun encode$default (Lcom/tcsappdev/worldwinddraw/serialization/GeoJson;Ljava/util/List;ZILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class com/tcsappdev/worldwinddraw/serialization/ImportResult {
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getEntities ()Ljava/util/List;
+	public final fun getLeftOut ()Ljava/util/Map;
+	public final fun getWarnings ()Ljava/util/List;
+}
+
+public final class com/tcsappdev/worldwinddraw/serialization/Kml {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/serialization/Kml;
+	public final fun decode (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/serialization/ImportResult;
+	public final fun encode (Ljava/util/List;Z)Ljava/lang/String;
+	public static synthetic fun encode$default (Lcom/tcsappdev/worldwinddraw/serialization/Kml;Ljava/util/List;ZILjava/lang/Object;)Ljava/lang/String;
+}
+

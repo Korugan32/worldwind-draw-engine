@@ -13,17 +13,17 @@ import kotlinx.coroutines.flow.asStateFlow
  * browser dropping its forward history once you navigate somewhere new after going back.
  * [capacity] caps how many steps stay undoable; the oldest entry is dropped once exceeded.
  */
-class HistoryManager(private val capacity: Int = 100) {
+public class HistoryManager(private val capacity: Int = 100) {
     private val undoStack = mutableListOf<Command>()
     private val redoStack = mutableListOf<Command>()
 
     private val _canUndo = MutableStateFlow(false)
-    val canUndo: StateFlow<Boolean> = _canUndo.asStateFlow()
+    public val canUndo: StateFlow<Boolean> = _canUndo.asStateFlow()
 
     private val _canRedo = MutableStateFlow(false)
-    val canRedo: StateFlow<Boolean> = _canRedo.asStateFlow()
+    public val canRedo: StateFlow<Boolean> = _canRedo.asStateFlow()
 
-    fun execute(command: Command) {
+    internal fun execute(command: Command) {
         command.execute()
         undoStack.add(command)
         if (undoStack.size > capacity) {
@@ -36,7 +36,7 @@ class HistoryManager(private val capacity: Int = 100) {
         updateFlags()
     }
 
-    fun undo() {
+    public fun undo() {
         if (undoStack.isNotEmpty()) {
             val command = undoStack.removeAt(undoStack.lastIndex)
             command.undo()
@@ -45,7 +45,7 @@ class HistoryManager(private val capacity: Int = 100) {
         }
     }
 
-    fun redo() {
+    public fun redo() {
         if (redoStack.isNotEmpty()) {
             val command = redoStack.removeAt(redoStack.lastIndex)
             command.execute()
@@ -55,7 +55,7 @@ class HistoryManager(private val capacity: Int = 100) {
     }
 
     /** Forgets every step, undoable and redoable. */
-    fun clear() {
+    public fun clear() {
         undoStack.clear()
         redoStack.clear()
         updateFlags()

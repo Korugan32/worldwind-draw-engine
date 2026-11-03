@@ -1,0 +1,104 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <worldwind-draw-engine:wwk-adapter>
+final class com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine { // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine|null[0]
+    constructor <init>(kotlinx.coroutines/CoroutineScope, com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine? = ..., kotlin/Int = ..., com.tcsappdev.worldwinddraw.core.style/HandleStyle = ..., com.tcsappdev.worldwinddraw.core.style/HighlightStyle = ..., kotlin/Boolean = ...) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.<init>|<init>(kotlinx.coroutines.CoroutineScope;com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine?;kotlin.Int;com.tcsappdev.worldwinddraw.core.style.HandleStyle;com.tcsappdev.worldwinddraw.core.style.HighlightStyle;kotlin.Boolean){}[0]
+
+    final val canRedo // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.canRedo|{}canRedo[0]
+        final fun <get-canRedo>(): kotlinx.coroutines.flow/StateFlow<kotlin/Boolean> // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.canRedo.<get-canRedo>|<get-canRedo>(){}[0]
+    final val canUndo // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.canUndo|{}canUndo[0]
+        final fun <get-canUndo>(): kotlinx.coroutines.flow/StateFlow<kotlin/Boolean> // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.canUndo.<get-canUndo>|<get-canUndo>(){}[0]
+    final val entities // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.entities|{}entities[0]
+        final fun <get-entities>(): kotlinx.coroutines.flow/StateFlow<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/DrawableEntity>> // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.entities.<get-entities>|<get-entities>(){}[0]
+    final val history // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.history|{}history[0]
+        final fun <get-history>(): com.tcsappdev.worldwinddraw.core.history/HistoryManager // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.history.<get-history>|<get-history>(){}[0]
+    final val input // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.input|{}input[0]
+        final fun <get-input>(): earth.worldwind.gesture/SelectDragCallback // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.input.<get-input>|<get-input>(){}[0]
+    final val layer // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.layer|{}layer[0]
+        final fun <get-layer>(): com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.layer.<get-layer>|<get-layer>(){}[0]
+    final val repository // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.repository|{}repository[0]
+        final fun <get-repository>(): com.tcsappdev.worldwinddraw.core.repository/EntityRepository // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.repository.<get-repository>|<get-repository>(){}[0]
+    final val state // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.state|{}state[0]
+        final fun <get-state>(): kotlinx.coroutines.flow/StateFlow<com.tcsappdev.worldwinddraw.core.state/DrawEngineState> // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.state.<get-state>|<get-state>(){}[0]
+
+    final fun cancel() // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.cancel|cancel(){}[0]
+    final fun cutBy(com.tcsappdev.worldwinddraw.core.geometry/EntityId, kotlin/String = ...) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.cutBy|cutBy(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.String){}[0]
+    final fun deleteSelected() // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.deleteSelected|deleteSelected(){}[0]
+    final fun edit(com.tcsappdev.worldwinddraw.core.geometry/EntityId) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.edit|edit(com.tcsappdev.worldwinddraw.core.geometry.EntityId){}[0]
+    final fun finishDrawing(com.tcsappdev.worldwinddraw.core.geometry/EntityId = ...): com.tcsappdev.worldwinddraw.core.geometry/EntityId? // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.finishDrawing|finishDrawing(com.tcsappdev.worldwinddraw.core.geometry.EntityId){}[0]
+    final fun mergeWith(com.tcsappdev.worldwinddraw.core.geometry/EntityId, kotlin/String = ...) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.mergeWith|mergeWith(com.tcsappdev.worldwinddraw.core.geometry.EntityId;kotlin.String){}[0]
+    final fun onRedrawNeeded(kotlin/Function0<kotlin/Unit>) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.onRedrawNeeded|onRedrawNeeded(kotlin.Function0<kotlin.Unit>){}[0]
+    final fun play(com.tcsappdev.worldwinddraw.core.animation/Animatable) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.play|play(com.tcsappdev.worldwinddraw.core.animation.Animatable){}[0]
+    final fun redo() // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.redo|redo(){}[0]
+    final fun select(com.tcsappdev.worldwinddraw.core.geometry/EntityId) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.select|select(com.tcsappdev.worldwinddraw.core.geometry.EntityId){}[0]
+    final fun send(com.tcsappdev.worldwinddraw.core.state/DrawEvent) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.send|send(com.tcsappdev.worldwinddraw.core.state.DrawEvent){}[0]
+    final fun startDrawing(com.tcsappdev.worldwinddraw.core.state/DrawableEntityType, com.tcsappdev.worldwinddraw.core.style/ShapeStyle? = ...) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.startDrawing|startDrawing(com.tcsappdev.worldwinddraw.core.state.DrawableEntityType;com.tcsappdev.worldwinddraw.core.style.ShapeStyle?){}[0]
+    final fun stop(com.tcsappdev.worldwinddraw.core.animation/Animatable) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.stop|stop(com.tcsappdev.worldwinddraw.core.animation.Animatable){}[0]
+    final fun stopEditing() // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.stopEditing|stopEditing(){}[0]
+    final fun tick(kotlin/Long) // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.tick|tick(kotlin.Long){}[0]
+    final fun undo() // com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine.undo|undo(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge : earth.worldwind.gesture/SelectDragCallback { // com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.state/DrawStateMachine) // com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge.<init>|<init>(com.tcsappdev.worldwinddraw.core.state.DrawStateMachine){}[0]
+
+    final fun canMoveObjects(kotlin/Any): kotlin/Boolean // com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge.canMoveObjects|canMoveObjects(kotlin.Any){}[0]
+    final fun canPickObjects(kotlin/Any): kotlin/Boolean // com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge.canPickObjects|canPickObjects(kotlin.Any){}[0]
+    final fun onObjectMoved(kotlin/Any, earth.worldwind.geom/Position, earth.worldwind.geom/Position) // com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge.onObjectMoved|onObjectMoved(kotlin.Any;earth.worldwind.geom.Position;earth.worldwind.geom.Position){}[0]
+    final fun onObjectMovingFinished(kotlin/Any, earth.worldwind.geom/Position) // com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge.onObjectMovingFinished|onObjectMovingFinished(kotlin.Any;earth.worldwind.geom.Position){}[0]
+    final fun onObjectPicked(kotlin/Any, earth.worldwind.geom/Position) // com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge.onObjectPicked|onObjectPicked(kotlin.Any;earth.worldwind.geom.Position){}[0]
+    final fun onTerrainPicked(earth.worldwind.geom/Position) // com.tcsappdev.worldwinddraw.adapter.input/PickInputBridge.onTerrainPicked|onTerrainPicked(earth.worldwind.geom.Position){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer : com.tcsappdev.worldwinddraw.core.animation/Animatable, earth.worldwind.layer/RenderableLayer { // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer|null[0]
+    constructor <init>(com.tcsappdev.worldwinddraw.core.repository/EntityRepository, com.tcsappdev.worldwinddraw.core.state/DrawStateMachine, kotlinx.coroutines/CoroutineScope, kotlin/Function0<kotlin/Unit> = ..., com.tcsappdev.worldwinddraw.core.style/HandleStyle = ..., com.tcsappdev.worldwinddraw.core.style/HighlightStyle = ..., kotlin/Boolean = ...) // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.<init>|<init>(com.tcsappdev.worldwinddraw.core.repository.EntityRepository;com.tcsappdev.worldwinddraw.core.state.DrawStateMachine;kotlinx.coroutines.CoroutineScope;kotlin.Function0<kotlin.Unit>;com.tcsappdev.worldwinddraw.core.style.HandleStyle;com.tcsappdev.worldwinddraw.core.style.HighlightStyle;kotlin.Boolean){}[0]
+
+    final var handleStyle // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.handleStyle|{}handleStyle[0]
+        final fun <get-handleStyle>(): com.tcsappdev.worldwinddraw.core.style/HandleStyle // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.handleStyle.<get-handleStyle>|<get-handleStyle>(){}[0]
+        final fun <set-handleStyle>(com.tcsappdev.worldwinddraw.core.style/HandleStyle) // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.handleStyle.<set-handleStyle>|<set-handleStyle>(com.tcsappdev.worldwinddraw.core.style.HandleStyle){}[0]
+    final var highlightStyle // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.highlightStyle|{}highlightStyle[0]
+        final fun <get-highlightStyle>(): com.tcsappdev.worldwinddraw.core.style/HighlightStyle // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.highlightStyle.<get-highlightStyle>|<get-highlightStyle>(){}[0]
+        final fun <set-highlightStyle>(com.tcsappdev.worldwinddraw.core.style/HighlightStyle) // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.highlightStyle.<set-highlightStyle>|<set-highlightStyle>(com.tcsappdev.worldwinddraw.core.style.HighlightStyle){}[0]
+
+    final fun onTick(kotlin/Long) // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.onTick|onTick(kotlin.Long){}[0]
+
+    final object Companion { // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion|null[0]
+        final const val DRAFT_EDGE_INDEX_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.DRAFT_EDGE_INDEX_KEY|{}DRAFT_EDGE_INDEX_KEY[0]
+            final fun <get-DRAFT_EDGE_INDEX_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.DRAFT_EDGE_INDEX_KEY.<get-DRAFT_EDGE_INDEX_KEY>|<get-DRAFT_EDGE_INDEX_KEY>(){}[0]
+        final const val DRAFT_POINT_INDEX_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.DRAFT_POINT_INDEX_KEY|{}DRAFT_POINT_INDEX_KEY[0]
+            final fun <get-DRAFT_POINT_INDEX_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.DRAFT_POINT_INDEX_KEY.<get-DRAFT_POINT_INDEX_KEY>|<get-DRAFT_POINT_INDEX_KEY>(){}[0]
+        final const val EDGE_INDEX_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.EDGE_INDEX_KEY|{}EDGE_INDEX_KEY[0]
+            final fun <get-EDGE_INDEX_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.EDGE_INDEX_KEY.<get-EDGE_INDEX_KEY>|<get-EDGE_INDEX_KEY>(){}[0]
+        final const val ENTITY_ID_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.ENTITY_ID_KEY|{}ENTITY_ID_KEY[0]
+            final fun <get-ENTITY_ID_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.ENTITY_ID_KEY.<get-ENTITY_ID_KEY>|<get-ENTITY_ID_KEY>(){}[0]
+        final const val MARKER_MOVE_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.MARKER_MOVE_KEY|{}MARKER_MOVE_KEY[0]
+            final fun <get-MARKER_MOVE_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.MARKER_MOVE_KEY.<get-MARKER_MOVE_KEY>|<get-MARKER_MOVE_KEY>(){}[0]
+        final const val RING_INDEX_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.RING_INDEX_KEY|{}RING_INDEX_KEY[0]
+            final fun <get-RING_INDEX_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.RING_INDEX_KEY.<get-RING_INDEX_KEY>|<get-RING_INDEX_KEY>(){}[0]
+        final const val SPAN_NEXT_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.SPAN_NEXT_KEY|{}SPAN_NEXT_KEY[0]
+            final fun <get-SPAN_NEXT_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.SPAN_NEXT_KEY.<get-SPAN_NEXT_KEY>|<get-SPAN_NEXT_KEY>(){}[0]
+        final const val SPAN_PREV_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.SPAN_PREV_KEY|{}SPAN_PREV_KEY[0]
+            final fun <get-SPAN_PREV_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.SPAN_PREV_KEY.<get-SPAN_PREV_KEY>|<get-SPAN_PREV_KEY>(){}[0]
+        final const val STRETCH_MIDDLE_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.STRETCH_MIDDLE_KEY|{}STRETCH_MIDDLE_KEY[0]
+            final fun <get-STRETCH_MIDDLE_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.STRETCH_MIDDLE_KEY.<get-STRETCH_MIDDLE_KEY>|<get-STRETCH_MIDDLE_KEY>(){}[0]
+        final const val VERTEX_ID_KEY // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.VERTEX_ID_KEY|{}VERTEX_ID_KEY[0]
+            final fun <get-VERTEX_ID_KEY>(): kotlin/String // com.tcsappdev.worldwinddraw.adapter.layer/DrawLayer.Companion.VERTEX_ID_KEY.<get-VERTEX_ID_KEY>|<get-VERTEX_ID_KEY>(){}[0]
+    }
+}
+
+final fun (com.tcsappdev.worldwinddraw.adapter.engine/WorldWindDrawEngine).com.tcsappdev.worldwinddraw.adapter.engine/attachTo(earth.worldwind/WorldWindow) // com.tcsappdev.worldwinddraw.adapter.engine/attachTo|attachTo@com.tcsappdev.worldwinddraw.adapter.engine.WorldWindDrawEngine(earth.worldwind.WorldWindow){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.geometry/DrawnMarker).com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPlacemark(): earth.worldwind.shape/Placemark // com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPlacemark|toWwkPlacemark@com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker(){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon).com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPolygon(): earth.worldwind.shape/Polygon // com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPolygon|toWwkPolygon@com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon(){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.geometry/DrawnPolyline).com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPolyline(): earth.worldwind.shape/Path // com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPolyline|toWwkPolyline@com.tcsappdev.worldwinddraw.core.geometry.DrawnPolyline(){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.geometry/GeoPosition).com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPosition(): earth.worldwind.geom/Position // com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPosition|toWwkPosition@com.tcsappdev.worldwinddraw.core.geometry.GeoPosition(){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.style/ColorRgba).com.tcsappdev.worldwinddraw.adapter.mapper/toWwkColor(): earth.worldwind.render/Color // com.tcsappdev.worldwinddraw.adapter.mapper/toWwkColor|toWwkColor@com.tcsappdev.worldwinddraw.core.style.ColorRgba(){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.style/ShapeStyle).com.tcsappdev.worldwinddraw.adapter.mapper/toWwkLineAttributes(kotlin/Float): earth.worldwind.shape/ShapeAttributes // com.tcsappdev.worldwinddraw.adapter.mapper/toWwkLineAttributes|toWwkLineAttributes@com.tcsappdev.worldwinddraw.core.style.ShapeStyle(kotlin.Float){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.style/ShapeStyle).com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPlacemarkAttributes(kotlin/Float): earth.worldwind.shape/PlacemarkAttributes // com.tcsappdev.worldwinddraw.adapter.mapper/toWwkPlacemarkAttributes|toWwkPlacemarkAttributes@com.tcsappdev.worldwinddraw.core.style.ShapeStyle(kotlin.Float){}[0]
+final fun (com.tcsappdev.worldwinddraw.core.style/ShapeStyle).com.tcsappdev.worldwinddraw.adapter.mapper/toWwkShapeAttributes(): earth.worldwind.shape/ShapeAttributes // com.tcsappdev.worldwinddraw.adapter.mapper/toWwkShapeAttributes|toWwkShapeAttributes@com.tcsappdev.worldwinddraw.core.style.ShapeStyle(){}[0]
+final fun (earth.worldwind.geom/Position).com.tcsappdev.worldwinddraw.adapter.mapper/toGeoPosition(): com.tcsappdev.worldwinddraw.core.geometry/GeoPosition // com.tcsappdev.worldwinddraw.adapter.mapper/toGeoPosition|toGeoPosition@earth.worldwind.geom.Position(){}[0]
+final suspend fun com.tcsappdev.worldwinddraw.adapter.mapper/preloadImage(kotlin/ByteArray) // com.tcsappdev.worldwinddraw.adapter.mapper/preloadImage|preloadImage(kotlin.ByteArray){}[0]

@@ -46,14 +46,14 @@ import kotlin.math.roundToInt
  *
  * Coordinates are `longitude,latitude[,altitude]`, as in GeoJSON.
  */
-object Kml {
+public object Kml {
     /**
      * The shapes in [text], and what was left out.
      *
      * @throws DrawFormatException if [text] is not well-formed XML, or XML whose root is not `kml` (a bare `Document`, `Folder` or `Placemark`
      * is accepted as well).
      */
-    fun decode(text: String): ImportResult {
+    public fun decode(text: String): ImportResult {
         val root = Xml.parse(text)
         if (root.name !in setOf("kml", "Document", "Folder", "Placemark")) throw DrawFormatException("not KML: the root element is <${root.name}>")
         val reader = KmlReader(root)
@@ -62,7 +62,7 @@ object Kml {
     }
 
     /** A KML document of [entities], in their order. [pretty] adds line breaks and indentation; the content is the same. */
-    fun encode(entities: List<DrawableEntity>, pretty: Boolean = false): String = KmlWriter(pretty).document(entities)
+    public fun encode(entities: List<DrawableEntity>, pretty: Boolean = false): String = KmlWriter(pretty).document(entities)
 }
 
 // ---- reading ----

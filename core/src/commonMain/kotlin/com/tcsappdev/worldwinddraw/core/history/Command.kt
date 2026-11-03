@@ -6,7 +6,7 @@ package com.tcsappdev.worldwinddraw.core.history
  * "Command kuralı" for why. [execute] and [undo] must be exact inverses: calling
  * `execute()` then `undo()` must leave the affected state bit-for-bit as it was before.
  */
-interface Command {
+internal interface Command {
     fun execute()
     fun undo()
 }

@@ -1,5 +1,7 @@
 package com.tcsappdev.worldwinddraw.core.raster
 
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
+
 import com.tcsappdev.worldwinddraw.core.style.ColorRgba
 import com.tcsappdev.worldwinddraw.core.style.HatchPattern
 import kotlin.math.abs
@@ -12,8 +14,9 @@ import kotlin.math.sqrt
  * run on without a seam (every distance is measured to the nearest line of the *repeating* pattern, so what leaves one edge
  * comes back in at the opposite one). The lines are anti-aliased over one pixel. Pure Kotlin, like the rest of this package.
  */
-object HatchTile {
-    fun render(pattern: HatchPattern, color: ColorRgba, background: ColorRgba?, spacing: Int, thickness: Float): PixelImage {
+@InternalWorldWindDrawApi
+public object HatchTile {
+    public fun render(pattern: HatchPattern, color: ColorRgba, background: ColorRgba?, spacing: Int, thickness: Float): PixelImage {
         val half = thickness / 2
         val out = IntArray(spacing * spacing)
         for (y in 0 until spacing) {

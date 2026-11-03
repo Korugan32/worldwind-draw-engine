@@ -41,7 +41,7 @@ import kotlin.math.sin
  * @property keepVehicle whether the vehicle is still there, at the end of the route, when the trip is over.
  * @property zIndex the drawing order of what is made, over the other shapes with a bigger number.
  */
-data class RouteOptions(
+public data class RouteOptions(
     val lineColor: ColorRgba = ColorRgba(255, 60, 20),
     val headColor: ColorRgba? = null,
     val lineWidth: Float = 3f,
@@ -92,7 +92,7 @@ data class RouteOptions(
  * it. What it makes has ids made from the route's `id`: `<id>#trail` for the line (and `<id>#trail.<band>`, with `~...` added for its light, see
  * [DrawOutline]), `<id>#vehicle` for the vehicle and `<id>#shadow` for its shadow.
  */
-object RouteMotion {
+public object RouteMotion {
     /** The radius of the globe the heights are measured against, in meters. */
     private const val EARTH_RADIUS = 6_371_000.0
 
@@ -131,7 +131,7 @@ object RouteMotion {
     }
 
     /** The route's shapes at [t] (0 the vehicle at the first point, 1 the trip is over); [route] needs at least 2 points. */
-    fun at(id: EntityId, route: List<GeoPosition>, t: Float, options: RouteOptions = RouteOptions()): List<DrawableEntity> {
+    public fun at(id: EntityId, route: List<GeoPosition>, t: Float, options: RouteOptions = RouteOptions()): List<DrawableEntity> {
         require(route.size >= 2) { "a route needs at least 2 points" }
         require(!t.isNaN()) { "t is not a number" }
         val (points, corners) = curve(route, options.arc, options.height, options.arcSteps)

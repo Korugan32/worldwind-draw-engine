@@ -18,7 +18,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * Undoing puts the target back as it was and the absorbed shape back in its place in the drawing order, leaving what else changed since alone.
  * The shapes are looked up when this runs; if either is missing or isn't a polygon, nothing happens (and neither does the undo).
  */
-class CombineShapesCommand(
+internal class CombineShapesCommand(
     private val repository: EntityRepository,
     private val targetId: EntityId,
     private val rings: List<List<Vertex>>,

@@ -7,7 +7,7 @@ import kotlin.jvm.JvmInline
  * [GeoPosition]. Two [VertexId]s are only equal if they wrap the same underlying string.
  */
 @JvmInline
-value class VertexId(val id: String)
+public value class VertexId(public val id: String)
 
 /**
  * A single, editable corner point of a [DrawnPolygon] or [DrawnPolyline].
@@ -18,7 +18,7 @@ value class VertexId(val id: String)
  *
  * @property metadata optional, free-form tags (e.g. a label or a snapping hint).
  */
-data class Vertex(
+public data class Vertex(
     val id: VertexId,
     val position: GeoPosition,
     val metadata: Map<String, String> = emptyMap()

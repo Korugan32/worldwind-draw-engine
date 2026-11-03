@@ -28,12 +28,12 @@ import kotlin.random.Random
  *
  * The overlay itself is JTS's (OverlayNG, in its Kotlin Multiplatform port), see docs/PLAN.md (Faz 12b).
  */
-object PolygonOverlay {
+public object PolygonOverlay {
     /** One cell of the default grid, in degrees. */
-    const val DEFAULT_GRID_SIZE = 1e-7
+    public const val DEFAULT_GRID_SIZE: Double = 1e-7
 
     /** The rings of [a] together with [b]. @throws com.tcsappdev.worldwinddraw.core.overlay.InvalidShapeException if either is not a valid polygon. */
-    fun union(
+    public fun union(
         a: DrawnPolygon,
         b: DrawnPolygon,
         gridSize: Double = DEFAULT_GRID_SIZE,
@@ -41,7 +41,7 @@ object PolygonOverlay {
     ): List<List<Vertex>> = JtsOverlay.run(JtsOverlay.Operation.Union, a, b, gridSize, newVertexId)
 
     /** The rings of [a] with [b] cut out of it. @throws com.tcsappdev.worldwinddraw.core.overlay.InvalidShapeException if either is not a valid polygon. */
-    fun difference(
+    public fun difference(
         a: DrawnPolygon,
         b: DrawnPolygon,
         gridSize: Double = DEFAULT_GRID_SIZE,
@@ -49,7 +49,7 @@ object PolygonOverlay {
     ): List<List<Vertex>> = JtsOverlay.run(JtsOverlay.Operation.Difference, a, b, gridSize, newVertexId)
 
     /** The rings of what [a] and [b] have in common. @throws com.tcsappdev.worldwinddraw.core.overlay.InvalidShapeException if either is not a valid polygon. */
-    fun intersection(
+    public fun intersection(
         a: DrawnPolygon,
         b: DrawnPolygon,
         gridSize: Double = DEFAULT_GRID_SIZE,
@@ -57,7 +57,7 @@ object PolygonOverlay {
     ): List<List<Vertex>> = JtsOverlay.run(JtsOverlay.Operation.Intersection, a, b, gridSize, newVertexId)
 
     /** Why [polygon] cannot be used in an overlay (a line crosses itself, a hole is outside, a ring has too few points...), or `null` if it can. */
-    fun validate(polygon: DrawnPolygon): String? = JtsOverlay.invalidReason(polygon)
+    public fun validate(polygon: DrawnPolygon): String? = JtsOverlay.invalidReason(polygon)
 
     private fun randomVertexId() = VertexId("v" + Random.nextLong().toString(36))
 }

@@ -11,7 +11,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * [MoveVertexCommand] for a marker, which has one position instead of vertices. Does nothing if
  * [entityId] isn't a marker (or no longer exists).
  */
-class MoveMarkerCommand(
+internal class MoveMarkerCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val oldPosition: GeoPosition,

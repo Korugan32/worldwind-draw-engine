@@ -1,0 +1,105 @@
+public final class com/tcsappdev/worldwinddraw/adapter/engine/AttachTo_jvmKt {
+	public static final fun attachTo (Lcom/tcsappdev/worldwinddraw/adapter/engine/WorldWindDrawEngine;Learth/worldwind/WorldWindow;)V
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/engine/WorldWindDrawEngine {
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lcom/tcsappdev/worldwinddraw/core/overlay/OverlayEngine;ILcom/tcsappdev/worldwinddraw/core/style/HandleStyle;Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;Z)V
+	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;Lcom/tcsappdev/worldwinddraw/core/overlay/OverlayEngine;ILcom/tcsappdev/worldwinddraw/core/style/HandleStyle;Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun cancel ()V
+	public final fun cutBy-pzVkGBA (Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun cutBy-pzVkGBA$default (Lcom/tcsappdev/worldwinddraw/adapter/engine/WorldWindDrawEngine;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun deleteSelected ()V
+	public final fun edit-KKtDD9c (Ljava/lang/String;)V
+	public final fun finishDrawing-bBW1onY (Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun finishDrawing-bBW1onY$default (Lcom/tcsappdev/worldwinddraw/adapter/engine/WorldWindDrawEngine;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun getCanRedo ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getCanUndo ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getEntities ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getHistory ()Lcom/tcsappdev/worldwinddraw/core/history/HistoryManager;
+	public final fun getInput ()Learth/worldwind/gesture/SelectDragCallback;
+	public final fun getLayer ()Lcom/tcsappdev/worldwinddraw/adapter/layer/DrawLayer;
+	public final fun getRepository ()Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;
+	public final fun getState ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun mergeWith-pzVkGBA (Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun mergeWith-pzVkGBA$default (Lcom/tcsappdev/worldwinddraw/adapter/engine/WorldWindDrawEngine;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun onRedrawNeeded (Lkotlin/jvm/functions/Function0;)V
+	public final fun play (Lcom/tcsappdev/worldwinddraw/core/animation/Animatable;)V
+	public final fun redo ()V
+	public final fun select-KKtDD9c (Ljava/lang/String;)V
+	public final fun send (Lcom/tcsappdev/worldwinddraw/core/state/DrawEvent;)V
+	public final fun startDrawing (Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;)V
+	public static synthetic fun startDrawing$default (Lcom/tcsappdev/worldwinddraw/adapter/engine/WorldWindDrawEngine;Lcom/tcsappdev/worldwinddraw/core/state/DrawableEntityType;Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;ILjava/lang/Object;)V
+	public final fun stop (Lcom/tcsappdev/worldwinddraw/core/animation/Animatable;)V
+	public final fun stopEditing ()V
+	public final fun tick (J)V
+	public final fun undo ()V
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/input/PickInputBridge : earth/worldwind/gesture/SelectDragCallback {
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/state/DrawStateMachine;)V
+	public fun canMoveObjects (Ljava/lang/Object;)Z
+	public fun canPickObjects (Ljava/lang/Object;)Z
+	public fun onNothingContext ()V
+	public fun onNothingPicked ()V
+	public fun onObjectContext (Ljava/lang/Object;Learth/worldwind/geom/Position;)V
+	public fun onObjectDoubleTap (Ljava/lang/Object;Learth/worldwind/geom/Position;)V
+	public fun onObjectMoved (Ljava/lang/Object;Learth/worldwind/geom/Position;Learth/worldwind/geom/Position;)V
+	public fun onObjectMovingFinished (Ljava/lang/Object;Learth/worldwind/geom/Position;)V
+	public fun onObjectPicked (Ljava/lang/Object;Learth/worldwind/geom/Position;)V
+	public fun onTerrainContext (Learth/worldwind/geom/Position;)V
+	public fun onTerrainDoubleTap (Learth/worldwind/geom/Position;)V
+	public fun onTerrainPicked (Learth/worldwind/geom/Position;)V
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/layer/DrawLayer : earth/worldwind/layer/RenderableLayer, com/tcsappdev/worldwinddraw/core/animation/Animatable {
+	public static final field Companion Lcom/tcsappdev/worldwinddraw/adapter/layer/DrawLayer$Companion;
+	public static final field DRAFT_EDGE_INDEX_KEY Ljava/lang/String;
+	public static final field DRAFT_POINT_INDEX_KEY Ljava/lang/String;
+	public static final field EDGE_INDEX_KEY Ljava/lang/String;
+	public static final field ENTITY_ID_KEY Ljava/lang/String;
+	public static final field MARKER_MOVE_KEY Ljava/lang/String;
+	public static final field RING_INDEX_KEY Ljava/lang/String;
+	public static final field SPAN_NEXT_KEY Ljava/lang/String;
+	public static final field SPAN_PREV_KEY Ljava/lang/String;
+	public static final field STRETCH_MIDDLE_KEY Ljava/lang/String;
+	public static final field VERTEX_ID_KEY Ljava/lang/String;
+	public fun <init> (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/core/state/DrawStateMachine;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;Lcom/tcsappdev/worldwinddraw/core/style/HandleStyle;Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;Z)V
+	public synthetic fun <init> (Lcom/tcsappdev/worldwinddraw/core/repository/EntityRepository;Lcom/tcsappdev/worldwinddraw/core/state/DrawStateMachine;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;Lcom/tcsappdev/worldwinddraw/core/style/HandleStyle;Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getHandleStyle ()Lcom/tcsappdev/worldwinddraw/core/style/HandleStyle;
+	public final fun getHighlightStyle ()Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;
+	public fun onTick (J)V
+	public final fun setHandleStyle (Lcom/tcsappdev/worldwinddraw/core/style/HandleStyle;)V
+	public final fun setHighlightStyle (Lcom/tcsappdev/worldwinddraw/core/style/HighlightStyle;)V
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/layer/DrawLayer$Companion {
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/mapper/GeoPositionMapperKt {
+	public static final fun toGeoPosition (Learth/worldwind/geom/Position;)Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;
+	public static final fun toWwkPosition (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)Learth/worldwind/geom/Position;
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/mapper/ImageSourcesKt {
+	public static final fun preloadImage ([BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/mapper/MarkerMapperKt {
+	public static final fun toWwkPlacemark (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnMarker;)Learth/worldwind/shape/Placemark;
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/mapper/PolygonMapperKt {
+	public static final fun toWwkPolygon (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;)Learth/worldwind/shape/Polygon;
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/mapper/PolylineMapperKt {
+	public static final fun toWwkPolyline (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolyline;)Learth/worldwind/shape/Path;
+}
+
+public final class com/tcsappdev/worldwinddraw/adapter/mapper/StyleAttributesMapperKt {
+	public static final fun toWwkColor (Lcom/tcsappdev/worldwinddraw/core/style/ColorRgba;)Learth/worldwind/render/Color;
+	public static final fun toWwkLineAttributes (Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;F)Learth/worldwind/shape/ShapeAttributes;
+	public static final fun toWwkPlacemarkAttributes (Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;F)Learth/worldwind/shape/PlacemarkAttributes;
+	public static final fun toWwkShapeAttributes (Lcom/tcsappdev/worldwinddraw/core/style/ShapeStyle;)Learth/worldwind/shape/ShapeAttributes;
+}
+

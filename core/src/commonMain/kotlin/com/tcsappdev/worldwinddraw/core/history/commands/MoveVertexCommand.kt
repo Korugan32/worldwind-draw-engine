@@ -10,7 +10,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * left untouched, since [DrawableEntity] doesn't expose a shared "vertices" contract for
  * a `when` to dispatch on generically.
  */
-class MoveVertexCommand(
+internal class MoveVertexCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val vertexId: VertexId,

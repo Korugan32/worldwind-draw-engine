@@ -15,7 +15,7 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  * edits made since it was drawn. If no such entity exists at that moment, executing (and undoing)
  * does nothing.
  */
-class DeleteEntityCommand private constructor(
+internal class DeleteEntityCommand private constructor(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private var entity: DrawableEntity?,

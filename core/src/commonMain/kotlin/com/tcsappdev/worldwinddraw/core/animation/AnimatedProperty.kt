@@ -7,7 +7,7 @@ package com.tcsappdev.worldwinddraw.core.animation
  * (a plain number, a color, a position, ...) — this class only owns the timing/easing/repeat
  * math, not the interpolation itself.
  */
-class AnimatedProperty<T>(
+public class AnimatedProperty<T>(
     private val startValue: T,
     private val targetValue: T,
     private val spec: AnimationSpec,
@@ -15,10 +15,10 @@ class AnimatedProperty<T>(
 ) : Animatable {
     private var elapsedMs: Long = 0L
 
-    var value: T = startValue
+    public var value: T = startValue
         private set
 
-    var isFinished: Boolean = false
+    public var isFinished: Boolean = false
         private set
 
     override fun onTick(deltaMs: Long) {

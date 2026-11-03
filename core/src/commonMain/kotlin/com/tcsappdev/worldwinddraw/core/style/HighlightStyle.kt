@@ -10,12 +10,12 @@ package com.tcsappdev.worldwinddraw.core.style
  * stand out on both dark ocean and green/tan land imagery and not to clash with each other.
  * The shape being drawn (before it is finished) uses [editingColor] for its outline.
  */
-data class HighlightStyle(
+public data class HighlightStyle(
     val selectedColor: ColorRgba = ColorRgba(red = 255, green = 92, blue = 138),
     val editingColor: ColorRgba = ColorRgba(red = 45, green = 212, blue = 191),
 ) {
     /** The highlight colour for a shape in [state], or `null` if that state isn't highlighted (all but SELECTED and EDITING). */
-    fun colorFor(state: StyleState): ColorRgba? = when (state) {
+    public fun colorFor(state: StyleState): ColorRgba? = when (state) {
         StyleState.SELECTED -> selectedColor
         StyleState.EDITING -> editingColor
         else -> null

@@ -52,7 +52,7 @@ import kotlin.random.Random
  * @param highlightStyle how a selected shape is marked; can be changed later through [layer].
  * @param buildOnFirstFrame whether the layer builds the shapes in the first frame instead of in the background (see [DrawLayer]).
  */
-class WorldWindDrawEngine(
+public class WorldWindDrawEngine(
     scope: CoroutineScope,
     overlay: OverlayEngine? = null,
     historyCapacity: Int = 100,
@@ -61,10 +61,10 @@ class WorldWindDrawEngine(
     buildOnFirstFrame: Boolean = false,
 ) {
     /** The shapes that exist. Putting one in here directly is not a step of the history (it cannot be undone); see [DrawEvent] for what is. */
-    val repository: EntityRepository = EntityRepository()
+    public val repository: EntityRepository = EntityRepository()
 
     /** The undo history; [undo] and [redo] are what a host needs of it. */
-    val history: HistoryManager = HistoryManager(historyCapacity)
+    public val history: HistoryManager = HistoryManager(historyCapacity)
 
     private val stateMachine = DrawStateMachine(history, repository, overlay)
 
@@ -72,51 +72,51 @@ class WorldWindDrawEngine(
     private var requestRedraw: () -> Unit = {}
 
     /** The layer that shows the shapes on the map; [attachTo] adds it to a window. */
-    val layer: DrawLayer = DrawLayer(repository, stateMachine, scope, { requestRedraw() }, handleStyle, highlightStyle, buildOnFirstFrame)
+    public val layer: DrawLayer = DrawLayer(repository, stateMachine, scope, { requestRedraw() }, handleStyle, highlightStyle, buildOnFirstFrame)
 
     /** Where the touches on the map go: taps and drags to select, draw and edit. [attachTo] gives it to the window. */
-    val input: SelectDragCallback = PickInputBridge(stateMachine)
+    public val input: SelectDragCallback = PickInputBridge(stateMachine)
 
     private val animation = AnimationController().also { it.register(layer) }
 
     /** What the engine is doing: idle, drawing, selecting, editing... */
-    val state: StateFlow<DrawEngineState> = stateMachine.state
+    public val state: StateFlow<DrawEngineState> = stateMachine.state
 
     /** The shapes that exist, as a flow. */
-    val entities: StateFlow<List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>> = repository.entities
+    public val entities: StateFlow<List<com.tcsappdev.worldwinddraw.core.geometry.DrawableEntity>> = repository.entities
 
     /** Whether there is a step to undo. */
-    val canUndo: StateFlow<Boolean> = history.canUndo
+    public val canUndo: StateFlow<Boolean> = history.canUndo
 
     /** Whether there is a step to redo. */
-    val canRedo: StateFlow<Boolean> = history.canRedo
+    public val canRedo: StateFlow<Boolean> = history.canRedo
 
     /**
      * Lets the engine ask the host's window to draw again when something changed (a shape, a selection, a step undone). [attachTo] does this;
      * call it yourself to use a window [attachTo] does not know.
      */
-    fun onRedrawNeeded(request: () -> Unit) {
+    public fun onRedrawNeeded(request: () -> Unit) {
         requestRedraw = request
     }
 
     /** Advances what moves by [deltaMs] milliseconds: call it once per frame. The engine has no clock of its own. */
-    fun tick(deltaMs: Long) = animation.tick(deltaMs)
+    public fun tick(deltaMs: Long): Unit = animation.tick(deltaMs)
 
     /** Moves [animatable] (an effect, see the `morph` module) along with every [tick] until [stop] is called for it. */
-    fun play(animatable: Animatable) = animation.register(animatable)
+    public fun play(animatable: Animatable): Unit = animation.register(animatable)
 
     /** Stops moving [animatable] (an effect that has finished); the opposite of [play]. */
-    fun stop(animatable: Animatable) = animation.unregister(animatable)
+    public fun stop(animatable: Animatable): Unit = animation.unregister(animatable)
 
-    fun undo() = history.undo()
+    public fun undo(): Unit = history.undo()
 
-    fun redo() = history.redo()
+    public fun redo(): Unit = history.redo()
 
     /** Gives the engine any [event] (what the buttons below do, and more: see [DrawEvent]). */
-    fun send(event: DrawEvent) = stateMachine.onEvent(event)
+    public fun send(event: DrawEvent): Unit = stateMachine.onEvent(event)
 
     /** Starts drawing a new shape of [type]; the person taps the map to place its points, then [finishDrawing]. [style] is how it looks while drawn. */
-    fun startDrawing(type: DrawableEntityType, style: ShapeStyle? = null) {
+    public fun startDrawing(type: DrawableEntityType, style: ShapeStyle? = null) {
         send(DrawEvent.ModeChange(if (style == null) DrawMode.Draw(type, emptyList()) else DrawMode.Draw(type, emptyList(), style)))
     }
 
@@ -124,33 +124,33 @@ class WorldWindDrawEngine(
      * Turns what is being drawn into a shape with the id [id] (a new one by default) and returns the id; null, and nothing happens, if nothing
      * is being drawn. Whether the points make a shape (a polygon needs 3) is for the engine to say: if they do not, it stays as it was.
      */
-    fun finishDrawing(id: EntityId = EntityId(Random.nextLong().toString())): EntityId? {
+    public fun finishDrawing(id: EntityId = EntityId(Random.nextLong().toString())): EntityId? {
         val draft = state.value.mode as? DrawMode.Draw ?: return null
         send(DrawEvent.FinishDrawing(id, draft.pendingVertices.map { VertexId(Random.nextLong().toString()) }))
         return if (repository.entities.value.any { it.id == id }) id else null
     }
 
     /** Gives up what is being drawn, or what is being edited or selected: back to idle. */
-    fun cancel() = send(DrawEvent.ModeChange(DrawMode.Idle))
+    public fun cancel(): Unit = send(DrawEvent.ModeChange(DrawMode.Idle))
 
     /** Selects the shape [id] (it is marked; [edit], [deleteSelected], [mergeWith] and the like then apply to it). */
-    fun select(id: EntityId) = send(DrawEvent.ModeChange(DrawMode.Select(id)))
+    public fun select(id: EntityId): Unit = send(DrawEvent.ModeChange(DrawMode.Select(id)))
 
     /** Starts editing the shape [id]: its corners can be dragged and new ones added. */
-    fun edit(id: EntityId) = send(DrawEvent.ModeChange(DrawMode.Edit(id)))
+    public fun edit(id: EntityId): Unit = send(DrawEvent.ModeChange(DrawMode.Edit(id)))
 
     /** Ends editing and leaves the shape selected. */
-    fun stopEditing() {
+    public fun stopEditing() {
         val editing = state.value.mode as? DrawMode.Edit ?: return
         select(editing.entityId)
     }
 
     /** Deletes the selected shape (or the one being edited); it can be undone. */
-    fun deleteSelected() = send(DrawEvent.DeleteSelected)
+    public fun deleteSelected(): Unit = send(DrawEvent.DeleteSelected)
 
     /** Merges the selected polygon with the polygon [otherId]; needs an `overlay`. New ids are made from [idPrefix]. */
-    fun mergeWith(otherId: EntityId, idPrefix: String = Random.nextLong().toString()) = send(DrawEvent.MergeWith(otherId, idPrefix))
+    public fun mergeWith(otherId: EntityId, idPrefix: String = Random.nextLong().toString()): Unit = send(DrawEvent.MergeWith(otherId, idPrefix))
 
     /** Cuts the polygon [cutterId] out of the selected polygon; needs an `overlay`. New ids are made from [idPrefix]. */
-    fun cutBy(cutterId: EntityId, idPrefix: String = Random.nextLong().toString()) = send(DrawEvent.CutBy(cutterId, idPrefix))
+    public fun cutBy(cutterId: EntityId, idPrefix: String = Random.nextLong().toString()): Unit = send(DrawEvent.CutBy(cutterId, idPrefix))
 }

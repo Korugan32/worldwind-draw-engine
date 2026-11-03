@@ -5,7 +5,7 @@ import com.tcsappdev.worldwinddraw.core.history.Command
 import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
 
 /** Adds [entity] to [repository]; undoing removes it again by [DrawableEntity.id]. */
-class AddEntityCommand(
+internal class AddEntityCommand(
     private val repository: EntityRepository,
     private val entity: DrawableEntity,
 ) : Command {

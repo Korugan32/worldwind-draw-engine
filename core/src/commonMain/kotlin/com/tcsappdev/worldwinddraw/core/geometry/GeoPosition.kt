@@ -12,7 +12,7 @@ package com.tcsappdev.worldwinddraw.core.geometry
  * @property altitude meters above the reference ellipsoid; defaults to sea level (`0.0`).
  * @throws IllegalArgumentException if [latitude] or [longitude] is out of range.
  */
-data class GeoPosition(
+public data class GeoPosition(
     val latitude: Double,
     val longitude: Double,
     val altitude: Double = 0.0

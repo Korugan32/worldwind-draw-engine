@@ -10,7 +10,7 @@ import com.tcsappdev.worldwinddraw.core.style.ShapeStyle
  * commands, this applies to all three [DrawableEntity] subtypes — `style` is part of the
  * shared [DrawableEntity] contract, so no type has to be skipped here.
  */
-class ChangeStyleCommand(
+internal class ChangeStyleCommand(
     private val repository: EntityRepository,
     private val entityId: EntityId,
     private val oldStyle: ShapeStyle,

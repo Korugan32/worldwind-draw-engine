@@ -10,17 +10,17 @@ import com.tcsappdev.worldwinddraw.core.repository.EntityRepository
  *
  * Two snapshots are what [Morph] works between and what a [SnapshotTransition] plays from one to the other.
  */
-data class Snapshot(val entities: List<DrawableEntity>) {
+public data class Snapshot(val entities: List<DrawableEntity>) {
     init {
         require(entities.map { it.id }.toSet().size == entities.size) { "two shapes have the same id" }
     }
 }
 
 /** The drawing as it is now. */
-fun EntityRepository.snapshot(): Snapshot = Snapshot(entities.value)
+public fun EntityRepository.snapshot(): Snapshot = Snapshot(entities.value)
 
 /**
  * Puts the drawing back as [snapshot] has it, in one change. This is not an edit: nothing is added to the undo history, and the
  * shapes the drawing had before are gone (take a [snapshot] first to keep them).
  */
-fun EntityRepository.restore(snapshot: Snapshot) = replaceAll(snapshot.entities)
+public fun EntityRepository.restore(snapshot: Snapshot): Unit = replaceAll(snapshot.entities)
