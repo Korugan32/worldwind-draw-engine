@@ -4,7 +4,7 @@ Draw, edit and animate shapes on a 3D globe, on Android, iOS and the web, from o
 
 It is a drawing layer for [WorldWind Kotlin](https://github.com/WorldWindEarth/WorldWindKotlin): a person taps the globe to draw polygons, lines and markers, drags their corners, merges and cuts them, undoes what they did, and the host app gets the shapes back as plain data (or as GeoJSON / KML). On top of that there are animation effects: a polygon outline drawn by a glowing pen, a plane flying a route, one drawing morphing into another.
 
-> **Status: 0.1.0, not released yet.** The API is closed and checked on every build (see [Contributing](CONTRIBUTING.md)), but it has had little real-world use and has not been tried on a physical iPhone (see [Known limits](#known-limits)). Expect changes before 1.0.
+> **Status: 0.1.0, on Maven Central.** The API is closed and checked on every build (see [Contributing](CONTRIBUTING.md)), but it has had little real-world use and has not been tried on a physical iPhone (see [Known limits](#known-limits)). Expect changes before 1.0: until then a minor version may change the API.
 
 ## What you get
 
@@ -27,10 +27,9 @@ It is a drawing layer for [WorldWind Kotlin](https://github.com/WorldWindEarth/W
 | `boolean-ops` | Merging and cutting polygons. | `core`, [kts-core](https://github.com/mipastgt/kts) |
 | `morph` | Snapshots, transitions and the effects. | `core` |
 
-Artifacts (planned for 0.1.0, group `io.github.korugan32`): `worldwind-draw-core`, `worldwind-draw-adapter`, `worldwind-draw-serialization`, `worldwind-draw-boolean-ops`, `worldwind-draw-morph`.
+Artifacts (group `io.github.korugan32`, from Maven Central): `worldwind-draw-core`, `worldwind-draw-adapter`, `worldwind-draw-serialization`, `worldwind-draw-boolean-ops`, `worldwind-draw-morph`.
 
 ```kotlin
-// Once released:
 dependencies {
     implementation("io.github.korugan32:worldwind-draw-adapter:0.1.0")
     implementation("io.github.korugan32:worldwind-draw-boolean-ops:0.1.0")   // only to merge and cut polygons
@@ -100,7 +99,7 @@ The full API is documented in the KDoc (`./gradlew dokkaGenerate`, then open `bu
 | JVM | yes | unit tests |
 | Web (`js`) | yes, without image fills | compiles only |
 
-Built with Kotlin 2.4, WorldWind Kotlin 2.1.1 and Compose Multiplatform 1.12 (the demo).
+Built with Kotlin 2.4, WorldWind Kotlin 2.1.1 and Compose Multiplatform 1.12 (the demo). `worldwind-draw-adapter` brings WorldWind Kotlin in by itself.
 
 ## Known limits
 
