@@ -60,6 +60,7 @@ internal sealed interface EntityDto {
         val description: String? = null,
         val zIndex: Int = 0,
         val properties: Map<String, String> = emptyMap(),
+        val rotation: Float = 0f,
     ) : EntityDto
 }
 

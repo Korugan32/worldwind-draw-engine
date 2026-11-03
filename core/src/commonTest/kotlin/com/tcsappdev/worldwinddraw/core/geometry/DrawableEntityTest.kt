@@ -162,4 +162,13 @@ class DrawableEntityTest {
         // Default size must NOT throw.
         DrawnMarker(id = EntityId("TestEntity2"), style = ShapeStyle.SolidColor(ColorRgba(0, 0, 0, 0)), position = position)
     }
+
+    @Test
+    fun aMarkerIsNotTurnedUnlessItIsAndAnyFiniteTurnIsAccepted() {
+        val style = ShapeStyle.SolidColor(ColorRgba(1, 2, 3))
+        assertEquals(0f, DrawnMarker(EntityId("m"), style, GeoPosition(0.0, 0.0)).rotation)
+        assertEquals(450f, DrawnMarker(EntityId("m"), style, GeoPosition(0.0, 0.0), rotation = 450f).rotation)
+        assertFailsWith<IllegalArgumentException> { DrawnMarker(EntityId("m"), style, GeoPosition(0.0, 0.0), rotation = Float.NaN) }
+        assertFailsWith<IllegalArgumentException> { DrawnMarker(EntityId("m"), style, GeoPosition(0.0, 0.0), rotation = Float.POSITIVE_INFINITY) }
+    }
 }

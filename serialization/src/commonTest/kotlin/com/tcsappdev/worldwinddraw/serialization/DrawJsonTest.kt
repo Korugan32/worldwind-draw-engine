@@ -143,6 +143,14 @@ class DrawJsonTest {
     }
 
     @Test
+    fun aMarkersRotationSurvivesAndIsLeftOutWhenItIsZero() {
+        val turned = DrawnMarker(EntityId("m"), red, GeoPosition(1.0, 2.0), rotation = 135f)
+        assertEquals(135f, (roundTrip(listOf(turned)).single() as DrawnMarker).rotation)
+        assertTrue("rotation" in DrawJson.encode(listOf(turned)))
+        assertFalse("rotation" in DrawJson.encode(listOf(turned.copy(rotation = 0f))))
+    }
+
+    @Test
     fun aLabelWithoutAnOutlineIsNotGivenTheDefaultOne() {
         val marker = DrawnMarker(EntityId("m"), red, GeoPosition(1.0, 2.0), label = MarkerLabel("x", outlineColor = null))
         assertEquals(null, (roundTrip(listOf(marker)).single() as DrawnMarker).label!!.outlineColor)

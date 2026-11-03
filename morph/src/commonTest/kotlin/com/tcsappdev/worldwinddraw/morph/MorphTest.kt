@@ -278,4 +278,13 @@ class MorphTest {
         assertEquals(fromBefore, from.entities)
         assertEquals(toBefore, to.entities)
     }
+
+    @Test
+    fun aMarkerTurnsTheShortWayRound() {
+        val from = Snapshot(listOf(marker("m", 0.0, 0.0).copy(rotation = 350f)))
+        val to = Snapshot(listOf(marker("m", 0.0, 0.0).copy(rotation = 10f)))
+        val half = Morph.between(from, to, 0.5f).single() as DrawnMarker
+        assertEquals(360f, half.rotation) // 350 up to 10 is 20 degrees: half way is 360, not 180
+        assertEquals(350f, (Morph.between(from, to, 0f).single() as DrawnMarker).rotation)
+    }
 }
