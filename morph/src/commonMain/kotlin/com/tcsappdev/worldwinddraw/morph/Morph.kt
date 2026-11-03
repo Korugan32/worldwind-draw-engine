@@ -108,6 +108,7 @@ object Morph {
         style = lerpStyle(a.style, b.style, t),
         position = lerpPosition(a.position, b.position, t),
         size = lerp(a.size, b.size, t),
+        rotation = lerpAngle(a.rotation, b.rotation, t),
         label = lerpLabel(a.label, b.label, t),
         description = step(a.description, b.description, t),
         zIndex = step(a.zIndex, b.zIndex, t),

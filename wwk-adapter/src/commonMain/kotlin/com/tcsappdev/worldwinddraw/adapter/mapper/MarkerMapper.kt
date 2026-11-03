@@ -4,10 +4,12 @@ import com.tcsappdev.worldwinddraw.core.geometry.DrawnMarker
 import com.tcsappdev.worldwinddraw.core.geometry.LabelPosition
 import com.tcsappdev.worldwinddraw.core.geometry.MarkerLabel
 import earth.worldwind.geom.AltitudeMode
+import earth.worldwind.geom.Angle.Companion.degrees
 import earth.worldwind.geom.Offset
 import earth.worldwind.geom.OffsetMode
 import earth.worldwind.render.Font
 import earth.worldwind.render.FontWeight
+import earth.worldwind.shape.OrientationMode
 import earth.worldwind.shape.Placemark
 import earth.worldwind.shape.TextAttributes
 
@@ -20,12 +22,20 @@ import earth.worldwind.shape.TextAttributes
  * left at its literal `ABSOLUTE` altitude (0 by default) can render behind higher terrain.
  * Clamping anchors it to the terrain surface instead, avoiding the issue at the source.
  *
+ * A [DrawnMarker.rotation] turns the icon on the globe (see [earth.worldwind.shape.Placemark.imageRotation]).
  * A [DrawnMarker.label] becomes the placemark's own label (see [applyLabel]).
  */
 fun DrawnMarker.toWwkPlacemark(): Placemark {
     val markerLabel = label
     return Placemark(position.toWwkPosition(), style.toWwkPlacemarkAttributes(size)).apply {
-        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+        // On the ground, or, with some altitude, that many meters above it (a plane in the air).
+        altitudeMode = if (position.altitude > 0.0) AltitudeMode.RELATIVE_TO_GROUND else AltitudeMode.CLAMP_TO_GROUND
+        // Turned on the globe (a plane keeps heading east when the map is turned); a marker that is not turned is left as WWK has it, which
+        // is the icon upright on the screen.
+        if (rotation != 0f) {
+            imageRotation = rotation.toDouble().degrees
+            imageRotationReference = OrientationMode.RELATIVE_TO_GLOBE
+        }
         if (markerLabel != null) {
             this.label = markerLabel.text
             attributes.labelAttributes.applyLabel(markerLabel, iconSize = size)

@@ -63,6 +63,7 @@ internal object Encoder {
             description = entity.description,
             zIndex = entity.zIndex,
             properties = entity.properties,
+            rotation = entity.rotation,
         )
     }
 
@@ -193,6 +194,7 @@ internal class Decoder(private val document: DocumentDto) {
             description = dto.description,
             zIndex = dto.zIndex,
             properties = dto.properties,
+            rotation = dto.rotation,
         )
     }
 

@@ -30,6 +30,7 @@ kotlin {
             dependencies {
                 implementation(project(":wwk-adapter"))
                 implementation(project(":boolean-ops"))
+                implementation(project(":morph"))
                 implementation(libs.worldwind.compose)
                 implementation(libs.compose.runtime)
                 implementation(libs.compose.foundation)
@@ -41,6 +42,7 @@ kotlin {
 
 // WorldWind's data files (the geoid, the base imagery, the stars) are moko-resources inside its klibs. An Android or Xcode build puts
 // them where they are looked for; for the browser they have to be plain files at the root of the site, so they are taken out here.
+@OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 val wwkWebAssets = tasks.register<Sync>("wwkWebAssets") {
     val klibs = kotlin.wasmJs().compilations.getByName("main").compileDependencyFiles
     from({ klibs.filter { it.name.startsWith("worldwind-assets") }.map { zipTree(it) } }) {

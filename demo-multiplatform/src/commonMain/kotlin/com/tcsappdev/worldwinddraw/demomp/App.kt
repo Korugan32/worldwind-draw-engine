@@ -34,6 +34,10 @@ import com.tcsappdev.worldwinddraw.adapter.mapper.preloadImage
 import com.tcsappdev.worldwinddraw.booleanops.JtsOverlayEngine
 import com.tcsappdev.worldwinddraw.adapter.mapper.toWwkPosition
 import com.tcsappdev.worldwinddraw.core.animation.AnimationController
+import com.tcsappdev.worldwinddraw.core.animation.AnimationSpec
+import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
+import com.tcsappdev.worldwinddraw.morph.DrawOutlineEffect
+import com.tcsappdev.worldwinddraw.morph.RouteEffect
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
@@ -46,12 +50,12 @@ import com.tcsappdev.worldwinddraw.core.state.DrawableEntityType
 import earth.worldwind.compose.WorldWindow
 import earth.worldwind.compose.rememberWorldWindowState
 import earth.worldwind.globe.elevation.coverage.BasicElevationCoverage
-import earth.worldwind.globe.elevation.coverage.ElevationCoverage
 import earth.worldwind.layer.BackgroundLayer
 import earth.worldwind.layer.atmosphere.AtmosphereLayer
 import earth.worldwind.layer.starfield.StarFieldLayer
+import earth.worldwind.layer.BlueMarbleLandsatLayer
 import earth.worldwind.layer.BlueMarbleLayer
-import earth.worldwind.layer.Layer
+import earth.worldwind.layer.mercator.WebMercatorLayerFactory
 import kotlin.random.Random
 
 /** The same map and the same draw engine on every platform, with a few buttons. */
@@ -85,6 +89,14 @@ fun App() {
     val counterLast = remember { FrameCounter(peer = counter) }
     val background = remember { BackgroundLayer() }
     val blueMarble = remember { BlueMarbleLayer() }
+    // Sharper maps for zooming in: NASA's Landsat (15 m) and Esri's world imagery (tiles down to the streets; check Esri's terms before shipping).
+    val landsat = remember { BlueMarbleLandsatLayer().also { it.isEnabled = false } }
+    val esri = remember {
+        WebMercatorLayerFactory.createLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", "Esri imagery", "image/jpeg", maxZoom = 19,
+        ).also { it.isEnabled = false }
+    }
+    var mapMode by remember { mutableStateOf(0) }
     // The library has no clock of its own (see Animatable): the host feeds it one tick per frame. Without this the selected shape does not pulse.
     val animationController = remember { AnimationController() }
     val drawLayer = remember {
@@ -107,6 +119,8 @@ fun App() {
         engine.layers.addLayer(atmosphere)
         engine.layers.addLayer(background)
         engine.layers.addLayer(blueMarble)
+        engine.layers.addLayer(landsat)
+        engine.layers.addLayer(esri)
         engine.layers.addLayer(drawLayer)
         engine.layers.addLayer(counterLast)
         val camera = GeoPosition(39.0, 33.0, 3_000_000.0).toWwkPosition()
@@ -144,6 +158,24 @@ fun App() {
                     Button("Close") { stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Idle)) }
                 }
                 else -> Button("Draw") { stateMachine.onEvent(DrawEvent.ModeChange(DrawMode.Draw(DrawableEntityType.Polygon, emptyList()))) }
+            }
+            Button("Outline") {
+                val polygon = repository.entities.value.filterIsInstance<DrawnPolygon>().firstOrNull { it.id.id == "flag" } ?: return@Button
+                var effect: DrawOutlineEffect? = null
+                effect = DrawOutlineEffect(repository, polygon, AnimationSpec(6000, easing = { it }), FLAME) { effect?.let(animationController::unregister) }
+                animationController.register(effect)
+            }
+            Button("Route") {
+                var effect: RouteEffect? = null
+                effect = RouteEffect(repository, EntityId("route"), DEMO_ROUTE, AnimationSpec(9000, easing = { it }), PLANE_ROUTE) { effect?.let(animationController::unregister) }
+                animationController.register(effect)
+            }
+            Button(listOf("Map: NASA", "Map: Landsat", "Map: Esri")[mapMode]) {
+                mapMode = (mapMode + 1) % 3
+                blueMarble.isEnabled = mapMode == 0
+                landsat.isEnabled = mapMode == 1
+                esri.isEnabled = mapMode == 2
+                redraw[0]()
             }
             Button(if (atmosphereOn) "Atm on" else "Atm off") { atmosphereOn = !atmosphereOn; atmosphere.isEnabled = atmosphereOn; redraw[0]() }
             Button("Undo", enabled = canUndo) { history.undo() }

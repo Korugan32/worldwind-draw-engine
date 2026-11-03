@@ -16,6 +16,13 @@ internal fun lerp(a: Float, b: Float, t: Float): Float = a + (b - a) * t
 
 internal fun <T> step(a: T, b: T, t: Float): T = if (t < 0.5f) a else b
 
+/** An angle in degrees takes the short way round: from 350 to 10 is 20 degrees, not 340 back. The answer is not wrapped (it may pass 360). */
+internal fun lerpAngle(a: Float, b: Float, t: Float): Float {
+    var delta = (b - a) % 360f
+    if (delta > 180f) delta -= 360f else if (delta < -180f) delta += 360f
+    return a + delta * t
+}
+
 /**
  * Longitude takes the short way round: from 170 to -170 is 20 degrees across the antimeridian, not 340 back across the whole map.
  * The answer stays within -180..180.
