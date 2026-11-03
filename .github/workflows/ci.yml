@@ -22,7 +22,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: android-actions/setup-android@v3   # the Android SDK and its licences
+      # The runner has the Android SDK already (ANDROID_HOME); Gradle downloads the platform it needs once the licences are accepted.
+      - name: Accept the Android SDK licences
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
       - name: Build, test and document
         run: ./gradlew build dokkaGenerate --continue -Dorg.gradle.jvmargs="-Xmx5g -Dfile.encoding=UTF-8"
