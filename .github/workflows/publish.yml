@@ -1,0 +1,34 @@
+name: Publish
+
+# Publishes to Maven Central when a version tag is pushed (git tag v0.1.0 && git push origin v0.1.0).
+# It needs these repository secrets (Settings > Secrets and variables > Actions); see CONTRIBUTING / the release checklist:
+#   MAVEN_CENTRAL_USERNAME, MAVEN_CENTRAL_PASSWORD   the Central Portal user token
+#   SIGNING_KEY, SIGNING_KEY_PASSWORD                the ASCII-armoured private GPG key and its password
+# The deployment then waits in the Central Portal (central.sonatype.com > Deployments) to be checked and released by hand.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: macos-latest   # the iOS artifacts can only be built on a Mac
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Check the tag is the version in gradle.properties
+        run: |
+          version=$(grep '^VERSION_NAME=' gradle.properties | cut -d= -f2)
+          if [ "v$version" != "${GITHUB_REF_NAME}" ]; then echo "tag ${GITHUB_REF_NAME} is not v$version"; exit 1; fi
+      # No build and tests here: the CI of the pull request already ran them, and the Mac runner is small. What is published is built by this step.
+      - name: Publish to Maven Central
+        run: ./gradlew publishToMavenCentral --no-configuration-cache -Dorg.gradle.jvmargs="-Xmx4g -Dfile.encoding=UTF-8"
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}

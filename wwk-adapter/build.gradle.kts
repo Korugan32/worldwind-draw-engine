@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.android.lint)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.vanniktech.publish)
 }
 
 kotlin {
@@ -122,4 +123,11 @@ kotlin {
         }
     }
 
+}
+
+// Publishing: the coordinates and the POM come from gradle.properties (the root one and this module's). The signing key is only there on the
+// machine that publishes (ORG_GRADLE_PROJECT_signingInMemoryKey and its password), so a local publishToMavenLocal works without it.
+mavenPublishing {
+    publishToMavenCentral()
+    if (providers.gradleProperty("signingInMemoryKey").isPresent) signAllPublications()
 }

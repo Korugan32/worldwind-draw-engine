@@ -1,0 +1,12 @@
+WorldWind Draw Engine
+Copyright 2026 Taha Can Şenel
+
+This product depends on, and does not include the source of:
+
+- WorldWind Kotlin (earth.worldwind:worldwind), Apache License 2.0
+  https://github.com/WorldWindEarth/WorldWindKotlin
+- kts-core, a Kotlin Multiplatform port of the JTS Topology Suite
+  (de.mpmediasoft.kts:kts-core), dual-licensed under the Eclipse Public
+  License 2.0 and the Eclipse Distribution License 1.0 like JTS itself
+  (used by the boolean-ops module only)
+  https://github.com/mipastgt/kts

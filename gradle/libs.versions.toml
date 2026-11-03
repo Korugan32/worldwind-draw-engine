@@ -15,6 +15,7 @@ core = "1.5.0"
 worldwind = "2.1.1"
 composeMultiplatform = "1.12.1"
 dokka = "2.2.0"
+vanniktechPublish = "0.35.0"
 kotlinxCoroutines = "1.11.0"
 kotlinxSerialization = "1.11.0"
 kts = "1.20.0.0"
@@ -61,4 +62,5 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 android-lint = { id = "com.android.lint", version.ref = "agp" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechPublish" }
 
