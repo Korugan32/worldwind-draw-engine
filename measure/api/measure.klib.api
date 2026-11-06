@@ -1,0 +1,58 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <worldwind-draw-engine:measure>
+final enum class com.tcsappdev.worldwinddraw.measure/AreaUnit : kotlin/Enum<com.tcsappdev.worldwinddraw.measure/AreaUnit> { // com.tcsappdev.worldwinddraw.measure/AreaUnit|null[0]
+    enum entry Acre // com.tcsappdev.worldwinddraw.measure/AreaUnit.Acre|null[0]
+    enum entry Donum // com.tcsappdev.worldwinddraw.measure/AreaUnit.Donum|null[0]
+    enum entry Hectare // com.tcsappdev.worldwinddraw.measure/AreaUnit.Hectare|null[0]
+    enum entry SquareKilometer // com.tcsappdev.worldwinddraw.measure/AreaUnit.SquareKilometer|null[0]
+    enum entry SquareMeter // com.tcsappdev.worldwinddraw.measure/AreaUnit.SquareMeter|null[0]
+
+    final val entries // com.tcsappdev.worldwinddraw.measure/AreaUnit.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.tcsappdev.worldwinddraw.measure/AreaUnit> // com.tcsappdev.worldwinddraw.measure/AreaUnit.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val squareMeters // com.tcsappdev.worldwinddraw.measure/AreaUnit.squareMeters|{}squareMeters[0]
+        final fun <get-squareMeters>(): kotlin/Double // com.tcsappdev.worldwinddraw.measure/AreaUnit.squareMeters.<get-squareMeters>|<get-squareMeters>(){}[0]
+
+    final fun fromSquareMeters(kotlin/Double): kotlin/Double // com.tcsappdev.worldwinddraw.measure/AreaUnit.fromSquareMeters|fromSquareMeters(kotlin.Double){}[0]
+    final fun toSquareMeters(kotlin/Double): kotlin/Double // com.tcsappdev.worldwinddraw.measure/AreaUnit.toSquareMeters|toSquareMeters(kotlin.Double){}[0]
+    final fun valueOf(kotlin/String): com.tcsappdev.worldwinddraw.measure/AreaUnit // com.tcsappdev.worldwinddraw.measure/AreaUnit.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.tcsappdev.worldwinddraw.measure/AreaUnit> // com.tcsappdev.worldwinddraw.measure/AreaUnit.values|values#static(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.measure/Piece { // com.tcsappdev.worldwinddraw.measure/Piece|null[0]
+    constructor <init>(kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>>, kotlin/Double, kotlin/Double) // com.tcsappdev.worldwinddraw.measure/Piece.<init>|<init>(kotlin.collections.List<kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.Vertex>>;kotlin.Double;kotlin.Double){}[0]
+
+    final val area // com.tcsappdev.worldwinddraw.measure/Piece.area|{}area[0]
+        final fun <get-area>(): kotlin/Double // com.tcsappdev.worldwinddraw.measure/Piece.area.<get-area>|<get-area>(){}[0]
+    final val rings // com.tcsappdev.worldwinddraw.measure/Piece.rings|{}rings[0]
+        final fun <get-rings>(): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.measure/Piece.rings.<get-rings>|<get-rings>(){}[0]
+    final val targetArea // com.tcsappdev.worldwinddraw.measure/Piece.targetArea|{}targetArea[0]
+        final fun <get-targetArea>(): kotlin/Double // com.tcsappdev.worldwinddraw.measure/Piece.targetArea.<get-targetArea>|<get-targetArea>(){}[0]
+}
+
+final class com.tcsappdev.worldwinddraw.measure/ShareSplitResult { // com.tcsappdev.worldwinddraw.measure/ShareSplitResult|null[0]
+    constructor <init>(kotlin.collections/List<com.tcsappdev.worldwinddraw.measure/Piece>, kotlin/Double) // com.tcsappdev.worldwinddraw.measure/ShareSplitResult.<init>|<init>(kotlin.collections.List<com.tcsappdev.worldwinddraw.measure.Piece>;kotlin.Double){}[0]
+
+    final val cutBearing // com.tcsappdev.worldwinddraw.measure/ShareSplitResult.cutBearing|{}cutBearing[0]
+        final fun <get-cutBearing>(): kotlin/Double // com.tcsappdev.worldwinddraw.measure/ShareSplitResult.cutBearing.<get-cutBearing>|<get-cutBearing>(){}[0]
+    final val pieces // com.tcsappdev.worldwinddraw.measure/ShareSplitResult.pieces|{}pieces[0]
+        final fun <get-pieces>(): kotlin.collections/List<com.tcsappdev.worldwinddraw.measure/Piece> // com.tcsappdev.worldwinddraw.measure/ShareSplitResult.pieces.<get-pieces>|<get-pieces>(){}[0]
+}
+
+final object com.tcsappdev.worldwinddraw.measure/Measure { // com.tcsappdev.worldwinddraw.measure/Measure|null[0]
+    final fun area(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon): kotlin/Double // com.tcsappdev.worldwinddraw.measure/Measure.area|area(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon){}[0]
+    final fun area(kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition>): kotlin/Double // com.tcsappdev.worldwinddraw.measure/Measure.area|area(kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.GeoPosition>){}[0]
+    final fun distance(com.tcsappdev.worldwinddraw.core.geometry/GeoPosition, com.tcsappdev.worldwinddraw.core.geometry/GeoPosition): kotlin/Double // com.tcsappdev.worldwinddraw.measure/Measure.distance|distance(com.tcsappdev.worldwinddraw.core.geometry.GeoPosition;com.tcsappdev.worldwinddraw.core.geometry.GeoPosition){}[0]
+    final fun edgeLengths(kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition>): kotlin.collections/List<kotlin/Double> // com.tcsappdev.worldwinddraw.measure/Measure.edgeLengths|edgeLengths(kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.GeoPosition>){}[0]
+    final fun length(kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition>): kotlin/Double // com.tcsappdev.worldwinddraw.measure/Measure.length|length(kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.GeoPosition>){}[0]
+    final fun perimeter(kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/GeoPosition>): kotlin/Double // com.tcsappdev.worldwinddraw.measure/Measure.perimeter|perimeter(kotlin.collections.List<com.tcsappdev.worldwinddraw.core.geometry.GeoPosition>){}[0]
+}
+
+final object com.tcsappdev.worldwinddraw.measure/ShareSplit { // com.tcsappdev.worldwinddraw.measure/ShareSplit|null[0]
+    final fun split(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin.collections/List<kotlin/Double>, com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine, kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId>, kotlin/Double? = ...): com.tcsappdev.worldwinddraw.measure/ShareSplitResult // com.tcsappdev.worldwinddraw.measure/ShareSplit.split|split(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.collections.List<kotlin.Double>;com.tcsappdev.worldwinddraw.core.overlay.OverlayEngine;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>;kotlin.Double?){}[0]
+}

@@ -1,0 +1,43 @@
+public final class com/tcsappdev/worldwinddraw/measure/AreaUnit : java/lang/Enum {
+	public static final field Acre Lcom/tcsappdev/worldwinddraw/measure/AreaUnit;
+	public static final field Donum Lcom/tcsappdev/worldwinddraw/measure/AreaUnit;
+	public static final field Hectare Lcom/tcsappdev/worldwinddraw/measure/AreaUnit;
+	public static final field SquareKilometer Lcom/tcsappdev/worldwinddraw/measure/AreaUnit;
+	public static final field SquareMeter Lcom/tcsappdev/worldwinddraw/measure/AreaUnit;
+	public final fun fromSquareMeters (D)D
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getSquareMeters ()D
+	public final fun toSquareMeters (D)D
+	public static fun valueOf (Ljava/lang/String;)Lcom/tcsappdev/worldwinddraw/measure/AreaUnit;
+	public static fun values ()[Lcom/tcsappdev/worldwinddraw/measure/AreaUnit;
+}
+
+public final class com/tcsappdev/worldwinddraw/measure/Measure {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/measure/Measure;
+	public final fun area (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;)D
+	public final fun area (Ljava/util/List;)D
+	public final fun distance (Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;Lcom/tcsappdev/worldwinddraw/core/geometry/GeoPosition;)D
+	public final fun edgeLengths (Ljava/util/List;)Ljava/util/List;
+	public final fun length (Ljava/util/List;)D
+	public final fun perimeter (Ljava/util/List;)D
+}
+
+public final class com/tcsappdev/worldwinddraw/measure/Piece {
+	public fun <init> (Ljava/util/List;DD)V
+	public final fun getArea ()D
+	public final fun getRings ()Ljava/util/List;
+	public final fun getTargetArea ()D
+}
+
+public final class com/tcsappdev/worldwinddraw/measure/ShareSplit {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/measure/ShareSplit;
+	public final fun split (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/overlay/OverlayEngine;Lkotlin/jvm/functions/Function0;Ljava/lang/Double;)Lcom/tcsappdev/worldwinddraw/measure/ShareSplitResult;
+	public static synthetic fun split$default (Lcom/tcsappdev/worldwinddraw/measure/ShareSplit;Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/overlay/OverlayEngine;Lkotlin/jvm/functions/Function0;Ljava/lang/Double;ILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/measure/ShareSplitResult;
+}
+
+public final class com/tcsappdev/worldwinddraw/measure/ShareSplitResult {
+	public fun <init> (Ljava/util/List;D)V
+	public final fun getCutBearing ()D
+	public final fun getPieces ()Ljava/util/List;
+}
+
