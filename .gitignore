@@ -18,3 +18,4 @@ local.properties
 /serialization/build/
 /boolean-ops/build
 /morph/build
+/measure/build

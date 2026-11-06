@@ -2,6 +2,8 @@ package com.tcsappdev.worldwinddraw.booleanops
 
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
+import com.tcsappdev.worldwinddraw.core.geometry.LocalFrame
+import com.tcsappdev.worldwinddraw.core.geometry.Plane
 import com.tcsappdev.worldwinddraw.core.geometry.PolygonParts
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
@@ -13,6 +15,8 @@ import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.LinearRing
 import org.locationtech.jts.geom.Polygon
 import org.locationtech.jts.geom.PrecisionModel
+import org.locationtech.jts.operation.buffer.BufferOp
+import org.locationtech.jts.operation.buffer.BufferParameters
 import org.locationtech.jts.operation.overlayng.OverlayNG
 import org.locationtech.jts.operation.overlayng.OverlayNGRobust
 import org.locationtech.jts.operation.valid.IsValidOp
@@ -40,6 +44,45 @@ internal object JtsOverlay {
         return ringsOf(result, listOf(a, b), gridSize, newVertexId)
     }
 
+    /**
+     * [polygon] with a strip of [distanceMeters] taken off its inside: done on a flat map in metres around the plot (a buffer needs the same
+     * distance in every direction, which longitude and latitude do not give), with mitred corners.
+     */
+    fun inset(polygon: DrawnPolygon, distanceMeters: Double, newVertexId: () -> VertexId): List<List<Vertex>> {
+        require(distanceMeters.isFinite() && distanceMeters >= 0.0) { "the distance has to be 0 or more, was $distanceMeters" }
+        require(polygon.rings.none { ring -> ring.indices.any { i -> kotlin.math.abs(ring[i].position.longitude - ring[(i + 1) % ring.size].position.longitude) > 180.0 } }) {
+            "a plot that crosses the antimeridian (longitude 180) cannot be set back"
+        }
+        geometryOf(polygon) // the shape has to be valid (as the overlays ask)
+        val positions = polygon.rings.flatten().map { it.position }
+        val frame = LocalFrame(GeoPosition(positions.sumOf { it.latitude } / positions.size, positions.sumOf { it.longitude } / positions.size))
+        val flat = build(polygon) { frame.toPlane(it).let { p -> Coordinate(p.x, p.y) } }
+        val inner = BufferOp.bufferOp(flat, -distanceMeters, BufferParameters(QUADRANT_SEGMENTS, BufferParameters.CAP_FLAT, BufferParameters.JOIN_MITRE, MITRE_LIMIT))
+
+        val polygons = ArrayList<Polygon>()
+        collectPolygons(inner, polygons)
+        val taken = HashSet<String>()
+        polygon.rings.forEach { ring -> ring.forEach { taken += it.id.id } }
+        fun vertexAt(c: Coordinate): Vertex {
+            // newVertexId has to give ids that nothing else has; one that keeps giving the same id would make this go on for ever.
+            repeat(MAX_ID_ATTEMPTS) {
+                val id = newVertexId()
+                if (taken.add(id.id)) return Vertex(id, frame.toGeo(Plane(c.x, c.y)))
+            }
+            throw IllegalArgumentException("newVertexId gave $MAX_ID_ATTEMPTS ids in a row that are already used: it has to make new ones")
+        }
+        val rings = ArrayList<List<Vertex>>()
+        for (part in polygons) {
+            rings += ringVertices(part.getExteriorRing().getCoordinates(), ::vertexAt)
+            for (i in 0 until part.getNumInteriorRing()) rings += ringVertices(part.getInteriorRingN(i).getCoordinates(), ::vertexAt)
+        }
+        return rings
+    }
+
+    private const val QUADRANT_SEGMENTS = 8
+    private const val MAX_ID_ATTEMPTS = 1_000
+    private const val MITRE_LIMIT = 10.0
+
     fun invalidReason(polygon: DrawnPolygon): String? {
         val geometry = try {
             build(polygon)
@@ -62,19 +105,19 @@ internal object JtsOverlay {
     }
 
     // The rings of a DrawnPolygon are parts and holes together (even-odd); PolygonParts tells which is which: a part is an outline with its holes.
-    private fun build(polygon: DrawnPolygon): Geometry {
+    private fun build(polygon: DrawnPolygon, coordinate: (GeoPosition) -> Coordinate = { Coordinate(it.longitude, it.latitude) }): Geometry {
         val parts = PolygonParts.split(polygon.rings.map { ring -> ring.map { it.position } })
         val polygons = parts.map { part ->
-            val shell = ringOf(part.first())
-            val holes = part.drop(1).map { ringOf(it) }.toTypedArray()
+            val shell = ringOf(part.first(), coordinate)
+            val holes = part.drop(1).map { ringOf(it, coordinate) }.toTypedArray()
             factory.createPolygon(shell, holes)
         }
         require(polygons.isNotEmpty()) { "no ring with 3 points" }
         return if (polygons.size == 1) polygons.single() else factory.createMultiPolygon(polygons.toTypedArray())
     }
 
-    private fun ringOf(positions: List<GeoPosition>): LinearRing {
-        val coordinates = positions.map { Coordinate(it.longitude, it.latitude) }
+    private fun ringOf(positions: List<GeoPosition>, coordinate: (GeoPosition) -> Coordinate): LinearRing {
+        val coordinates = positions.map(coordinate)
         return factory.createLinearRing((coordinates + coordinates.first()).toTypedArray())
     }
 

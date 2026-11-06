@@ -280,6 +280,10 @@ public final class com/tcsappdev/worldwinddraw/core/history/commands/VertexSpan 
 	public final fun getPrevId-njm_F8Q ()Ljava/lang/String;
 }
 
+public abstract interface class com/tcsappdev/worldwinddraw/core/overlay/InsetEngine {
+	public abstract fun inset (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;DLkotlin/jvm/functions/Function0;)Ljava/util/List;
+}
+
 public final class com/tcsappdev/worldwinddraw/core/overlay/InvalidShapeException : java/lang/Exception {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

@@ -16,4 +16,5 @@ dependencies {
     dokka(project(":serialization"))
     dokka(project(":boolean-ops"))
     dokka(project(":morph"))
+    dokka(project(":measure"))
 }
