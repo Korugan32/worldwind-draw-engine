@@ -1,5 +1,6 @@
-package com.tcsappdev.worldwinddraw.measure
+package com.tcsappdev.worldwinddraw.core.geometry
 
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
 import kotlin.math.PI
 import kotlin.math.atanh
 import kotlin.math.sin
@@ -10,20 +11,22 @@ import kotlin.math.sqrt
  * mean radius is out by a tenth of a percent of an area at the latitude of Turkey (a metre of every dönüm) and by nearly half a percent at the
  * equator, which is more than a surveyor's figure leaves room for.
  */
-internal object Wgs84 {
+@InternalWorldWindDrawApi
+public object Wgs84 {
     /** The equatorial radius, in metres. */
-    const val A: Double = 6_378_137.0
+    public const val A: Double = 6_378_137.0
 
     /** The flattening. */
-    const val F: Double = 1.0 / 298.257223563
+    public const val F: Double = 1.0 / 298.257223563
 
     /** The polar radius, in metres. */
-    const val B: Double = A * (1.0 - F)
+    public const val B: Double = A * (1.0 - F)
 
     /** The square of the first eccentricity. */
-    const val E2: Double = F * (2.0 - F)
+    public const val E2: Double = F * (2.0 - F)
 
-    val E: Double = sqrt(E2)
+    /** The first eccentricity. */
+    public val E: Double = sqrt(E2)
 
     /** `q` of the authalic latitude at the pole (see [authalicSine]). */
     private val QP: Double = q(1.0)
@@ -32,7 +35,7 @@ internal object Wgs84 {
      * The radius of the ball that has the same surface as the ellipsoid, in metres (about 6,371,007.18). A region measured on that ball, with
      * its latitudes turned into authalic latitudes, has the area it has on the ellipsoid.
      */
-    val AUTHALIC_RADIUS: Double = A * sqrt(QP / 2.0)
+    public val AUTHALIC_RADIUS: Double = A * sqrt(QP / 2.0)
 
     private fun q(sinLatitude: Double): Double {
         val eSin = E * sinLatitude
@@ -43,5 +46,5 @@ internal object Wgs84 {
      * The sine of the authalic latitude of the geodetic latitude [latitudeDegrees]: the latitude on the equal-area ball that has the same
      * share of the surface between it and the equator as the geodetic one has on the ellipsoid.
      */
-    fun authalicSine(latitudeDegrees: Double): Double = q(sin(latitudeDegrees * PI / 180.0)) / QP
+    public fun authalicSine(latitudeDegrees: Double): Double = q(sin(latitudeDegrees * PI / 180.0)) / QP
 }

@@ -4,6 +4,7 @@ import com.tcsappdev.worldwinddraw.booleanops.JtsOverlayEngine
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.EntityId
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
+import com.tcsappdev.worldwinddraw.core.geometry.Wgs84
 import com.tcsappdev.worldwinddraw.core.geometry.Vertex
 import com.tcsappdev.worldwinddraw.core.geometry.VertexId
 import com.tcsappdev.worldwinddraw.core.overlay.InvalidShapeException

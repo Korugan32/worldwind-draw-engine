@@ -2,6 +2,7 @@ package com.tcsappdev.worldwinddraw.measure
 
 import com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon
 import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
+import com.tcsappdev.worldwinddraw.core.geometry.Wgs84
 import com.tcsappdev.worldwinddraw.core.geometry.GreatCircle
 import com.tcsappdev.worldwinddraw.core.geometry.PolygonParts
 import kotlin.math.PI

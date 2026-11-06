@@ -120,6 +120,10 @@ abstract interface com.tcsappdev.worldwinddraw.core.animation/Animatable { // co
     abstract fun onTick(kotlin/Long) // com.tcsappdev.worldwinddraw.core.animation/Animatable.onTick|onTick(kotlin.Long){}[0]
 }
 
+abstract interface com.tcsappdev.worldwinddraw.core.overlay/InsetEngine { // com.tcsappdev.worldwinddraw.core.overlay/InsetEngine|null[0]
+    abstract fun inset(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Double, kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId>): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.core.overlay/InsetEngine.inset|inset(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Double;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
+}
+
 abstract interface com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine { // com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine|null[0]
     abstract fun difference(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId>): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine.difference|difference(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]
     abstract fun union(com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, com.tcsappdev.worldwinddraw.core.geometry/DrawnPolygon, kotlin/Function0<com.tcsappdev.worldwinddraw.core.geometry/VertexId>): kotlin.collections/List<kotlin.collections/List<com.tcsappdev.worldwinddraw.core.geometry/Vertex>> // com.tcsappdev.worldwinddraw.core.overlay/OverlayEngine.union|union(com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;com.tcsappdev.worldwinddraw.core.geometry.DrawnPolygon;kotlin.Function0<com.tcsappdev.worldwinddraw.core.geometry.VertexId>){}[0]

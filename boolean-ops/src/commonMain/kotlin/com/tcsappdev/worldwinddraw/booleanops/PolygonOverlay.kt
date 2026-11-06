@@ -56,6 +56,19 @@ public object PolygonOverlay {
         newVertexId: () -> VertexId = ::randomVertexId,
     ): List<List<Vertex>> = JtsOverlay.run(JtsOverlay.Operation.Intersection, a, b, gridSize, newVertexId)
 
+    /**
+     * The rings of what is left of [polygon] when a strip of [distanceMeters] metres is taken off its inside all the way round (a setback), with
+     * mitred corners; a hole grows by the same distance. An empty list if nothing is left. Done on a flat map in metres around the plot, not on
+     * longitude and latitude, so the distance is the same in every direction; every corner of the result is new.
+     * @throws com.tcsappdev.worldwinddraw.core.overlay.InvalidShapeException if [polygon] is not a valid polygon.
+     * @throws IllegalArgumentException if [distanceMeters] is negative or not a number, or the plot crosses the antimeridian.
+     */
+    public fun inset(
+        polygon: DrawnPolygon,
+        distanceMeters: Double,
+        newVertexId: () -> VertexId = ::randomVertexId,
+    ): List<List<Vertex>> = JtsOverlay.inset(polygon, distanceMeters, newVertexId)
+
     /** Why [polygon] cannot be used in an overlay (a line crosses itself, a hole is outside, a ring has too few points...), or `null` if it can. */
     public fun validate(polygon: DrawnPolygon): String? = JtsOverlay.invalidReason(polygon)
 

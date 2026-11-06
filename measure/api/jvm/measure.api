@@ -12,6 +12,20 @@ public final class com/tcsappdev/worldwinddraw/measure/AreaUnit : java/lang/Enum
 	public static fun values ()[Lcom/tcsappdev/worldwinddraw/measure/AreaUnit;
 }
 
+public final class com/tcsappdev/worldwinddraw/measure/Buildable {
+	public fun <init> (Ljava/util/List;D)V
+	public final fun getArea ()D
+	public final fun getRings ()Ljava/util/List;
+}
+
+public final class com/tcsappdev/worldwinddraw/measure/BuildingAllowance {
+	public fun <init> (DDD)V
+	public final fun getFloors ()D
+	public final fun getMaxFootprint ()D
+	public final fun getMaxTotalArea ()D
+	public final fun getWholeFloors ()I
+}
+
 public final class com/tcsappdev/worldwinddraw/measure/Measure {
 	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/measure/Measure;
 	public final fun area (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;)D
@@ -29,6 +43,11 @@ public final class com/tcsappdev/worldwinddraw/measure/Piece {
 	public final fun getTargetArea ()D
 }
 
+public final class com/tcsappdev/worldwinddraw/measure/Setback {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/measure/Setback;
+	public final fun buildable (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;DLcom/tcsappdev/worldwinddraw/core/overlay/InsetEngine;Lkotlin/jvm/functions/Function0;)Lcom/tcsappdev/worldwinddraw/measure/Buildable;
+}
+
 public final class com/tcsappdev/worldwinddraw/measure/ShareSplit {
 	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/measure/ShareSplit;
 	public final fun split (Lcom/tcsappdev/worldwinddraw/core/geometry/DrawnPolygon;Ljava/util/List;Lcom/tcsappdev/worldwinddraw/core/overlay/OverlayEngine;Lkotlin/jvm/functions/Function0;Ljava/lang/Double;)Lcom/tcsappdev/worldwinddraw/measure/ShareSplitResult;
@@ -39,5 +58,30 @@ public final class com/tcsappdev/worldwinddraw/measure/ShareSplitResult {
 	public fun <init> (Ljava/util/List;D)V
 	public final fun getCutBearing ()D
 	public final fun getPieces ()Ljava/util/List;
+}
+
+public final class com/tcsappdev/worldwinddraw/measure/Zoning {
+	public static final field INSTANCE Lcom/tcsappdev/worldwinddraw/measure/Zoning;
+	public final fun allowance (DLcom/tcsappdev/worldwinddraw/measure/ZoningLimits;D)Lcom/tcsappdev/worldwinddraw/measure/BuildingAllowance;
+	public static synthetic fun allowance$default (Lcom/tcsappdev/worldwinddraw/measure/Zoning;DLcom/tcsappdev/worldwinddraw/measure/ZoningLimits;DILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/measure/BuildingAllowance;
+	public final fun check (DDDLcom/tcsappdev/worldwinddraw/measure/ZoningLimits;D)Lcom/tcsappdev/worldwinddraw/measure/ZoningCheck;
+	public static synthetic fun check$default (Lcom/tcsappdev/worldwinddraw/measure/Zoning;DDDLcom/tcsappdev/worldwinddraw/measure/ZoningLimits;DILjava/lang/Object;)Lcom/tcsappdev/worldwinddraw/measure/ZoningCheck;
+	public final fun kaks (DD)D
+	public final fun taks (DD)D
+}
+
+public final class com/tcsappdev/worldwinddraw/measure/ZoningCheck {
+	public fun <init> (DDZZ)V
+	public final fun getAllowed ()Z
+	public final fun getFootprintAllowed ()Z
+	public final fun getKaks ()D
+	public final fun getTaks ()D
+	public final fun getTotalAllowed ()Z
+}
+
+public final class com/tcsappdev/worldwinddraw/measure/ZoningLimits {
+	public fun <init> (DD)V
+	public final fun getKaks ()D
+	public final fun getTaks ()D
 }
 

@@ -1,13 +1,14 @@
-package com.tcsappdev.worldwinddraw.measure
+package com.tcsappdev.worldwinddraw.core.geometry
 
-import com.tcsappdev.worldwinddraw.core.geometry.GeoPosition
+import com.tcsappdev.worldwinddraw.core.InternalWorldWindDrawApi
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
 /** A point on the local plane, in metres: [x] to the east and [y] to the north of the origin of its [LocalFrame]. */
-internal class Plane(val x: Double, val y: Double)
+@InternalWorldWindDrawApi
+public class Plane(public val x: Double, public val y: Double)
 
 /**
  * A flat map of a small piece of the globe (a plot of land) in metres, around [origin]: a metre to the east is `N cos(latitude)` and a
@@ -18,7 +19,8 @@ internal class Plane(val x: Double, val y: Double)
  * The map is **linear in latitude and longitude** (an affine map): a straight line on it is a straight line in latitude and longitude as
  * well, which is what an overlay engine, working on longitude and latitude as if they were flat, needs to cut along the same line.
  */
-internal class LocalFrame(val origin: GeoPosition) {
+@InternalWorldWindDrawApi
+public class LocalFrame(public val origin: GeoPosition) {
     private val metersPerDegreeNorth: Double
     private val metersPerDegreeEast: Double
 
@@ -31,14 +33,16 @@ internal class LocalFrame(val origin: GeoPosition) {
         metersPerDegreeEast = radiusAcross * cos(phi) * PI / 180.0
     }
 
-    fun toPlane(p: GeoPosition): Plane {
+    /** The point [p] on this map, in metres. */
+    public fun toPlane(p: GeoPosition): Plane {
         var dLon = p.longitude - origin.longitude
         // the short way round the antimeridian
         if (dLon > 180.0) dLon -= 360.0 else if (dLon < -180.0) dLon += 360.0
         return Plane(dLon * metersPerDegreeEast, (p.latitude - origin.latitude) * metersPerDegreeNorth)
     }
 
-    fun toGeo(p: Plane): GeoPosition {
+    /** The place on the globe that is the point [p] of this map. */
+    public fun toGeo(p: Plane): GeoPosition {
         var lon = origin.longitude + p.x / metersPerDegreeEast
         if (lon > 180.0) lon -= 360.0 else if (lon < -180.0) lon += 360.0
         return GeoPosition((origin.latitude + p.y / metersPerDegreeNorth).coerceIn(-90.0, 90.0), lon.coerceIn(-180.0, 180.0))
